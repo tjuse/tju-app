@@ -1,7 +1,11 @@
+"use client";
+
 import { BookText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { TjuArrange, TjuLibCourse } from "@/lib/tju/types";
+import { cn } from "@/lib/utils";
+import { FavoriteButton } from "./favorite-button";
 
 const WEEKDAY = ["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
@@ -18,15 +22,38 @@ function arrangeLabel(arr: TjuArrange): string {
 
 export { arrangeLabel };
 
-export function CourseCard({ course }: { course: TjuLibCourse }) {
+interface CourseCardProps {
+  course: TjuLibCourse;
+  semester: string;
+  /** 点击卡片主体（查看详情） */
+  onOpen?: (course: TjuLibCourse) => void;
+}
+
+export function CourseCard({ course, semester, onOpen }: CourseCardProps) {
   const teachers = course.teacher?.join("、");
   const isUG = course.student_type === "undergraduate";
+  const clickable = !!onOpen;
 
   return (
-    <Card className="p-4 transition-all hover:-translate-y-0.5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="truncate font-medium text-[var(--color-text-high)] text-sm">
+    <Card
+      className={cn(
+        "group relative p-4 transition-all",
+        clickable && "cursor-pointer hover:-translate-y-0.5 hover:border-[var(--color-accent)]/40",
+      )}
+      onClick={clickable ? () => onOpen(course) : undefined}
+      onKeyDown={
+        clickable
+          ? (e) => {
+              if (e.key === "Enter") onOpen(course);
+            }
+          : undefined
+      }
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate pr-1 font-medium text-[var(--color-text-high)] text-sm">
             {course.name ?? "未命名课程"}
           </h3>
           <p className="mt-0.5 font-mono text-[12px] text-[var(--color-text-low)]">
@@ -34,17 +61,19 @@ export function CourseCard({ course }: { course: TjuLibCourse }) {
             {course.class_id ? `-${course.class_id}` : ""}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
-          <Badge variant={isUG ? "default" : "secondary"}>{isUG ? "本科" : "研究生"}</Badge>
-          {course.credit != null && (
-            <span className="text-[12px] text-[var(--color-text-mid)] tabular-nums">
-              {course.credit} 学分
-            </span>
-          )}
+        <div className="flex shrink-0 items-center gap-1">
+          <div className="flex flex-col items-end gap-1">
+            <Badge variant={isUG ? "default" : "secondary"}>{isUG ? "本科" : "研究生"}</Badge>
+            {course.credit != null && (
+              <span className="text-[12px] text-[var(--color-text-mid)] tabular-nums">
+                {course.credit} 学分
+              </span>
+            )}
+          </div>
+          <FavoriteButton course={course} semester={semester} />
         </div>
       </div>
 
-      {/* 类别标签 */}
       {course.course_type && course.course_type.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {course.course_type.map((t) => (
@@ -55,7 +84,6 @@ export function CourseCard({ course }: { course: TjuLibCourse }) {
         </div>
       )}
 
-      {/* 元信息 */}
       <div className="mt-3 flex flex-col gap-1.5 text-[12px] text-[var(--color-text-mid)]">
         {teachers && (
           <span className="flex items-center gap-1.5">
@@ -79,7 +107,6 @@ export function CourseCard({ course }: { course: TjuLibCourse }) {
         )}
       </div>
 
-      {/* 底部：校区 / 周次 / 选课人数 / 大纲 */}
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-[var(--color-border)] border-t pt-2.5 text-[11px] text-[var(--color-text-low)]">
         {course.campus && <span>{course.campus}</span>}
         {course.weeks && <span>{course.weeks} 周</span>}

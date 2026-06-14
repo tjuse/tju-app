@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import type { StuTypeFilter } from "@/features/courses/filter";
+import type { CourseSort, StuTypeFilter } from "@/features/courses/filter";
 import { isValidSemester } from "@/features/courses/semesters";
 import { queryCachedCourses, refreshCourses } from "@/lib/tju/courses-store";
 import { TjuError } from "@/lib/tju/types";
@@ -41,11 +41,17 @@ export async function GET(req: NextRequest) {
 
   // 查询缓存
   const stuTypeParam = (searchParams.get("stuType") ?? "all") as StuTypeFilter;
+  const sortParam = (searchParams.get("sort") ?? "default") as CourseSort;
+  const validSort: CourseSort[] = ["default", "credit-desc", "credit-asc", "name"];
+  const weekdayNum = Number(searchParams.get("weekday"));
   const page = await queryCachedCourses(semester, {
     q: searchParams.get("q") ?? undefined,
     stuType: ["all", "undergraduate", "graduate"].includes(stuTypeParam) ? stuTypeParam : "all",
     campus: searchParams.get("campus") ?? undefined,
     courseType: searchParams.get("courseType") ?? undefined,
+    weekday: weekdayNum >= 1 && weekdayNum <= 7 ? weekdayNum : undefined,
+    hasSyllabus: searchParams.get("hasSyllabus") === "1" || undefined,
+    sort: validSort.includes(sortParam) ? sortParam : "default",
     page: Number(searchParams.get("page")) || 1,
     pageSize: Number(searchParams.get("pageSize")) || 30,
   });

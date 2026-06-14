@@ -20,6 +20,7 @@ const DEFAULT_TIMEOUT_MS = 45_000;
 interface RunOptions {
   semester?: string;
   stuType?: "ug" | "gs" | "both";
+  lessionId?: string;
   timeoutMs?: number;
 }
 
@@ -31,6 +32,7 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
   const args = [SCRIPT, command];
   if (opts.semester) args.push("--semester", opts.semester);
   if (opts.stuType) args.push("--stu-type", opts.stuType);
+  if (opts.lessionId) args.push("--lession-id", opts.lessionId);
 
   return new Promise<T>((resolve, reject) => {
     const child = spawn(python, args, {
@@ -111,4 +113,11 @@ export function fetchCourses(
     stuType,
     timeoutMs: 180_000, // 全量爬取给足时间
   });
+}
+
+/** 抓取课程大纲（markdown）。需校园网/VPN。 */
+export function fetchSyllabus(
+  lessionId: string,
+): Promise<{ lession_id: string; syllabus: string }> {
+  return runTju<{ lession_id: string; syllabus: string }>("syllabus", { lessionId });
 }

@@ -7,12 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CoursesPage } from "@/lib/tju/courses-store";
+import type { TjuLibCourse } from "@/lib/tju/types";
 import { cn } from "@/lib/utils";
 import { CourseCard } from "./course-card";
-import type { StuTypeFilter } from "./filter";
+import { CourseDetailDialog } from "./course-detail-dialog";
+import type { CourseSort, StuTypeFilter } from "./filter";
 import type { SemesterOption } from "./semesters";
 
 const PAGE_SIZE = 30;
+const WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 interface Props {
   semesters: SemesterOption[];
@@ -27,6 +30,9 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
   const [stuType, setStuType] = useState<StuTypeFilter>("all");
   const [campus, setCampus] = useState("");
   const [courseType, setCourseType] = useState("");
+  const [weekday, setWeekday] = useState("0"); // "0" = 全部
+  const [hasSyllabus, setHasSyllabus] = useState(false);
+  const [sort, setSort] = useState<CourseSort>("default");
   const [page, setPage] = useState(1);
 
   const [data, setData] = useState<CoursesPage | null>(initial);
@@ -34,8 +40,14 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [detail, setDetail] = useState<TjuLibCourse | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
   const firstRun = useRef(true);
   const abortRef = useRef<AbortController | null>(null);
+
+  // 重置到第 1 页的辅助
+  const resetPage = () => setPage(1);
 
   // 搜索防抖（关键词变化时回到第 1 页）
   useEffect(() => {
@@ -62,24 +74,24 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
       if (stuType !== "all") params.set("stuType", stuType);
       if (campus) params.set("campus", campus);
       if (courseType) params.set("courseType", courseType);
+      if (weekday !== "0") params.set("weekday", weekday);
+      if (hasSyllabus) params.set("hasSyllabus", "1");
+      if (sort !== "default") params.set("sort", sort);
       const res = await fetch(`/api/courses?${params}`, { signal: ac.signal });
       const body = await res.json();
-      if (!res.ok) {
-        setError(body.error ?? "加载失败");
-      } else {
-        setData(body.data as CoursesPage | null);
-      }
+      if (!res.ok) setError(body.error ?? "加载失败");
+      else setData(body.data as CoursesPage | null);
     } catch (e) {
       if ((e as Error).name !== "AbortError") setError("网络错误");
     } finally {
       setLoading(false);
     }
-  }, [semester, page, qDebounced, stuType, campus, courseType]);
+  }, [semester, page, qDebounced, stuType, campus, courseType, weekday, hasSyllabus, sort]);
 
   useEffect(() => {
     if (firstRun.current) {
       firstRun.current = false;
-      return; // 首屏用 SSR 的 initial，避免重复请求
+      return; // 首屏用 SSR 的 initial
     }
     load();
   }, [load]);
@@ -90,16 +102,18 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
     try {
       const res = await fetch(`/api/courses?semester=${semester}&refresh=1`);
       const body = await res.json();
-      if (!res.ok) {
-        setError(body.error ?? "抓取失败");
-      } else {
-        await load();
-      }
+      if (!res.ok) setError(body.error ?? "抓取失败");
+      else await load();
     } catch {
       setError("网络错误，请重试");
     } finally {
       setRefreshing(false);
     }
+  }
+
+  function openDetail(course: TjuLibCourse) {
+    setDetail(course);
+    setDetailOpen(true);
   }
 
   const facets = data?.facets;
@@ -122,7 +136,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
             value={semester}
             onChange={(e) => {
               setSemester(e.target.value);
-              setPage(1);
+              resetPage();
             }}
             aria-label="选择学期"
             className="min-w-44"
@@ -156,7 +170,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
             value={stuType}
             onChange={(e) => {
               setStuType(e.target.value as StuTypeFilter);
-              setPage(1);
+              resetPage();
             }}
             aria-label="学生类型"
           >
@@ -169,7 +183,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
             value={campus}
             onChange={(e) => {
               setCampus(e.target.value);
-              setPage(1);
+              resetPage();
             }}
             aria-label="校区"
           >
@@ -185,10 +199,10 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
             value={courseType}
             onChange={(e) => {
               setCourseType(e.target.value);
-              setPage(1);
+              resetPage();
             }}
             aria-label="课程类别"
-            className="max-w-52"
+            className="max-w-48"
           >
             <option value="">全部类别</option>
             {facets?.courseTypes.map((t) => (
@@ -197,6 +211,46 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
               </option>
             ))}
           </Select>
+
+          <Select
+            value={weekday}
+            onChange={(e) => {
+              setWeekday(e.target.value);
+              resetPage();
+            }}
+            aria-label="上课星期"
+          >
+            <option value="0">全部星期</option>
+            {WEEKDAYS.map((w, i) => (
+              <option key={w} value={String(i + 1)}>
+                {w}
+              </option>
+            ))}
+          </Select>
+
+          <Select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as CourseSort)}
+            aria-label="排序"
+          >
+            <option value="default">默认排序</option>
+            <option value="credit-desc">学分高→低</option>
+            <option value="credit-asc">学分低→高</option>
+            <option value="name">按课程名</option>
+          </Select>
+
+          <label className="flex h-9 cursor-pointer items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 text-[13px] text-[var(--color-text-mid)] transition-colors hover:border-[var(--color-border-strong)]">
+            <input
+              type="checkbox"
+              checked={hasSyllabus}
+              onChange={(e) => {
+                setHasSyllabus(e.target.checked);
+                resetPage();
+              }}
+              className="accent-[var(--color-accent)]"
+            />
+            仅看有大纲
+          </label>
         </div>
       </div>
 
@@ -230,7 +284,12 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((c) => (
-              <CourseCard key={`${c.course_id}-${c.class_id}-${c.lession_id}`} course={c} />
+              <CourseCard
+                key={`${c.course_id}-${c.class_id}-${c.lession_id}`}
+                course={c}
+                semester={semester}
+                onOpen={openDetail}
+              />
             ))}
           </div>
         )}
@@ -262,6 +321,13 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
           </Button>
         </div>
       )}
+
+      <CourseDetailDialog
+        course={detail}
+        semester={semester}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
     </div>
   );
 }

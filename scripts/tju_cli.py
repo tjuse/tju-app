@@ -139,9 +139,10 @@ def _cmd_courses(client, StuType, semester, which):
 def main() -> None:
     parser = argparse.ArgumentParser(description="tju.app Python bridge")
     parser.add_argument(
-        "command", choices=["courses", "schedule", "profile", "exam", "score"]
+        "command", choices=["courses", "schedule", "profile", "exam", "score", "syllabus"]
     )
     parser.add_argument("--semester", default=None, help="学期代码，如 25262；缺省用当前学期")
+    parser.add_argument("--lession-id", default=None, help="syllabus：课程 lession_id")
     parser.add_argument(
         "--stu-type",
         choices=["ug", "gs", "both"],
@@ -175,7 +176,14 @@ def main() -> None:
             "semester": semester,
         }
 
-        if args.command == "courses":
+        if args.command == "syllabus":
+            if not args.lession_id:
+                _fail("syllabus 需要 --lession-id", code="usage")
+                return
+            md = client.query_syllabus(args.lession_id, format="md")
+            _ok({"lession_id": args.lession_id, "syllabus": md})
+
+        elif args.command == "courses":
             _cmd_courses(client, StuType, semester, args.stu_type)
 
         elif args.command == "schedule":

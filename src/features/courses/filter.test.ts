@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TjuLibCourse } from "@/lib/tju/types";
-import { computeFacets, filterCourses, queryCourses } from "./filter";
+import { computeFacets, filterCourses, queryCourses, sortCourses } from "./filter";
 
 function mk(partial: Partial<TjuLibCourse>): TjuLibCourse {
   return {
@@ -84,6 +84,48 @@ describe("filterCourses", () => {
     expect(filterCourses(courses, { stuType: "undergraduate", campus: "卫津路校区" })).toHaveLength(
       1,
     );
+  });
+
+  it("按是否有大纲过滤", () => {
+    const list = [
+      mk({ has_syllabus: true }),
+      mk({ has_syllabus: false }),
+      mk({ has_syllabus: null }),
+    ];
+    expect(filterCourses(list, { hasSyllabus: true })).toHaveLength(1);
+  });
+
+  it("按上课星期过滤（任一安排命中）", () => {
+    const list = [
+      mk({ arrange: [{ teacher: null, week: null, unit: [1], weekday: 1, location: null }] }),
+      mk({ arrange: [{ teacher: null, week: null, unit: [1], weekday: 3, location: null }] }),
+    ];
+    expect(filterCourses(list, { weekday: 1 })).toHaveLength(1);
+  });
+});
+
+describe("sortCourses", () => {
+  const list = [
+    mk({ name: "B", credit: 2 }),
+    mk({ name: "A", credit: 5 }),
+    mk({ name: "C", credit: 1 }),
+  ];
+
+  it("default 不改变顺序", () => {
+    expect(sortCourses(list, "default").map((c) => c.name)).toEqual(["B", "A", "C"]);
+  });
+  it("学分降序", () => {
+    expect(sortCourses(list, "credit-desc").map((c) => c.credit)).toEqual([5, 2, 1]);
+  });
+  it("学分升序", () => {
+    expect(sortCourses(list, "credit-asc").map((c) => c.credit)).toEqual([1, 2, 5]);
+  });
+  it("按课程名", () => {
+    expect(sortCourses(list, "name").map((c) => c.name)).toEqual(["A", "B", "C"]);
+  });
+  it("不修改原数组", () => {
+    sortCourses(list, "credit-desc");
+    expect(list.map((c) => c.name)).toEqual(["B", "A", "C"]);
   });
 });
 

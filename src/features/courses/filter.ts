@@ -5,11 +5,16 @@ import type { TjuLibCourse } from "@/lib/tju/types";
 
 export type StuTypeFilter = "all" | "undergraduate" | "graduate";
 
+export type CourseSort = "default" | "credit-desc" | "credit-asc" | "name";
+
 export interface CourseFilters {
   q?: string; // 关键词：课程名 / 课程代码 / 教师
   stuType?: StuTypeFilter;
   campus?: string; // 精确匹配校区
   courseType?: string; // 课程类别（course_type 列表含此项）
+  weekday?: number; // 上课星期 1-7（任一 arrange 命中）
+  hasSyllabus?: boolean; // 仅含有大纲
+  sort?: CourseSort;
   page?: number; // 1-based
   pageSize?: number;
 }
@@ -43,14 +48,29 @@ function matchesQuery(course: TjuLibCourse, q: string): boolean {
 
 /** 应用过滤（不分页）。 */
 export function filterCourses(courses: TjuLibCourse[], filters: CourseFilters): TjuLibCourse[] {
-  const { q, stuType = "all", campus, courseType } = filters;
+  const { q, stuType = "all", campus, courseType, weekday, hasSyllabus } = filters;
   return courses.filter((c) => {
     if (stuType !== "all" && c.student_type !== stuType) return false;
     if (campus && c.campus !== campus) return false;
     if (courseType && !(c.course_type ?? []).includes(courseType)) return false;
+    if (hasSyllabus && !c.has_syllabus) return false;
+    if (weekday && !(c.arrange ?? []).some((a) => a.weekday === weekday)) return false;
     if (q && !matchesQuery(c, q)) return false;
     return true;
   });
+}
+
+/** 排序（返回新数组，不改原数组）。 */
+export function sortCourses(courses: TjuLibCourse[], sort: CourseSort = "default"): TjuLibCourse[] {
+  if (sort === "default") return courses;
+  const sorted = [...courses];
+  if (sort === "name") {
+    sorted.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", "zh"));
+  } else {
+    const dir = sort === "credit-desc" ? -1 : 1;
+    sorted.sort((a, b) => ((a.credit ?? 0) - (b.credit ?? 0)) * dir);
+  }
+  return sorted;
 }
 
 /** 计算分面（用于筛选下拉），基于全量课程。 */
@@ -73,11 +93,11 @@ export function computeFacets(courses: TjuLibCourse[]): CourseFacets {
   };
 }
 
-/** 过滤 + 分页。 */
+/** 过滤 + 排序 + 分页。 */
 export function queryCourses(courses: TjuLibCourse[], filters: CourseFilters): CourseQueryResult {
   const page = Math.max(1, filters.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 30));
-  const filtered = filterCourses(courses, filters);
+  const filtered = sortCourses(filterCourses(courses, filters), filters.sort);
   const start = (page - 1) * pageSize;
   return {
     items: filtered.slice(start, start + pageSize),

@@ -192,6 +192,43 @@
     }
   }
 
+  /* 课程大纲 markdown 排版 */
+  .prose-tju :where(h1, h2, h3, h4) {
+    color: var(--color-text-high);
+    font-weight: 600;
+    margin: 1em 0 0.4em;
+    font-size: 0.95rem;
+  }
+  .prose-tju p {
+    margin: 0.5em 0;
+  }
+  .prose-tju :where(ul, ol) {
+    margin: 0.5em 0;
+    padding-left: 1.25em;
+    list-style: revert;
+  }
+  .prose-tju li {
+    margin: 0.2em 0;
+  }
+  .prose-tju strong {
+    color: var(--color-text-high);
+  }
+  .prose-tju table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5em 0;
+    font-size: 0.9em;
+  }
+  .prose-tju :where(th, td) {
+    border: 1px solid var(--color-border);
+    padding: 4px 8px;
+    text-align: left;
+  }
+  .prose-tju a {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
   /* 入场动效（纯 CSS，无需 JS 即可显示 —— 比 framer 更稳健） */
   .animate-fade-in-up {
     animation: fade-in-up 0.32s ease-out both;

@@ -1,6 +1,7 @@
 import { Header } from "@/components/dashboard/header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { CoursesBrowser } from "@/features/courses/courses-browser";
+import { CoursesTabs } from "@/features/courses/courses-tabs";
 import { currentSemesterCode, listSemesters, semesterLabel } from "@/features/courses/semesters";
 import { queryCachedCourses } from "@/lib/tju/courses-store";
 
@@ -17,6 +18,7 @@ export default async function CoursesPage() {
     <>
       <Header title="公共课表" subtitle="全校开课课程库 · 可按学期检索" />
       <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
+        <CoursesTabs />
         <FadeIn>
           <CoursesBrowser semesters={semesters} initialSemester={semester} initial={initial} />
         </FadeIn>
