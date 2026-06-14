@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/*
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * tju.app — Design System
+ * 极简现代（Linear/Vercel 风）· 深色为主 · 天大北洋蓝强调色
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ */
+
+@theme {
+  /* ─── 色彩 Token ──────────────────────────────────────────────── */
+
+  /* 背景分层（深色） */
+  --color-bg-base:    #0a0a0b;  /* 最底层背景 */
+  --color-bg-subtle:  #111113;  /* 卡片背景 */
+  --color-bg-muted:   #18181b;  /* 悬停态、次层 */
+  --color-bg-overlay: #1f1f24;  /* 弹窗、下拉 */
+
+  /* 边框 */
+  --color-border:        #27272a;  /* 默认边框（低对比） */
+  --color-border-strong: #3f3f46;  /* 强调边框 */
+
+  /* 文本三档 */
+  --color-text-high:   #f4f4f5;  /* 主内容 */
+  --color-text-mid:    #a1a1aa;  /* 次要内容 */
+  --color-text-low:    #52525b;  /* 占位/禁用 */
+
+  /* 天大北洋蓝 — 强调色系 */
+  --color-accent:        #3b82f6;  /* 深色背景下可见的亮版北洋蓝 */
+  --color-accent-hover:  #60a5fa;
+  --color-accent-muted:  #1d3a6e;  /* 低饱和背景用 */
+  --color-accent-subtle: #172554;  /* 极淡背景 */
+
+  /* 状态色 */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger:  #ef4444;
+  --color-info:    #3b82f6;
+
+  /* ─── 字体 ────────────────────────────────────────────────────── */
+  --font-sans:
+    var(--font-geist-sans), "Inter", ui-sans-serif, system-ui, -apple-system,
+    "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Microsoft YaHei", sans-serif;
+  --font-mono: var(--font-geist-mono), "JetBrains Mono", ui-monospace, monospace;
+
+  /* ─── 圆角 ────────────────────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;   /* 主要卡片 */
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+}
+
+/* ─── 基础重置 ───────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-high);
+    font-family: var(--font-sans);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* 浅色模式（next-themes 切换 .light class） */
+  .light {
+    color-scheme: light;
+    --color-bg-base: #ffffff;
+    --color-bg-subtle: #f9f9fb;
+    --color-bg-muted: #f3f4f6;
+    --color-bg-overlay: #ffffff;
+    --color-border: #e5e7eb;
+    --color-border-strong: #d1d5db;
+    --color-text-high: #09090b;
+    --color-text-mid: #6b7280;
+    --color-text-low: #9ca3af;
+    --color-accent: #1d4ed8;
+    --color-accent-hover: #1e40af;
+    --color-accent-muted: #dbeafe;
+    --color-accent-subtle: #eff6ff;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-muted);
+    color: var(--color-text-high);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-full);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-low);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ─── 工具类扩展 ─────────────────────────────────────────────────── */
+@layer utilities {
+  .card {
+    background-color: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition:
+      border-color 150ms ease-out,
+      box-shadow 150ms ease-out;
+  }
+
+  .card:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  /* 深色下微弱内发光 */
+  .card-glow {
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* 渐变文本（北洋蓝） */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 骨架屏 */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-bg-muted) 25%,
+      var(--color-bg-overlay) 50%,
+      var(--color-bg-muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+  }
+
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
