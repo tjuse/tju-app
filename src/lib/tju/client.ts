@@ -4,7 +4,12 @@
  */
 import { spawn } from "node:child_process";
 import path from "node:path";
-import { type TjuCliResponse, TjuError, type TjuScheduleResult } from "./types";
+import {
+  type TjuCliResponse,
+  type TjuCoursesResult,
+  TjuError,
+  type TjuScheduleResult,
+} from "./types";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT = path.join(PROJECT_ROOT, "scripts", "tju_cli.py");
@@ -14,6 +19,7 @@ const DEFAULT_TIMEOUT_MS = 45_000;
 
 interface RunOptions {
   semester?: string;
+  stuType?: "ug" | "gs" | "both";
   timeoutMs?: number;
 }
 
@@ -24,17 +30,14 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
   const python = process.env.TJU_PYTHON || ".venv/bin/python";
   const args = [SCRIPT, command];
   if (opts.semester) args.push("--semester", opts.semester);
+  if (opts.stuType) args.push("--stu-type", opts.stuType);
 
   return new Promise<T>((resolve, reject) => {
     const child = spawn(python, args, {
       cwd: PROJECT_ROOT,
-      env: {
-        ...process.env,
-        // 确保凭据透传（tju 的 Session() 读取这两个）
-        TJU_USER: process.env.TJU_USER ?? "",
-        TJU_PASS: process.env.TJU_PASS ?? "",
-        PYTHONIOENCODING: "utf-8",
-      },
+      // 继承 process.env：透传 TJU_USER/TJU_PASS（若设置）与 TJU_ENV_FILE。
+      // 不显式写空串，否则会顶掉 Python 侧从 TJU_ENV_FILE 读取的回退。
+      env: { ...process.env, PYTHONIOENCODING: "utf-8" },
     });
 
     let stdout = "";
@@ -93,4 +96,19 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
 /** 抓取个人课表（实时，未缓存）。需校园网/VPN。 */
 export function fetchSchedule(semester?: string): Promise<TjuScheduleResult> {
   return runTju<TjuScheduleResult>("schedule", { semester });
+}
+
+/**
+ * 抓取全校公开课程库（实时，未缓存）。一学期数千门、多页爬取，较慢。
+ * 需校园网/VPN。
+ */
+export function fetchCourses(
+  semester: string,
+  stuType: "ug" | "gs" | "both" = "both",
+): Promise<TjuCoursesResult> {
+  return runTju<TjuCoursesResult>("courses", {
+    semester,
+    stuType,
+    timeoutMs: 180_000, // 全量爬取给足时间
+  });
 }

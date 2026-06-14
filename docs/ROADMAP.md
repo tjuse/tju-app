@@ -16,9 +16,12 @@
 - [x] 首页今日课程接真实缓存数据
 - [x] 课表截图 AI 解析后端（`/api/import/ocr` + Claude 视觉）
 - [x] 移除 Postgres/Prisma/Auth/Docker，改文件缓存
+- [x] **公共课表（全校课程库）**：`courses` 子命令爬本研全量 → 按学期缓存 → 服务端过滤分页 → `/courses` 页面（学期/搜索/本研/校区/类别/分页）
+- [x] 凭据复用：`TJU_ENV_FILE` 只读外部 .env（不复制凭据进仓库）
 
 ## 进行中 🚧
 
+- [ ] 课程详情 / 大纲（tju `query_course_info` / `query_syllabus`，按 lession_id）
 - [ ] 课表截图导入**前端**：上传 → OCR → 预览/编辑确认 → 写入缓存（合并 tju 数据）
 - [ ] 课表手动录入 / 编辑（覆盖个别课）
 - [ ] ICS 导入（node-ical）/ 导出（ics 包）

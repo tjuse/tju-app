@@ -16,7 +16,7 @@
 | `client.profile` | 学生档案 | ✅ `profile` |
 | `client.exam(semester)` | 考试安排 | ✅ `exam` |
 | `client.score()` | 成绩 | ✅ `score` |
-| `client.query_courses(semester)` | 公开课程库 | ⏳ 可加 |
+| `client.query_courses(stu_type, semester, page_no, page_size)` | 公开课程库（本研全量分页） | ✅ `courses` |
 | `client.free_classrooms(...)` | 空教室 | ⏳ 可加 |
 
 ### 数据结构（schedule）
@@ -33,12 +33,22 @@
 3. `src/lib/tju/client.ts`：加 `fetchXxx()`。
 4. 需要持久化就经 `lib/cache` 落文件。
 
-### 运行前提
+### 公共课表（已实现）
 
-- `pnpm py:setup` 安装 tju 到 `.venv`。
-- `.env.local` 配 `TJU_USER` / `TJU_PASS`。
-- **校园网或 VPN**（tju 实时调用要求）。
-- 命令行调试：`pnpm tju:schedule` 或 `.venv/bin/python scripts/tju_cli.py schedule`。
+- 子命令：`courses --semester 25262 [--stu-type ug|gs|both]`，爬取本科(project 1)+研究生(project 22)全量分页，每条标 `student_type`。
+- 一学期约 5000+ 门、~3.7MB → **按学期缓存**（`data/cache/courses-<sem>.json`），**服务端过滤分页**（`src/features/courses/filter.ts`），不下发整包给客户端。
+- 页面 `/courses`：学期选择 + 关键词（课名/课号/教师）+ 本研/校区/类别筛选 + 分页，`CoursesBrowser`。
+- 学期代码见 `src/features/courses/semesters.ts`（格式同 tju `consts.SEMESTER`，如 `25262`=2025-2026春）。
+
+### 运行前提（凭据）
+
+两种方式：
+- **A**：`.env.local` 配 `TJU_USER` / `TJU_PASS` + `pnpm py:setup`（本项目 `.venv` 装 tju）。
+- **B（本机当前用）**：复用已有环境，**不复制凭据**：
+  - `TJU_ENV_FILE=/data/workspace/tju-python/.env`（只读其中凭据）
+  - `TJU_PYTHON=/data/workspace/tju-python/.venv/bin/python`（已装 tju）
+- 共同要求：**校园网或 VPN**。
+- 命令行调试：`.venv/bin/python scripts/tju_cli.py courses --semester 25262`。
 
 ## 校园卡 / 电费 —— 未来另接
 

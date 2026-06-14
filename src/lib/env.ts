@@ -11,8 +11,11 @@ const envSchema = z.object({
   TJU_USER: z.string().optional(),
   TJU_PASS: z.string().optional(),
 
-  // Python 解释器路径（默认项目内 venv）
+  // Python 解释器路径（默认项目内 venv；可指向 tju-python 的 venv）
   TJU_PYTHON: z.string().default(".venv/bin/python"),
+
+  // 可选：从该 .env 文件读取 TJU_USER/TJU_PASS（只读，不复制凭据进本仓库）
+  TJU_ENV_FILE: z.string().optional(),
 
   // ─── Anthropic（课表截图 OCR，可选） ────────────────────
   ANTHROPIC_API_KEY: z.string().startsWith("sk-ant-").optional(),

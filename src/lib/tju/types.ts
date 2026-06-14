@@ -30,6 +30,32 @@ export interface TjuStudent {
   semester: string | null;
 }
 
+/** 公开课程库条目（LibCourse dump），扩展 TjuCourse。 */
+export interface TjuLibCourse extends TjuCourse {
+  semester: string | null;
+  lession_id: string | null; // 用于查详情/大纲
+  course_type: string[] | null; // 如 ["专业核心课程"]
+  teaching_class: string[] | null;
+  selected: number | null; // 已选（本科有，研究生为 null）
+  limit: number | null; // 上限
+  extra_limit: number | null;
+  is_extra_open: boolean | null;
+  hours: number | null; // 总学时
+  week_hours: number | null; // 周学时
+  has_syllabus: boolean | null; // 有无课程大纲
+  student_type: "undergraduate" | "graduate";
+}
+
+/** courses 子命令返回 */
+export interface TjuCoursesResult {
+  semester: string;
+  total: number;
+  undergraduate: number;
+  graduate: number;
+  courses: TjuLibCourse[];
+  warnings: string[];
+}
+
 export interface TjuScheduleResult {
   student: TjuStudent;
   semester: string;
