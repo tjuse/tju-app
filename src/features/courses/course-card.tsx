@@ -7,10 +7,16 @@ const WEEKDAY = ["", "周一", "周二", "周三", "周四", "周五", "周六",
 
 function arrangeLabel(arr: TjuArrange): string {
   const wd = arr.weekday ? WEEKDAY[arr.weekday] : "";
-  const units =
-    arr.unit && arr.unit.length > 0 ? `${arr.unit[0]}-${arr.unit[arr.unit.length - 1]}节` : "";
+  let units = "";
+  if (arr.unit && arr.unit.length > 0) {
+    const start = arr.unit[0];
+    const end = arr.unit[arr.unit.length - 1];
+    units = start === end ? `${start}节` : `${start}-${end}节`;
+  }
   return [wd, units].filter(Boolean).join(" ");
 }
+
+export { arrangeLabel };
 
 export function CourseCard({ course }: { course: TjuLibCourse }) {
   const teachers = course.teacher?.join("、");

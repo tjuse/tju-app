@@ -1,13 +1,15 @@
-import { Clock, MapPin, Table2 } from "lucide-react";
+import { MapPin, Table2, User } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CourseWithTime } from "@/types";
 
 interface TodayCoursesWidgetProps {
   courses: CourseWithTime[];
+  /** 是否已导入/抓取过课表（用于区分「没课」与「未导入」） */
+  hasSchedule: boolean;
 }
 
-export function TodayCoursesWidget({ courses }: TodayCoursesWidgetProps) {
+export function TodayCoursesWidget({ courses, hasSchedule }: TodayCoursesWidgetProps) {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -27,12 +29,14 @@ export function TodayCoursesWidget({ courses }: TodayCoursesWidgetProps) {
       <CardContent className="flex flex-col gap-2">
         {courses.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <p className="text-[var(--color-text-mid)] text-sm">今天没有课程安排 🎉</p>
+            <p className="text-[var(--color-text-mid)] text-sm">
+              {hasSchedule ? "今天没有课，好好休息 🎉" : "还没有课表"}
+            </p>
             <Link
               href="/schedule"
               className="text-[13px] text-[var(--color-accent)] hover:underline"
             >
-              去添加课程 →
+              {hasSchedule ? "查看课程表 →" : "去导入课表 →"}
             </Link>
           </div>
         ) : (
@@ -80,7 +84,7 @@ export function TodayCoursesWidget({ courses }: TodayCoursesWidgetProps) {
                     )}
                     {course.teacher && (
                       <span className="flex items-center gap-1">
-                        <Clock className="size-3" />
+                        <User className="size-3" />
                         {course.teacher}
                       </span>
                     )}

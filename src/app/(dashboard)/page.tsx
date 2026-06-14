@@ -31,7 +31,7 @@ export default async function DashboardHome() {
         {/* Bento 风网格：左侧今日课程占两行，右侧本周/校历/链接/卡费 */}
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <FadeIn delay={0.05} className="md:col-span-1 md:row-span-2">
-            <TodayCoursesWidget courses={todayCourses} />
+            <TodayCoursesWidget courses={todayCourses} hasSchedule={cached !== null} />
           </FadeIn>
 
           <FadeIn delay={0.1}>
