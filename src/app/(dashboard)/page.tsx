@@ -7,12 +7,18 @@ import { TodayCoursesWidget } from "@/components/dashboard/widgets/today-courses
 import { UpcomingEventsWidget } from "@/components/dashboard/widgets/upcoming-events-widget";
 import { WeekWidget } from "@/components/dashboard/widgets/week-widget";
 import { FadeIn } from "@/components/motion/fade-in";
-import type { CourseWithTime } from "@/types";
+import { getCurrentSemester } from "@/features/calendar/calendar-data";
+import { getWeekOfSemester } from "@/features/calendar/utils";
+import { getTodayCourses } from "@/features/schedule/utils";
+import { readCachedSchedule } from "@/lib/tju/schedule-store";
 
-export default function DashboardHome() {
-  // Phase 1：课程数据将由用户录入/导入后从 DB 读取。
-  // 当前阶段先以空数组渲染空态，接入 API 后替换。
-  const todayCourses: CourseWithTime[] = [];
+export const dynamic = "force-dynamic";
+
+export default async function DashboardHome() {
+  // 从文件缓存读今日课程（无缓存则为空态，引导去课表页抓取）
+  const cached = await readCachedSchedule();
+  const currentWeek = getWeekOfSemester(getCurrentSemester()) ?? 1;
+  const todayCourses = cached ? getTodayCourses(cached.courses, currentWeek) : [];
 
   return (
     <>

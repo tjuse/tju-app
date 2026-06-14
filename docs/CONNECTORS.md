@@ -1,45 +1,50 @@
-# TJU 数据接入 — connectors（Phase 2）
+# 数据接入 — tju.app
 
-> ⚠️ 本文档描述 **Phase 2** 的实现计划。当前 `lib/connectors/tju/*` 为占位接口，调用即抛 `Phase 2 not implemented`。**进入 Phase 2 前不要实现真实抓取。**
+## 课表 / 成绩 / 考试 —— 用 `tju` 库（已接入）
 
-## 安全红线（先于一切）
+复用社区成熟库 **[`tju`](https://github.com/tjuse/tju-python)**（PyPI: `tju`，GPL-3.0），它封装了：
+- TJU SSO 单点登录（`sso.tju.edu.cn`）+ EAMS 教务（`classes.tju.edu.cn`）
+- CAS 认证、验证码、HTML 解析
 
-- 校内凭据**永不**明文存储 / 打印 / 写日志。
-- 用 AES-GCM（`CREDENTIAL_ENC_KEY`，32 字节 hex）加密存储，或仅保留**短期会话 cookie**。
-- 仅抓取**用户本人授权**数据；请求低频、带缓存、尊重学校系统，避免高频轮询。
+**不重复造轮子**：我们只写瘦桥接 `scripts/tju_cli.py`，由 Next.js spawn 调用。
 
-## TJU 系统地图（调研）
+### tju 提供的能力（`Client`）
 
-| 系统 | 入口 | 说明 |
+| 方法 | 说明 | 已接入 CLI |
 |---|---|---|
-| 统一身份认证 (CAS) | `https://sso.tju.edu.cn/cas/login` | 单点登录网关 |
-| 教务处 | `https://oaa.tju.edu.cn/` | 教务 |
-| 选课 / 课表 | `http://classes.tju.edu.cn/` | 学号登录，课表来源 |
-| 信息门户 | `https://my.tju.edu.cn/` | 一站式服务聚合 |
-| 校园卡 | `https://card.tju.edu.cn/` | 余额 / 流水 |
-| 社区参考 | `https://wiki.tjubot.cn/` | 北洋维基（端点与流程参考） |
+| `client.schedule(semester)` | 个人课表 | ✅ `schedule` |
+| `client.profile` | 学生档案 | ✅ `profile` |
+| `client.exam(semester)` | 考试安排 | ✅ `exam` |
+| `client.score()` | 成绩 | ✅ `score` |
+| `client.query_courses(semester)` | 公开课程库 | ⏳ 可加 |
+| `client.free_classrooms(...)` | 空教室 | ⏳ 可加 |
 
-## CAS 登录流程（待实现，`cas.ts`）
+### 数据结构（schedule）
 
-典型 CAS 流程：
-1. GET 登录页，抓取 `execution`、`lt` 等隐藏字段 + 初始 cookie。
-2. POST 学号 / 密码 / 隐藏字段 → 取得 TGT/ST，处理 302 跳转。
-3. 携带认证 cookie 访问各业务系统（可能需各系统二次 ST 换取会话）。
-4. 缓存会话（带过期时间），复用以减少登录频次。
+`client.schedule()` 返回 `Course[]`，每门课：`class_id / course_id / name / credit / campus / weeks(原始串如 "1-16") / teacher[] / arrange[]`。
+`arrange` 每段：`weekday(1-7) / unit[](节次) / week[](周次) / location / teacher[]`。
 
-> 实现前先用**隔离脚本**（不入仓库 / 用 `.env.local` 凭据）验证流程跑通，再落地为 connector。
+映射见 `src/features/schedule/mapping.ts`：一门课按 arrange 展开为多条扁平 `Course`。
 
-## 各 connector
+### 加一个新查询（步骤）
 
-- `cas.ts` — `casLogin(creds) → CasSession`、`validateCasSession`。
-- `schedule.ts` — `fetchScheduleFromTju(session, semester) → TjuCourse[]`（落库 `source=sync`，复用 Phase 1 的 `Course` 结构）。
-- `card.ts` — `fetchCardBalance` / `fetchCardTransactions`（落库做 Recharts 趋势）。
-- `electricity.ts` — `fetchElectricityBalance`（余额 + 低额提醒）。
+1. `scripts/tju_cli.py`：在 `choices` 加子命令，调用对应 `client.xxx()`，`_ok(...)` 输出。
+2. `src/lib/tju/types.ts`：加返回类型。
+3. `src/lib/tju/client.ts`：加 `fetchXxx()`。
+4. 需要持久化就经 `lib/cache` 落文件。
 
-## 部署考量（Vercel）
+### 运行前提
 
-Serverless 抓取校内系统可能遇超时 / 出口 IP 限制。Connector 接口稳定，必要时把实现搬到**独立自托管 worker**（队列 / webhook 触发），UI 不变。详见 `ARCHITECTURE.md`。
+- `pnpm py:setup` 安装 tju 到 `.venv`。
+- `.env.local` 配 `TJU_USER` / `TJU_PASS`。
+- **校园网或 VPN**（tju 实时调用要求）。
+- 命令行调试：`pnpm tju:schedule` 或 `.venv/bin/python scripts/tju_cli.py schedule`。
 
-## 验证
+## 校园卡 / 电费 —— 未来另接
 
-进入 Phase 2 后：先脚本验证 CAS 与各系统抓取 → 接 UI → 用真实账号核对课表 / 消费 / 电费正确性 → 确认凭据加密存储、日志无明文。
+**tju 不覆盖**校园卡与电费（独立于 EAMS 的系统）。占位在 `src/lib/connectors/tju/{card,electricity}.ts`，调用即抛「尚未实现」。后续可参考北洋维基（`wiki.tjubot.cn`）单独实现，沿用同样的「spawn/抓取 + 文件缓存」模式。
+
+## 安全
+
+- 凭据只在 `.env.local`，经 env 透传子进程；不打印、不写缓存。
+- 只抓本人授权数据；低频、带缓存、尊重学校系统。

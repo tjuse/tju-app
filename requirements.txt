@@ -1,0 +1,4 @@
+# tju.app Python 依赖
+# tju：天津大学 SSO + EAMS 客户端（GPL-3.0），课表/成绩/考试等数据来源
+# 仓库：https://github.com/tjuse/tju-python  PyPI：https://pypi.org/project/tju/
+tju>=0.3.0

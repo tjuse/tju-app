@@ -1,7 +1,7 @@
 /**
- * TJU 电费查询 connector — Phase 2 占位
+ * 电费 connector — 未来功能占位。
+ * tju 库不覆盖电费/缴费系统，需另行接入。
  */
-import type { CasSession } from "./cas";
 
 export interface ElectricityStatus {
   balance: number; // 剩余电费（元）
@@ -9,6 +9,6 @@ export interface ElectricityStatus {
   dormitory: string;
 }
 
-export async function fetchElectricityBalance(_session: CasSession): Promise<ElectricityStatus> {
-  throw new Error("Phase 2 not implemented — see docs/CONNECTORS.md");
+export function fetchElectricityBalance(): Promise<ElectricityStatus> {
+  throw new Error("电费功能尚未实现（独立于 tju/EAMS，待接入）");
 }

@@ -22,8 +22,7 @@ export interface UserProfile {
 // ─── 课程表 ───────────────────────────────────────────────────────
 
 export interface Course {
-  id: string;
-  userId: string;
+  id: string; // 合成的稳定 id（无数据库）
   name: string;
   teacher?: string | null;
   location?: string | null;
@@ -32,8 +31,11 @@ export interface Course {
   endSlot: number; // 1-11（含）
   weeks: number[]; // 上课周次
   color?: string | null;
-  source: "manual" | "ics" | "ocr" | "sync";
+  source: "manual" | "ics" | "ocr" | "tju"; // tju = 经 tju 库实时抓取
   semester?: string | null;
+  courseId?: string | null; // 课程代码
+  classId?: string | null; // 课程序号
+  credit?: number | null;
   note?: string | null;
 }
 

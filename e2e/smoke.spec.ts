@@ -19,6 +19,6 @@ test.describe("核心页面冒烟测试", () => {
 
   test("课程表页显示空态", async ({ page }) => {
     await page.goto("/schedule");
-    await expect(page.getByText("还没有课程")).toBeVisible();
+    await expect(page.getByText("还没有课表")).toBeVisible();
   });
 });

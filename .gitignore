@@ -52,3 +52,12 @@ test-results/
 public/sw.js
 public/sw.js.map
 public/swe-worker-*.js
+
+# python (tju integration)
+.venv/
+__pycache__/
+*.pyc
+
+# local data cache (fetched schedule/scores etc.)
+data/
+examples/output/

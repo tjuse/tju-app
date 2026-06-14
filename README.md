@@ -21,26 +21,31 @@
 
 ## 🛠 技术栈
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn 风格组件 · Framer Motion · TanStack Query · Prisma + PostgreSQL · Auth.js · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn 风格组件 · Framer Motion · TanStack Query · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm
+
+课表数据源：**[`tju`](https://github.com/tjuse/tju-python)** Python 库（封装 SSO + EAMS），经瘦桥接脚本由 Next.js 调用。**无数据库**（文件 JSON 缓存）、**无 Docker**、**自托管**。
 
 ## 🚀 快速开始
 
+> ⚠️ 课表实时抓取需 **校园网或 VPN**，且 **不能部署到 Vercel**（云端无校园网），请自托管在能连校园网的机器。
+
 ```bash
-# 1. 安装依赖
+# 1. 安装 JS 依赖
 pnpm install
 
-# 2. 配置环境变量
-cp .env.example .env.local
-#   - DATABASE_URL：本地 docker Postgres 默认值即可
-#   - AUTH_SECRET：openssl rand -hex 32
-#   - ANTHROPIC_API_KEY：用截图导入时需要
+# 2. 安装 Python 依赖（创建 .venv + 安装 tju）
+pnpm py:setup
 
-# 3. 起本地数据库 + 建表
-docker compose up -d
-pnpm db:migrate
+# 3. 配置环境变量
+cp .env.example .env.local
+#   - TJU_USER / TJU_PASS：学号与统一认证密码（课表抓取用）
+#   - ANTHROPIC_API_KEY：截图导入时需要（可选）
 
 # 4. 开发
 pnpm dev          # http://localhost:3000
+
+# 调试：命令行直接抓课表（需校园网 + 凭据）
+pnpm tju:schedule
 ```
 
 ## 常用命令
@@ -53,7 +58,8 @@ pnpm dev          # http://localhost:3000
 | `pnpm lint` / `pnpm lint:fix` | Biome 检查 / 自动修复 |
 | `pnpm test` | 单元测试（Vitest） |
 | `pnpm test:e2e` | 端到端测试（Playwright） |
-| `pnpm db:studio` | Prisma Studio |
+| `pnpm py:setup` | 创建 .venv 并安装 tju |
+| `pnpm tju:schedule` | 命令行抓课表（调试） |
 
 > **注**：构建用 `--webpack`（Serwist 暂不支持 Turbopack）。Biome 命令不要带 `.` 路径参数。
 
@@ -64,10 +70,10 @@ pnpm dev          # http://localhost:3000
 - [docs/DEV_PLAN.md](./docs/DEV_PLAN.md) — 开发任务拆解
 - [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) — 设计系统
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — 架构
-- [docs/CONNECTORS.md](./docs/CONNECTORS.md) — TJU 数据接入（Phase 2）
+- [docs/CONNECTORS.md](./docs/CONNECTORS.md) — TJU 数据接入（tju 库）
 
 ## ⚠️ 说明
 
-非官方项目。需登录的功能仅抓取**用户本人授权**的数据，凭据加密存储、绝不明文记录。校历等静态数据需每学期核对官方发布更新。
+非官方项目。需登录的功能仅抓取**用户本人授权**的数据；凭据只存本地 `.env.local`，绝不写日志或缓存。校历等静态数据需每学期核对官方发布更新。课表数据源 [`tju`](https://github.com/tjuse/tju-python) 为 GPL-3.0。
 
 可部署到 Vercel（Phase 2 校内抓取可能受 Serverless IP/超时限制，详见架构文档的 connector 解耦方案）。
