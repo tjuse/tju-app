@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
 """tju.app — Python CLI bridge to the `tju` library.
 
-被 Next.js 后端通过 child_process spawn 调用。登录后按子命令查询，并把结果以
-**统一 JSON** 打印到 stdout：
+Called by the Next.js backend via child_process.spawn. Logs in to TJU, runs
+the requested sub-command, and prints the result as a single JSON line on
+stdout using the unified envelope:
 
     {"ok": true,  "data": {...}}
     {"ok": false, "error": "...", "code": "login|network|parse|usage|unknown"}
 
-约定：无论成功失败都打印一行 JSON 到 stdout；成功 exit 0，失败 exit 1。
+Contract: always exactly one JSON line on stdout; exit 0 on success, exit 1 on
+failure.
 
-凭据来源（按优先级）：
-  1. TJU_ENV_FILE 指向的 .env 文件（KEY=VALUE，仅读取，不修改）
-  2. 进程环境变量 TJU_USER / TJU_PASS
-真实查询需校园网 / VPN。
+Credential resolution order:
+  1. TJU_ENV_FILE — path to an .env file (KEY=VALUE); read-only, never written.
+  2. Process environment variables TJU_USER / TJU_PASS.
 
-用法：
+Live data requires campus network access or VPN.
+
+Usage:
     python scripts/tju_cli.py courses  [--semester 25262] [--stu-type ug|gs|both]
     python scripts/tju_cli.py schedule [--semester 25262]
     python scripts/tju_cli.py profile
     python scripts/tju_cli.py exam [--semester 25262]
     python scripts/tju_cli.py score
+    python scripts/tju_cli.py syllabus --lession-id <id>
 """
 
 from __future__ import annotations
@@ -48,7 +52,11 @@ def _fail(message: str, code: str = "unknown") -> None:
 
 
 def _load_env_file() -> None:
-    """若设置了 TJU_ENV_FILE，从中读取 KEY=VALUE 注入环境（仅在未设置时）。只读。"""
+    """If TJU_ENV_FILE is set, inject KEY=VALUE pairs into the environment.
+
+    Values are only set when the key is not already present (os.environ.setdefault).
+    The file is never modified — read-only access only.
+    """
     path = os.environ.get("TJU_ENV_FILE")
     if not path:
         return
@@ -61,18 +69,19 @@ def _load_env_file() -> None:
             value = value.strip().strip('"').strip("'")
             os.environ.setdefault(key.strip(), value)
     except OSError:
-        # 读取失败不致命：可能凭据已在进程环境里
+        # Non-fatal: credentials may already be in the process environment.
         pass
 
 
-# 全校课程库分页参数（对学校系统友好）
+# Pagination parameters for the public course catalog (be polite to the server).
 PAGE_SIZE = 1000
 PAGE_DELAY = 0.8
 PROJECT_DELAY = 1.2
 
 
 def _fetch_project(client, StuType, semester, stu_type, label):
-    """爬取某 project（本科/研究生）的全部分页，返回 dump 后的 dict 列表。"""
+    """Crawl all pages for one project (undergraduate or graduate) and return
+    a list of serialised LibCourse dicts."""
     from tju.models.course import LibCourse
 
     collected = []
@@ -141,13 +150,13 @@ def main() -> None:
     parser.add_argument(
         "command", choices=["courses", "schedule", "profile", "exam", "score", "syllabus"]
     )
-    parser.add_argument("--semester", default=None, help="学期代码，如 25262；缺省用当前学期")
-    parser.add_argument("--lession-id", default=None, help="syllabus：课程 lession_id")
+    parser.add_argument("--semester", default=None, help="semester code, e.g. 25262 (defaults to current)")
+    parser.add_argument("--lession-id", default=None, help="syllabus: lession_id to fetch")
     parser.add_argument(
         "--stu-type",
         choices=["ug", "gs", "both"],
         default="both",
-        help="courses：本科 ug / 研究生 gs / 两者 both（默认）",
+        help="courses: undergraduate=ug / graduate=gs / both (default)",
     )
     args = parser.parse_args()
 
@@ -197,14 +206,26 @@ def main() -> None:
             _ok({"student": student, "profile": data})
 
         elif args.command == "exam":
+            from tju.models.exam import Exam
             exams = client.exam(semester=semester)
-            data = exams.Schema(many=True).dump(exams) if hasattr(exams, "Schema") else exams
-            _ok({"student": student, "semester": semester, "exams": data})
+            rows = Exam.Schema(many=True).dump(list(exams))
+            _ok({"student": student, "semester": semester, "exams": rows})
 
         elif args.command == "score":
-            scores = client.score()
-            data = scores.Schema(many=True).dump(scores) if hasattr(scores, "Schema") else scores
-            _ok({"student": student, "scores": data})
+            is_gs = client.stu_type == StuType.GRADUATE
+            result = client.score()
+            score_list = result.get("list", [])
+            if is_gs:
+                from tju.models.score import GSScore
+                rows = GSScore.Schema(many=True).dump(list(score_list))
+            else:
+                from tju.models.score import UGScore
+                rows = UGScore.Schema(many=True).dump(list(score_list))
+            _ok({
+                "student": student,
+                "student_type": "graduate" if is_gs else "undergraduate",
+                "scores": rows,
+            })
 
     except LoginError as exc:
         _fail(f"登录失败：{exc}。请检查 TJU_USER/TJU_PASS，并确认已连校园网/VPN。", code="login")

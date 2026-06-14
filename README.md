@@ -2,78 +2,95 @@
 
 # tju.app
 
-**天津大学校园 Dashboard** — 课程表 · 校历 · 校园卡 · 电费 · 常用链接
+**Tianjin University Campus Dashboard** — Course Library · Schedule · Calendar · Grades · Exams · Quick Links
 
-美观、可交互、功能大而全。极简现代设计，深色为主，PWA 可安装。
+Polished, interactive, all-in-one. Minimal modern design, dark-first, PWA-ready.
+
+[中文版 README](./README.zh-CN.md) · [AGENTS.md](./AGENTS.md) · [Roadmap](./docs/ROADMAP.md)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftjuse%2Ftju-app)
+
+> **Demo note:** The Vercel deploy is read-only — public course catalog, statistics, trends, and conflict detection all work from bundled cache data. Personal features (schedule, grades, exams) require local setup with valid TJU credentials.
 
 </div>
 
 ---
 
-## ✨ 特性
+## ✨ Features
 
-- 🎨 **一流 UI/UX** —— 极简现代设计系统（Linear/Vercel 风），深色为主 + 北洋蓝强调色，流畅微动效
-- 📅 **课程表** —— 手动录入 / ICS 导入 / **截图 AI 识别**（Claude 视觉），周视图、当前课程高亮
-- 🗓 **校历** —— 学期周次、考试周、假期一目了然，"今天第几周"
-- 🔗 **常用链接** —— 内置 TJU 高频入口 + 自定义
-- 💳 **校园卡 / ⚡ 电费** —— 余额与消费趋势（Phase 2，需校园认证）
-- 📱 **PWA** —— 添加到主屏幕、离线缓存，响应式适配手机/桌面
+- 🎨 **World-class UI/UX** — minimal modern design (Linear/Vercel aesthetic), dark-first + Beiyang Blue accent, smooth micro-animations
+- 📚 **Public Course Library** — full TJU course catalog (5,000+ courses per semester), semester history, advanced filters, statistics, trends across semesters
+- ⭐ **Favorites + Conflict Detection** — star courses, then auto-detect schedule conflicts in your selection
+- 📅 **Personal Schedule** — import via screenshot AI recognition (Claude Vision) or manual entry; weekly view
+- 🗓 **Academic Calendar** — semester weeks, exam periods, holidays at a glance
+- 🔗 **Quick Links** — curated TJU portals (EAMS, library, SSO, mail, …)
+- 🎓 **Grades** — full grade history with GPA summary (requires credentials locally)
+- 📝 **Exams** — upcoming exam schedule with date / time / location / seat (requires credentials locally)
+- 📱 **PWA** — installable, offline-ready, responsive for mobile and desktop
 
-## 🛠 技术栈
+## 🛠 Tech Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn 风格组件 · Framer Motion · TanStack Query · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm
+Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style components · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm
 
-课表数据源：**[`tju`](https://github.com/tjuse/tju-python)** Python 库（封装 SSO + EAMS），经瘦桥接脚本由 Next.js 调用。**无数据库**（文件 JSON 缓存）、**无 Docker**、**自托管**。
+Data source: **[`tju`](https://github.com/tjuse/tju-python)** Python library (wraps TJU SSO + EAMS) via a thin `scripts/tju_cli.py` bridge. **No database, no Docker** — file-based JSON cache.
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-> ⚠️ 课表实时抓取需 **校园网或 VPN**，且 **不能部署到 Vercel**（云端无校园网），请自托管在能连校园网的机器。
+### Vercel (demo mode, read-only)
+
+Click the "Deploy with Vercel" button above. The course catalog, statistics, trends, and conflict detection work immediately from the bundled demo data. Personal data features show a demo-mode notice until credentials are configured.
+
+### Local (full features)
 
 ```bash
-# 1. 安装 JS 依赖
+# 1. Install JS dependencies
 pnpm install
 
-# 2. 安装 Python 依赖（创建 .venv + 安装 tju）
+# 2. Install Python dependencies (creates .venv + installs tju)
 pnpm py:setup
 
-# 3. 配置环境变量
+# 3. Configure environment variables
 cp .env.example .env.local
-#   - TJU_USER / TJU_PASS：学号与统一认证密码（课表抓取用）
-#   - ANTHROPIC_API_KEY：截图导入时需要（可选）
+#   Edit .env.local:
+#   - TJU_USER / TJU_PASS  — student ID and unified-auth password (for live EAMS fetching)
+#   - TJU_ENV_FILE          — or point to an existing .env file with those credentials
+#   - ANTHROPIC_API_KEY     — optional, for schedule-screenshot OCR import
 
-# 4. 开发
+# 4. Start development server
 pnpm dev          # http://localhost:3000
 
-# 调试：命令行直接抓课表（需校园网 + 凭据）
-pnpm tju:schedule
+# Fetch the current semester's public course catalog (requires campus network / VPN)
+pnpm tju:courses
+
+# Debug: run the Python CLI directly
+TJU_ENV_FILE=... .venv/bin/python scripts/tju_cli.py score
 ```
 
-## 常用命令
+## 📋 Commands
 
-| 命令 | 作用 |
+| Command | Description |
 |---|---|
-| `pnpm dev` | 开发服务器（webpack） |
-| `pnpm build` | 生产构建 |
-| `pnpm typecheck` | TypeScript 检查 |
-| `pnpm lint` / `pnpm lint:fix` | Biome 检查 / 自动修复 |
-| `pnpm test` | 单元测试（Vitest） |
-| `pnpm test:e2e` | 端到端测试（Playwright） |
-| `pnpm py:setup` | 创建 .venv 并安装 tju |
-| `pnpm tju:schedule` | 命令行抓课表（调试） |
+| `pnpm dev` | Development server (webpack) |
+| `pnpm build` | Production build |
+| `pnpm typecheck` | TypeScript check |
+| `pnpm lint` / `pnpm lint:fix` | Biome check / auto-fix |
+| `pnpm test` | Unit tests (Vitest) |
+| `pnpm test:e2e` | End-to-end tests (Playwright) |
+| `pnpm py:setup` | Create .venv and install tju |
+| `pnpm tju:schedule` | Fetch personal schedule (debug) |
+| `pnpm tju:courses` | Fetch public course catalog (debug) |
 
-> **注**：构建用 `--webpack`（Serwist 暂不支持 Turbopack）。Biome 命令不要带 `.` 路径参数。
+> **Note:** Build uses `--webpack` because Serwist (PWA) is not yet compatible with Turbopack. Biome commands must not receive a `.` path argument.
 
-## 📁 项目结构 / 文档
+## 📁 Project Structure
 
-- [AGENTS.md](./AGENTS.md) — 协作约定（必读）
-- [docs/ROADMAP.md](./docs/ROADMAP.md) — 分阶段路线图
-- [docs/DEV_PLAN.md](./docs/DEV_PLAN.md) — 开发任务拆解
-- [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) — 设计系统
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — 架构
-- [docs/CONNECTORS.md](./docs/CONNECTORS.md) — TJU 数据接入（tju 库）
+- [AGENTS.md](./AGENTS.md) — collaboration conventions (read first)
+- [docs/ROADMAP.md](./docs/ROADMAP.md) — phased feature roadmap
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — architecture overview
+- [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) — design system tokens and rules
+- [docs/CONNECTORS.md](./docs/CONNECTORS.md) — TJU data source integration details
+- [docs/DEV_PLAN.md](./docs/DEV_PLAN.md) — development task breakdown
 
-## ⚠️ 说明
+## ⚠️ Disclaimer
 
-非官方项目。需登录的功能仅抓取**用户本人授权**的数据；凭据只存本地 `.env.local`，绝不写日志或缓存。校历等静态数据需每学期核对官方发布更新。课表数据源 [`tju`](https://github.com/tjuse/tju-python) 为 GPL-3.0。
-
-可部署到 Vercel（Phase 2 校内抓取可能受 Serverless IP/超时限制，详见架构文档的 connector 解耦方案）。
+Unofficial project. Login-required features only fetch data authorized by the user; credentials are stored locally in `.env.local` only — never logged or cached to disk in readable form. Course data (`tju`) is GPL-3.0 licensed. Calendar data requires manual verification against official TJU publications each semester.

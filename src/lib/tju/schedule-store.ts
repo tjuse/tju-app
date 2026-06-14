@@ -1,6 +1,7 @@
 /**
- * 课表存取（服务端）。组合 tju 抓取 + 文件缓存。
- * 自用单用户：当前课表缓存在固定 key 下；刷新即重新抓取覆盖。
+ * Personal schedule cache (server-only). Combines live tju fetching with file
+ * caching. Single-user: the current schedule is stored under a fixed cache key
+ * and replaced on every refresh.
  */
 import "server-only";
 import { mapTjuSchedule } from "@/features/schedule/mapping";
@@ -21,14 +22,14 @@ export interface ScheduleWithMeta extends StoredSchedule {
   cachedAt: string;
 }
 
-/** 仅读缓存，不触发网络。页面 SSR 用。无缓存返回 null。 */
+/** Read from cache only — no network call. Used by SSR pages. Returns null when empty. */
 export async function readCachedSchedule(): Promise<ScheduleWithMeta | null> {
   const hit = await readCacheWithMeta<StoredSchedule>(CACHE_KEY);
   if (!hit) return null;
   return { ...hit.data, cachedAt: hit.cachedAt };
 }
 
-/** 实时抓取 + 映射 + 写缓存。需校园网/VPN。抛 TjuError。 */
+/** Live fetch + mapping + write cache. Requires campus network / VPN. Throws TjuError. */
 export async function refreshSchedule(semester?: string): Promise<ScheduleWithMeta> {
   const result = await fetchSchedule(semester);
   const stored: StoredSchedule = {

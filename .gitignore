@@ -58,6 +58,11 @@ public/swe-worker-*.js
 __pycache__/
 *.pyc
 
-# local data cache (fetched schedule/scores etc.)
-data/
+# local data cache — personal data stays git-ignored; public course/syllabus
+# caches are whitelisted so they can be committed as Vercel demo data.
+/data/*
+!/data/cache
+/data/cache/*
+!/data/cache/courses-*.json
+!/data/cache/syllabus-*.json
 examples/output/

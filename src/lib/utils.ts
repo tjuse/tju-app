@@ -2,15 +2,15 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
- * 合并 Tailwind 类名，处理冲突。
- * 用法：cn("px-4", condition && "text-blue-500", ...)
+ * Merge Tailwind class names, resolving conflicts via tailwind-merge.
+ * Usage: cn("px-4", condition && "text-blue-500", ...)
  */
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
 /**
- * 格式化金额（人民币），如 42.5 → "¥42.50"
+ * Format an amount as Chinese yuan, e.g. 42.5 → "¥42.50"
  */
 export function formatCNY(amount: number): string {
   return new Intl.NumberFormat("zh-CN", {
@@ -21,8 +21,9 @@ export function formatCNY(amount: number): string {
 }
 
 /**
- * 将课程节次转换为时间字符串（天大课程时间表）
- * 第1节：08:30，每节 45min，间隔 10min；大课之间大课间 30min
+ * Convert a class-period number (节次) to a start/end time string using
+ * TJU's official timetable. Period 1 starts at 08:30; each period is 45 min
+ * with 10-min breaks and a 30-min midday break between periods 4 and 5.
  */
 const TJU_SLOT_START: Record<number, string> = {
   1: "08:30",
@@ -60,7 +61,7 @@ export function slotToTime(slot: number): { start: string; end: string } {
 }
 
 /**
- * 判断今天是学期第几周（基于学期开始日期）
+ * Calculate the current week number relative to a semester start date.
  */
 export function getCurrentWeek(semesterStart: Date): number {
   const now = new Date();
@@ -70,7 +71,7 @@ export function getCurrentWeek(semesterStart: Date): number {
 }
 
 /**
- * 获取当前星期几（1=周一 … 7=周日）
+ * Return today's weekday as 1=Monday … 7=Sunday.
  */
 export function getTodayWeekday(): number {
   const day = new Date().getDay(); // 0=周日

@@ -1,6 +1,8 @@
 /**
- * 极简文件 JSON 缓存（替代数据库）。仅服务端使用。
- * 数据落在 `data/cache/<key>.json`，含写入时间戳，可选 TTL。
+ * Minimal file-based JSON cache (no database). Server-only.
+ * Files are stored at `data/cache/<key>.json` with a write-time timestamp.
+ * Supports an optional TTL; omitting it means "never expire" (manual-refresh
+ * model).
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -8,19 +10,19 @@ import path from "node:path";
 const CACHE_DIR = path.join(process.cwd(), "data", "cache");
 
 interface CacheEnvelope<T> {
-  cachedAt: string; // ISO 时间戳
+  cachedAt: string; // ISO timestamp
   data: T;
 }
 
 function cachePath(key: string): string {
-  // 防目录穿越：只保留安全字符
+  // Strip non-alphanumeric characters to prevent path traversal.
   const safe = key.replace(/[^a-zA-Z0-9._-]/g, "_");
   return path.join(CACHE_DIR, `${safe}.json`);
 }
 
 /**
- * 读取缓存。未命中或已过期（超过 maxAgeMs）返回 null。
- * maxAgeMs 省略表示永不过期（手动刷新模式）。
+ * Read from the cache. Returns null on miss or when the entry is older than
+ * maxAgeMs. Omitting maxAgeMs means "never expire" (manual-refresh model).
  */
 export async function readCache<T>(key: string, maxAgeMs?: number): Promise<T | null> {
   try {
@@ -36,7 +38,7 @@ export async function readCache<T>(key: string, maxAgeMs?: number): Promise<T | 
   }
 }
 
-/** 读取缓存及其写入时间（用于在 UI 显示"最后更新于"）。 */
+/** Read the cached value together with the write-time timestamp (for "last updated" UI). */
 export async function readCacheWithMeta<T>(
   key: string,
 ): Promise<{ data: T; cachedAt: string } | null> {
@@ -49,7 +51,7 @@ export async function readCacheWithMeta<T>(
   }
 }
 
-/** 写入缓存。 */
+/** Write a value to the cache. */
 export async function writeCache<T>(key: string, data: T): Promise<void> {
   await mkdir(CACHE_DIR, { recursive: true });
   const env: CacheEnvelope<T> = { cachedAt: new Date().toISOString(), data };

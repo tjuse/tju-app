@@ -1,15 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { DEMO_MODE_MESSAGE, isLiveFetchAvailable } from "@/lib/runtime";
 import { readCachedSchedule, refreshSchedule } from "@/lib/tju/schedule-store";
 import { TjuError } from "@/lib/tju/types";
 
 export const runtime = "nodejs";
-// tju 登录+抓取较慢
+// TJU login + crawl can be slow; 60s is the Vercel Hobby ceiling.
 export const maxDuration = 60;
 
 /**
- * GET /api/schedule           → 返回缓存课表（无缓存返回 null）
- * GET /api/schedule?refresh=1 → 实时抓取并刷新缓存（需校园网/VPN）
- *   可选 ?semester=24251
+ * GET /api/schedule           → Return cached personal schedule (null if none).
+ * GET /api/schedule?refresh=1 → Live crawl from EAMS and refresh the cache.
+ *   Requires campus network / VPN. Returns 503 in demo / Vercel mode.
+ *   Optional: ?semester=24251
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -19,6 +21,10 @@ export async function GET(req: NextRequest) {
   if (!refresh) {
     const cached = await readCachedSchedule();
     return NextResponse.json({ data: cached });
+  }
+
+  if (!isLiveFetchAvailable()) {
+    return NextResponse.json({ error: DEMO_MODE_MESSAGE, code: "usage" }, { status: 503 });
   }
 
   try {

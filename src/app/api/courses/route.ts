@@ -1,17 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { CourseSort, StuTypeFilter } from "@/features/courses/filter";
 import { isValidSemester } from "@/features/courses/semesters";
+import { DEMO_MODE_MESSAGE, isLiveFetchAvailable } from "@/lib/runtime";
 import { queryCachedCourses, refreshCourses } from "@/lib/tju/courses-store";
 import { TjuError } from "@/lib/tju/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 300; // 全量爬取可能较久（自托管无硬限制）
+// Keep within Vercel Hobby's 60s limit. Local self-hosted instances have no
+// platform cap so long crawls are still fine in practice.
+export const maxDuration = 60;
 
 /**
  * GET /api/courses?semester=25262[&q=&stuType=&campus=&courseType=&page=&pageSize=]
- *   → 在缓存上过滤分页返回（无缓存返回 data:null，提示去抓取）
+ *   → Filter + paginate from the in-memory cache. Returns data:null when no
+ *     cache exists for the requested semester (prompts the user to crawl).
  * GET /api/courses?semester=25262&refresh=1[&stuType=ug|gs|both]
- *   → 实时全量爬取并写缓存（需校园网/VPN），返回 meta
+ *   → Live crawl the TJU EAMS and write to the cache. Requires campus network /
+ *     VPN and valid credentials. Returns 503 in demo / Vercel mode.
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -21,8 +26,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "无效的学期代码" }, { status: 400 });
   }
 
-  // 刷新（抓取）
+  // Live crawl — unavailable in demo / Vercel mode.
   if (searchParams.get("refresh") === "1") {
+    if (!isLiveFetchAvailable()) {
+      return NextResponse.json({ error: DEMO_MODE_MESSAGE, code: "usage" }, { status: 503 });
+    }
     const stuTypeRaw = searchParams.get("stuType");
     const crawl =
       stuTypeRaw === "ug" || stuTypeRaw === "gs" || stuTypeRaw === "both" ? stuTypeRaw : "both";
@@ -39,7 +47,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 查询缓存
+  // Read from the file cache and apply server-side filters + pagination.
   const stuTypeParam = (searchParams.get("stuType") ?? "all") as StuTypeFilter;
   const sortParam = (searchParams.get("sort") ?? "default") as CourseSort;
   const validSort: CourseSort[] = ["default", "credit-desc", "credit-asc", "name"];

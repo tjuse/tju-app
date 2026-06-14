@@ -1,80 +1,80 @@
-# 设计系统 — tju.app
+# Design System — tju.app
 
-**风格**：极简现代（Linear / Vercel 风）· 深色为主 · 大留白 · 克制微动效 · 天大北洋蓝强调色。
+**Style**: minimal modern (Linear / Vercel aesthetic) · dark-first · generous whitespace · restrained micro-animations · Beiyang Blue accent.
 
-所有 token 定义在 `src/app/globals.css` 的 `@theme` 块，通过 `var(--*)` 使用。**禁止硬编码颜色**（课程色板等纯数据色除外）。
+All tokens are defined in the `@theme` block of `src/app/globals.css` and used via `var(--*)`. **Never hardcode color hex values** (data palettes for charts are the only exception).
 
-## 色彩
+## Color
 
-### 背景分层（深色）
-| Token | 值 | 用途 |
+### Background layers (dark mode)
+| Token | Value | Usage |
 |---|---|---|
-| `--color-bg-base` | `#0a0a0b` | 最底层页面背景 |
-| `--color-bg-subtle` | `#111113` | 卡片背景 |
-| `--color-bg-muted` | `#18181b` | 悬停态、次层 |
-| `--color-bg-overlay` | `#1f1f24` | 弹窗、下拉 |
+| `--color-bg-base` | `#0a0a0b` | Deepest page background |
+| `--color-bg-subtle` | `#111113` | Card background |
+| `--color-bg-muted` | `#18181b` | Hover state, secondary layer |
+| `--color-bg-overlay` | `#1f1f24` | Modals, dropdowns |
 
-### 文本（三档对比）
-| Token | 用途 |
+### Text (three contrast levels)
+| Token | Usage |
 |---|---|
-| `--color-text-high` | 主内容标题/正文 |
-| `--color-text-mid` | 次要说明 |
-| `--color-text-low` | 占位 / 禁用 / 时间戳 |
+| `--color-text-high` | Primary content, headings, body |
+| `--color-text-mid` | Secondary descriptions |
+| `--color-text-low` | Placeholder / disabled / timestamps |
 
-### 边框
-`--color-border`（默认低对比）· `--color-border-strong`（hover / 强调）
+### Borders
+`--color-border` (default low-contrast) · `--color-border-strong` (hover / emphasis)
 
-### 强调色（天大北洋蓝）
-| Token | 深色值 | 用途 |
+### Accent (Beiyang Blue)
+| Token | Dark value | Usage |
 |---|---|---|
-| `--color-accent` | `#3b82f6` | 主操作、激活态、图标高亮 |
-| `--color-accent-hover` | `#60a5fa` | hover |
-| `--color-accent-muted` | `#1d3a6e` | 低饱和背景 |
-| `--color-accent-subtle` | `#172554` | 极淡背景（徽章、当前列） |
+| `--color-accent` | `#3b82f6` | Primary actions, active state, icon highlight |
+| `--color-accent-hover` | `#60a5fa` | Hover |
+| `--color-accent-muted` | `#1d3a6e` | Low-saturation background |
+| `--color-accent-subtle` | `#172554` | Very faint background (badges, current column) |
 
-> 浅色模式在 `.light` class 下重定义同名变量（accent 用更深的 `#1d4ed8` 保证对比度）。
+> Light mode redefines the same variable names under the `.light` class (accent uses deeper `#1d4ed8` for sufficient contrast).
 
-### 状态色
+### Status colors
 `--color-success` · `--color-warning` · `--color-danger` · `--color-info`
 
-## 间距 & 圆角
+## Spacing & Radius
 
-- 间距：**8px 基准**（Tailwind 默认 scale 即对应）。
-- 圆角：`--radius-sm 6` · `md 10` · **`lg 16`（主卡片）** · `xl 24` · `full`。
+- Spacing: **8px base grid** (matches Tailwind's default scale).
+- Radius: `--radius-sm 6` · `md 10` · **`lg 16` (primary cards)** · `xl 24` · `full`.
 
-## 排版
+## Typography
 
-- 无衬线：Geist → Inter → 系统 → PingFang/思源黑（中文回退）。
-- 字阶（Tailwind）：标题 `text-2xl/lg font-semibold tracking-tight`，正文 `text-sm`，说明 `text-[13px]`，caption `text-[12px]/[11px]`。
-- 数字用 `tabular-nums`（时间、金额、天数对齐）。
+- Sans-serif: Geist → Inter → system → PingFang / Source Han Sans (Chinese fallback).
+- Type scale (Tailwind): heading `text-2xl/lg font-semibold tracking-tight`, body `text-sm`, caption `text-[13px]`, micro `text-[12px]/[11px]`.
+- Numbers use `tabular-nums` (time, amounts, counts — for alignment).
 
-## 组件
+## Components
 
-- 基础组件在 `src/components/ui`：`Button`（6 variant）、`Card`、`Badge`、`Skeleton`。
-- 卡片统一用 `.card` + `.card-glow`（`Card` 组件已封装）。
-- 工具类：`.gradient-text`（北洋蓝渐变标题）、`.skeleton`（骨架屏动画）、`.text-pretty/.text-balance`。
+- Base components in `src/components/ui`: `Button` (6 variants), `Card`, `Badge`, `Skeleton`.
+- Cards use `.card` + `.card-glow` (encapsulated in the `Card` component).
+- Utility classes: `.gradient-text` (Beiyang Blue gradient heading), `.skeleton` (loading animation), `.text-pretty/.text-balance`.
 
-## 动效（Framer Motion）
+## Animation
 
-- 入场：`<FadeIn delay={...}>` —— opacity + translateY(8px)，220ms ease-out。
-- 列表：`staggerContainer` / `staggerItem`（间隔 0.05s）。
-- 微交互：按钮 `active:scale-[0.98]`；卡片 hover 边框提亮 / 轻微 lift。
-- 原则：**克制、流畅、无炫技**。尊重 `prefers-reduced-motion`（globals.css 已全局降级）。
+- Entrance: `<FadeIn delay={...}>` — opacity + translateY(8px), 220ms ease-out.
+- Lists: stagger with the `delay` prop on each `<FadeIn>`.
+- Micro-interactions: buttons `active:scale-[0.98]`; card hover lifts border brightness slightly.
+- Principle: **restrained, fluid, no showboating**. Respects `prefers-reduced-motion` (globally degraded in `globals.css`).
 
-## 状态设计（强制）
+## State Design (mandatory)
 
-每个数据视图必须覆盖：
-1. **加载**：`Skeleton` 骨架屏，形状贴近真实内容。
-2. **空态**：友好文案 + 引导行动（如"去添加课程 →"）。
-3. **错误态**：可读的中文提示 + 重试入口。
+Every data view must cover:
+1. **Loading**: `<Skeleton>` with a shape that matches the real content.
+2. **Empty state**: friendly copy + a guiding action (e.g. "Add a course →").
+3. **Error state**: readable Chinese message + retry entry point.
 
-## 可访问性
+## Accessibility
 
-- 对比度 ≥ WCAG AA。
-- `:focus-visible` 已全局加 2px 北洋蓝描边。
-- 触控目标 ≥ 44px（移动端）。
-- 图标按钮必须有 `aria-label`。
+- Contrast ≥ WCAG AA.
+- `:focus-visible` globally has a 2px Beiyang Blue outline.
+- Touch targets ≥ 44px (mobile).
+- Icon-only buttons must have `aria-label`.
 
-## 响应式
+## Responsive
 
-移动端单列堆叠（底部 Tab 栏）→ `md` 起显示侧边栏 + 多列 Bento 网格。断点用 Tailwind 默认（`sm/md/lg`）。
+Mobile: single-column stack with bottom tab bar → `md` breakpoint: sidebar + multi-column Bento grid. Breakpoints use Tailwind defaults (`sm/md/lg`).

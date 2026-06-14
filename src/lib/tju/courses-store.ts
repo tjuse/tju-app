@@ -1,6 +1,7 @@
 /**
- * 公开课程库存取（服务端）。组合 tju 抓取 + 文件缓存 + 服务端过滤分页。
- * 每学期一份缓存：courses-<semester>.json（一学期数千门，避免下发整包给客户端）。
+ * Public course catalog: server-only. Combines live tju fetching, file caching,
+ * and server-side filtering + pagination. One cache file per semester
+ * (courses-<semester>.json), keeping large payloads off the client.
  */
 import "server-only";
 import {
@@ -24,7 +25,7 @@ export interface CoursesMeta {
   cachedAt: string;
 }
 
-/** 读某学期缓存（全量）。无缓存返回 null。 */
+/** Read the full cached course list for a semester. Returns null on cache miss. */
 export async function readCachedCourses(
   semester: string,
 ): Promise<{ result: TjuCoursesResult; cachedAt: string } | null> {
@@ -33,7 +34,7 @@ export async function readCachedCourses(
   return { result: hit.data, cachedAt: hit.cachedAt };
 }
 
-/** 实时爬取某学期全校课程并写缓存。需校园网/VPN。抛 TjuError。 */
+/** Live crawl all courses for a semester and write to cache. Requires campus net / VPN. Throws TjuError. */
 export async function refreshCourses(
   semester: string,
   stuType: "ug" | "gs" | "both" = "both",
@@ -54,7 +55,7 @@ export interface CoursesPage extends CourseQueryResult {
   meta: CoursesMeta;
 }
 
-/** 在某学期缓存上做过滤分页 + 分面。无缓存返回 null（提示去抓取）。 */
+/** Filter + paginate + compute facets from a semester's cache. Returns null on cache miss. */
 export async function queryCachedCourses(
   semester: string,
   filters: CourseFilters,

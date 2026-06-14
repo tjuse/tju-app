@@ -1,10 +1,11 @@
 "use client";
 
-import { BookText, MapPin, Users } from "lucide-react";
+import { BookText, GitCompare, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { TjuArrange, TjuLibCourse } from "@/lib/tju/types";
 import { cn } from "@/lib/utils";
+import { useCompare } from "./compare-store";
 import { FavoriteButton } from "./favorite-button";
 
 const WEEKDAY = ["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"];
@@ -25,7 +26,7 @@ export { arrangeLabel };
 interface CourseCardProps {
   course: TjuLibCourse;
   semester: string;
-  /** 点击卡片主体（查看详情） */
+  /** Click on the card body (opens detail dialog) */
   onOpen?: (course: TjuLibCourse) => void;
 }
 
@@ -33,6 +34,8 @@ export function CourseCard({ course, semester, onOpen }: CourseCardProps) {
   const teachers = course.teacher?.join("、");
   const isUG = course.student_type === "undergraduate";
   const clickable = !!onOpen;
+  const { toggle, has } = useCompare();
+  const inCompare = has(course.lession_id ?? "");
 
   return (
     <Card
@@ -70,6 +73,24 @@ export function CourseCard({ course, semester, onOpen }: CourseCardProps) {
               </span>
             )}
           </div>
+          {/* Compare toggle button */}
+          <button
+            type="button"
+            aria-label={inCompare ? "移出对比" : "加入对比"}
+            title={inCompare ? "移出对比" : "加入对比"}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggle(course);
+            }}
+            className={cn(
+              "rounded-md p-1.5 transition-colors",
+              inCompare
+                ? "text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]"
+                : "text-[var(--color-text-low)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text-mid)]",
+            )}
+          >
+            <GitCompare className="size-4" />
+          </button>
           <FavoriteButton course={course} semester={semester} />
         </div>
       </div>

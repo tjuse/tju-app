@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Library, Star } from "lucide-react";
+import { AlertTriangle, BarChart3, GitCompare, Library, Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,9 @@ const tabs = [
   { href: "/courses", label: "浏览", icon: Library },
   { href: "/courses/favorites", label: "收藏", icon: Star },
   { href: "/courses/stats", label: "统计", icon: BarChart3 },
+  { href: "/courses/trends", label: "趋势", icon: TrendingUp },
+  { href: "/courses/conflict", label: "冲突", icon: AlertTriangle },
+  { href: "/courses/compare", label: "对比", icon: GitCompare },
 ];
 
 export function CoursesTabs() {

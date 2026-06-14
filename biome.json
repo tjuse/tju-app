@@ -16,7 +16,8 @@
       "!**/coverage",
       "!**/playwright-report",
       "!public/sw.js",
-      "!**/*.css"
+      "!**/*.css",
+      "!data/cache"
     ]
   },
   "formatter": {

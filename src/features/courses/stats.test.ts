@@ -79,8 +79,8 @@ describe("computeStats", () => {
 
   it("星期分布按天去重（同一天多段算一次）", () => {
     const s = computeStats(courses);
-    expect(s.byWeekday[0].count).toBe(2); // 周一: 两门课
-    expect(s.byWeekday[2].count).toBe(1); // 周三: 一门
+    expect(s.byWeekday[0].count).toBe(2); // Monday: 2 courses
+    expect(s.byWeekday[2].count).toBe(1); // Wednesday: 1 course
   });
 
   it("学分分布按学分值升序", () => {

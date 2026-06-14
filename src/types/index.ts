@@ -1,8 +1,8 @@
 /**
- * 全局共享类型定义
+ * Global shared type definitions.
  */
 
-// ─── API 响应通用包装 ─────────────────────────────────────────────
+// ─── API response wrapper ─────────────────────────────────────────
 
 export interface ApiResponse<T> {
   data?: T;
@@ -10,7 +10,7 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-// ─── 用户 ─────────────────────────────────────────────────────────
+// ─── User ────────────────────────────────────────────────────────
 
 export interface UserProfile {
   id: string;
@@ -19,33 +19,33 @@ export interface UserProfile {
   image?: string | null;
 }
 
-// ─── 课程表 ───────────────────────────────────────────────────────
+// ─── Schedule ────────────────────────────────────────────────────
 
 export interface Course {
-  id: string; // 合成的稳定 id（无数据库）
+  id: string; // Synthetic stable id (no database)
   name: string;
   teacher?: string | null;
   location?: string | null;
-  weekday: number; // 1=周一 … 7=周日
-  startSlot: number; // 1-11
-  endSlot: number; // 1-11（含）
-  weeks: number[]; // 上课周次
+  weekday: number; // 1=Monday … 7=Sunday
+  startSlot: number; // 1–11
+  endSlot: number; // 1–11 (inclusive)
+  weeks: number[]; // Teaching weeks
   color?: string | null;
-  source: "manual" | "ics" | "ocr" | "tju"; // tju = 经 tju 库实时抓取
+  source: "manual" | "ics" | "ocr" | "tju"; // tju = fetched via tju library
   semester?: string | null;
-  courseId?: string | null; // 课程代码
-  classId?: string | null; // 课程序号
+  courseId?: string | null; // Course code
+  classId?: string | null; // Class ID
   credit?: number | null;
   note?: string | null;
 }
 
-// 课表视图用 —— 带时间字符串
+// Extended for timetable view — includes formatted time strings
 export interface CourseWithTime extends Course {
-  startTime: string; // 如 "08:30"
-  endTime: string; // 如 "09:15"
+  startTime: string; // e.g. "08:30"
+  endTime: string; // e.g. "09:15"
 }
 
-// ─── 链接 ─────────────────────────────────────────────────────────
+// ─── Links ───────────────────────────────────────────────────────
 
 export interface Link {
   id: string;
@@ -57,27 +57,27 @@ export interface Link {
   isBuiltIn: boolean;
 }
 
-// ─── 校历 ─────────────────────────────────────────────────────────
+// ─── Academic Calendar ───────────────────────────────────────────
 
 export interface AcademicCalendarEvent {
   id: string;
   title: string;
-  startDate: string; // ISO 日期 "2025-09-01"
+  startDate: string; // ISO date "2025-09-01"
   endDate: string;
   type: "holiday" | "exam" | "holiday_break" | "important" | "semester_start" | "semester_end";
   description?: string;
 }
 
 export interface Semester {
-  id: string; // 如 "2025-2026-1"
-  name: string; // 如 "2025-2026 学年第一学期"
+  id: string; // e.g. "2025-2026-1"
+  name: string; // e.g. "2025-2026 学年第一学期"
   startDate: string;
   endDate: string;
   totalWeeks: number;
   events: AcademicCalendarEvent[];
 }
 
-// ─── 天气（占位，Phase 1 可接公开 API） ─────────────────────────────
+// ─── Weather (placeholder, can connect a public API in Phase 1) ──
 
 export interface WeatherInfo {
   temperature: number;
@@ -86,6 +86,6 @@ export interface WeatherInfo {
   city: string;
 }
 
-// ─── 主题 ─────────────────────────────────────────────────────────
+// ─── Theme ──────────────────────────────────────────────────────
 
 export type Theme = "dark" | "light" | "system";

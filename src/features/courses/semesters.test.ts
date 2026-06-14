@@ -4,7 +4,7 @@ import { currentSemesterCode, isValidSemester, listSemesters, semesterLabel } fr
 describe("listSemesters", () => {
   it("按时间倒序，最新在前", () => {
     const s = listSemesters(2024, 2025);
-    expect(s[0].code).toBe("25262"); // 2025-2026 春
+    expect(s[0].code).toBe("25262"); // 2025-2026 spring
     expect(s.map((x) => x.code)).toEqual(["25262", "25261", "24252", "24251"]);
   });
 

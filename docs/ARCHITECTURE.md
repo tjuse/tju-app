@@ -1,67 +1,75 @@
-# 架构说明 — tju.app
+# Architecture — tju.app
 
-## 总览
+## Overview
 
-单仓库 Next.js（App Router）应用 + 一个瘦 Python 桥接脚本。**无数据库、无 Docker、自托管**，刻意保持最轻。
+Single-repo Next.js (App Router) application + one thin Python bridge script. **No database, no Docker, self-hosted** — intentionally minimal.
 
 ```
-浏览器 (响应式 Web + PWA)
+Browser (responsive Web + PWA)
    │
    ▼
-Next.js (前端 + Route Handlers 后端)
+Next.js (frontend + Route Handlers backend)
    │
-   ├── features/* 业务逻辑（calendar / links 静态/内置数据）
-   ├── lib/ai     课表截图 → Claude 视觉解析
-   ├── lib/cache  文件 JSON 缓存（data/cache/*.json）
-   └── lib/tju    课表数据源
+   ├── features/*  business logic (calendar / links — static/built-in data)
+   ├── lib/ai      schedule screenshot → Claude Vision parsing
+   ├── lib/cache   file JSON cache (data/cache/*.json)
+   └── lib/tju     TJU data access layer
           │  child_process.spawn
           ▼
-       scripts/tju_cli.py  ──→  tju 库  ──→  SSO + EAMS（需校园网/VPN）
+       scripts/tju_cli.py  ──→  tju library  ──→  SSO + EAMS (requires campus network/VPN)
 ```
 
-## 为什么这样设计
+## Why this design
 
-用户要求：**复用 `tju` 库（不造轮子）、不要重数据库、不要 Docker、最简单**。由此：
+User requirement: **reuse the `tju` library (don't reinvent the wheel), no heavyweight database, no Docker, keep it minimal**. Therefore:
 
-- **课表/成绩/考试**等需登录的数据：全部交给成熟的 `tju` Python 库（封装了 CAS 登录、验证码、HTML 解析）。我们只写一个**瘦桥接** `scripts/tju_cli.py`。
-- **集成方式**：Next.js Route Handler 用 `child_process.spawn` 按需调用 Python 脚本，读其 stdout 的 JSON。无常驻 Python 服务、无 Docker。
-- **存储**：文件 JSON 缓存替代数据库。课表一学期基本不变，「实时抓一次 + 缓存 + 手动刷新」足够，且零运维。
-- **部署**：tju 需校园网/VPN → **不能用 Vercel**（云服务器无校园网），须自托管在能连校园网的机器（个人电脑 / 校内服务器 / 带校园 VPN 的 NAS）。
+- **Schedule/grades/exams** (login-required data): all delegated to the mature `tju` Python library (wraps CAS login, CAPTCHA, HTML parsing). We only write a **thin bridge** `scripts/tju_cli.py`.
+- **Integration pattern**: Next.js Route Handlers use `child_process.spawn` to call the Python script on demand and read its stdout JSON. No persistent Python service, no Docker.
+- **Storage**: file JSON cache instead of a database. A schedule rarely changes during a semester — "fetch once + cache + manual refresh" is sufficient, with zero operational overhead.
+- **Deployment**: tju requires campus network/VPN → **Vercel cannot run live fetching** (no campus network in cloud). For live features: self-host on a machine with campus-network access (personal computer / campus server / NAS with campus VPN). For read-only demo: a Vercel deployment works via bundled public cache data.
 
-## 关键模块
+## Vercel Demo Mode
 
-| 模块 | 职责 |
+`src/lib/runtime.ts` exports `isLiveFetchAvailable()` and `isDemoMode()`. When `process.env.VERCEL` is set (or `TJU_LIVE=0`), all spawn-based API routes return HTTP 503 with a user-friendly message instead of attempting to spawn Python. Public cache files (`courses-*.json`, `syllabus-*.json`) are committed and bundled via `outputFileTracingIncludes` in `next.config.ts`.
+
+## Key Modules
+
+| Module | Responsibility |
 |---|---|
-| `scripts/tju_cli.py` | 读 `TJU_USER/TJU_PASS` 登录，按子命令查询，输出统一 JSON（`{ok,data}`/`{ok:false,error,code}`） |
-| `src/lib/tju/client.ts` | `spawn` python，超时控制，解析 JSON，失败抛 `TjuError`（带 code） |
-| `src/lib/tju/types.ts` | tju dump 输出的 TS 镜像类型 + `TjuError` |
-| `src/lib/tju/schedule-store.ts` | `readCachedSchedule()`（仅读缓存）/ `refreshSchedule()`（抓取+映射+写缓存），`server-only` |
-| `src/lib/cache/file-cache.ts` | `readCache/writeCache/readCacheWithMeta`，可选 TTL，防目录穿越 |
-| `src/features/schedule/mapping.ts` | tju Course（多段 arrange）→ 扁平 `Course[]`；含 `parseWeeksString` |
+| `scripts/tju_cli.py` | Reads `TJU_USER/TJU_PASS`, logs in, queries by sub-command, outputs unified JSON (`{ok,data}` / `{ok:false,error,code}`) |
+| `src/lib/tju/client.ts` | Spawns Python, timeout control, parses JSON, throws `TjuError` (with code) |
+| `src/lib/tju/types.ts` | TypeScript mirror types for tju dump output + `TjuError` |
+| `src/lib/tju/schedule-store.ts` | `readCachedSchedule()` (read-only cache) / `refreshSchedule()` (fetch + map + write cache), `server-only` |
+| `src/lib/tju/courses-store.ts` | `readCachedCourses(semester)` / `refreshCourses(semester)` — per-semester public catalog |
+| `src/lib/tju/score-store.ts` | `readCachedScore()` / `refreshScore()` — personal grades (cache key: `score-current`) |
+| `src/lib/tju/exam-store.ts` | `readCachedExam(semester)` / `refreshExam(semester)` — personal exams (cache key: `exam-<semester>`) |
+| `src/lib/cache/file-cache.ts` | `readCache/writeCache/readCacheWithMeta`, optional TTL, directory-traversal guard |
+| `src/features/schedule/mapping.ts` | Maps tju Course (multi-segment arrange) → flat `Course[]`; includes `parseWeeksString` |
+| `src/lib/runtime.ts` | `isLiveFetchAvailable()` / `isDemoMode()` — Vercel demo mode detection |
 
-## 课表数据流
+## Schedule Data Flow
 
-1. **SSR**：`schedule/page.tsx`（`dynamic`）调用 `readCachedSchedule()` —— 只读文件缓存，**不联网**，秒开。
-2. 有缓存 → `ScheduleView`（周次切换 + 刷新）；无缓存 → `ScheduleEmpty`（引导抓取）。
-3. 用户点「从教务刷新」→ `useRefreshSchedule` → `GET /api/schedule?refresh=1`。
-4. 路由调 `refreshSchedule()` → `client.ts` spawn `tju_cli.py schedule` → `mapTjuSchedule` → `writeCache`。
-5. 成功 → `router.refresh()` 重新 SSR，展示新数据 + 「更新于 …」。
-6. 失败 → `TjuError.code` 映射 HTTP（login→401 / usage→503 / 其他→502），前端显示中文错误。
+1. **SSR**: `schedule/page.tsx` (`dynamic`) calls `readCachedSchedule()` — reads file cache only, **no network**, instant.
+2. Cache hit → `ScheduleView` (week switching + refresh button); cache miss → `ScheduleEmpty` (prompts user to fetch).
+3. User clicks "Refresh from EAMS" → `useRefreshSchedule` → `GET /api/schedule?refresh=1`.
+4. Route calls `refreshSchedule()` → `client.ts` spawns `tju_cli.py schedule` → `mapTjuSchedule` → `writeCache`.
+5. Success → `router.refresh()` re-runs SSR, shows new data + "Updated at …".
+6. Failure → `TjuError.code` maps to HTTP (login→401 / usage→503 / other→502); frontend shows Chinese error message.
 
-首页今日课程同样读缓存 + `getTodayCourses(courses, currentWeek)`。
+The home page today-courses widget also reads from cache + `getTodayCourses(courses, currentWeek)`.
 
-## 凭据与安全
+## Credentials & Security
 
-- `TJU_USER/TJU_PASS` 仅存 `.env.local`（gitignore），由 Next.js 进程经 env 透传给 Python 子进程。
-- 缓存文件只存课表数据，**不含凭据**。
-- 自托管单用户场景，无多用户凭据管理负担。开放多用户前需另设鉴权与隔离。
+- `TJU_USER/TJU_PASS` only in `.env.local` (gitignored), passed to the Python child process via environment.
+- Cache files only store course/grade/exam data — **no credentials**.
+- Single-user self-hosted scenario; no multi-user credential management required. Before opening to multiple users: add authentication, data isolation, privacy notice, rate limiting.
 
 ## PWA
 
-Serwist（`app/sw.ts`）预缓存 + 运行时缓存；`manifest.ts` 可安装元信息。开发禁用 SW。
+Serwist (`app/sw.ts`) precaches + runtime caching; `manifest.ts` for installable metadata. Service worker is disabled in development.
 
-## 已知约束
+## Known Constraints
 
-- **构建用 webpack**（`--webpack`）：Serwist 暂不支持 Turbopack。
-- **Python 环境**：需 `pnpm py:setup` 建 `.venv`；`TJU_PYTHON` 可指向其它解释器。
-- **GPL-3.0**：tju 为 GPL-3.0。本项目通过独立进程（spawn）调用，属聚合；`scripts/tju_cli.py` 直接 import tju，如对外分发需遵守 GPL。
+- **Webpack build** (`--webpack`): Serwist is not yet compatible with Turbopack.
+- **Python environment**: requires `pnpm py:setup` to create `.venv`; `TJU_PYTHON` can point to an alternative interpreter.
+- **GPL-3.0**: `tju` is GPL-3.0. This project calls it via a separate process (spawn) — that is aggregation. `scripts/tju_cli.py` directly imports `tju`; if distributing externally, GPL compliance is required.

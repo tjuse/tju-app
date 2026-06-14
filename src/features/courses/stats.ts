@@ -1,5 +1,6 @@
 /**
- * 公开课程库统计（纯函数，服务端在缓存上计算，便于测试）。
+ * Aggregate statistics for the public course catalog.
+ * Pure functions — computed server-side on the cached course list; also unit-tested.
  */
 import type { TjuLibCourse } from "@/lib/tju/types";
 
@@ -13,10 +14,10 @@ export interface CourseStats {
   undergraduate: number;
   graduate: number;
   byCampus: NameCount[];
-  byCourseType: NameCount[]; // top N + 其他
-  byCredit: NameCount[]; // 按学分值
-  byWeekday: NameCount[]; // 周一..周日
-  topTeachers: NameCount[]; // 开课最多的教师
+  byCourseType: NameCount[]; // top N + "其他"
+  byCredit: NameCount[]; // bucketed by credit value
+  byWeekday: NameCount[]; // Mon … Sun
+  topTeachers: NameCount[]; // teachers with the most offerings
 }
 
 const WEEKDAY = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
@@ -58,7 +59,7 @@ export function computeStats(courses: TjuLibCourse[]): CourseStats {
       if (name) teacher.set(name, (teacher.get(name) ?? 0) + 1);
     }
 
-    // 一门课在某天有任意安排即计一次（去重到天）
+    // Count each course on a given weekday at most once (de-dup by day).
     const days = new Set<number>();
     for (const a of c.arrange ?? []) {
       if (a.weekday && a.weekday >= 1 && a.weekday <= 7) days.add(a.weekday);

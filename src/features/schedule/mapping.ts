@@ -1,22 +1,23 @@
 /**
- * 把 tju 库返回的课表（TjuCourse[]，每门课可有多段 arrange）
- * 映射为本应用的扁平 Course[]（每段一条，便于 timetable 渲染）。
+ * Map the tju library's schedule (TjuCourse[], each with potentially multiple
+ * arrange segments) to the app's flat Course[] (one entry per segment),
+ * suitable for timetable rendering.
  */
 import type { TjuCourse, TjuScheduleResult } from "@/lib/tju/types";
 import type { Course } from "@/types";
 
 /**
- * 解析起止周字符串为周次数组。支持：
- *   "1-16"、"1-16周"、"1-8,10-16"、"1-15单"、"2-16双"
- * 解析失败返回空数组。
+ * Parse a week-range string into an array of week numbers. Supports:
+ *   "1-16", "1-16周", "1-8,10-16", "1-15单" (odd weeks), "2-16双" (even weeks)
+ * Returns [] on parse failure.
  */
 export function parseWeeksString(raw: string | null | undefined): number[] {
   if (!raw) return [];
   const weeks = new Set<number>();
-  // 判断单双周
+  // Detect odd/even-week patterns.
   const isOdd = /单/.test(raw);
   const isEven = /双/.test(raw);
-  // 提取所有 "a-b" 或单个 "a"
+  // Extract all "a-b" or single "a" numeric segments.
   const segments = raw.replace(/[周单双\s]/g, "").split(/[,，]/);
   for (const seg of segments) {
     if (!seg) continue;
@@ -41,13 +42,13 @@ function joinTeachers(...lists: (string[] | null | undefined)[]): string | null 
   return null;
 }
 
-/** 稳定 id：课程标识 + 星期 + 起始节 + 段序号 */
+/** Stable ID: course identifier + weekday + start slot + segment index. */
 function makeId(course: TjuCourse, weekday: number, startSlot: number, idx: number): string {
   const base = course.class_id || course.course_id || course.name || "course";
   return `${base}-${weekday}-${startSlot}-${idx}`;
 }
 
-/** 把单门 tju 课程展开为多条 Course（按 arrange）。 */
+/** Expand one tju course into multiple Course entries, one per arrange segment. */
 export function mapTjuCourse(course: TjuCourse, semester?: string): Course[] {
   const arranges = course.arrange ?? [];
   if (arranges.length === 0) return [];
@@ -65,7 +66,7 @@ export function mapTjuCourse(course: TjuCourse, semester?: string): Course[] {
 
       const mapped: Course = {
         id: makeId(course, weekday, startSlot, idx),
-        name: course.name ?? "未知课程",
+        name: course.name ?? "未命名课程",
         teacher: joinTeachers(arr.teacher, course.teacher),
         location: arr.location ?? null,
         weekday,
@@ -83,7 +84,7 @@ export function mapTjuCourse(course: TjuCourse, semester?: string): Course[] {
     .filter((c): c is Course => c !== null);
 }
 
-/** 把整张 tju 课表映射为 Course[]。 */
+/** Map an entire tju schedule result to a flat Course[]. */
 export function mapTjuSchedule(result: TjuScheduleResult): Course[] {
   return result.courses.flatMap((c) => mapTjuCourse(c, result.semester));
 }

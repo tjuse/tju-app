@@ -1,6 +1,7 @@
 /**
- * 通过 child_process spawn 调用 `scripts/tju_cli.py`，解析其统一 JSON 输出。
- * 仅在服务端（Route Handler / Server Component）使用。
+ * Server-only module that spawns `scripts/tju_cli.py` via child_process and
+ * parses its unified {ok, data} JSON output. Must not be imported from client
+ * components or edge runtime.
  */
 import { spawn } from "node:child_process";
 import path from "node:path";
@@ -8,13 +9,15 @@ import {
   type TjuCliResponse,
   type TjuCoursesResult,
   TjuError,
+  type TjuExamResult,
   type TjuScheduleResult,
+  type TjuScoreResult,
 } from "./types";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT = path.join(PROJECT_ROOT, "scripts", "tju_cli.py");
 
-/** tju 登录 + 抓取较慢（CAS 流程），给足超时 */
+// TJU login via CAS SSO + EAMS crawl is slow; allow 45 s by default.
 const DEFAULT_TIMEOUT_MS = 45_000;
 
 interface RunOptions {
@@ -25,7 +28,8 @@ interface RunOptions {
 }
 
 /**
- * 运行一个 tju CLI 子命令，返回解析后的数据（成功）或抛 TjuError（失败）。
+ * Run one tju CLI sub-command and return the parsed data on success, or throw
+ * TjuError on failure (login / network / parse / usage errors).
  */
 async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
   const python = process.env.TJU_PYTHON || ".venv/bin/python";
@@ -37,8 +41,9 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const child = spawn(python, args, {
       cwd: PROJECT_ROOT,
-      // 继承 process.env：透传 TJU_USER/TJU_PASS（若设置）与 TJU_ENV_FILE。
-      // 不显式写空串，否则会顶掉 Python 侧从 TJU_ENV_FILE 读取的回退。
+      // Inherit process.env so TJU_USER/TJU_PASS and TJU_ENV_FILE are
+      // forwarded. Do not set empty strings — that would shadow the fallback
+      // that tju_cli.py reads from TJU_ENV_FILE.
       env: { ...process.env, PYTHONIOENCODING: "utf-8" },
     });
 
@@ -58,7 +63,7 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
 
     child.on("error", (err) => {
       clearTimeout(timer);
-      // 通常是 python 解释器找不到
+      // Typically means the Python interpreter was not found.
       reject(
         new TjuError(
           `无法启动 Python（${python}）：${err.message}。请先运行 \`pnpm py:setup\`。`,
@@ -95,14 +100,15 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
   });
 }
 
-/** 抓取个人课表（实时，未缓存）。需校园网/VPN。 */
+/** Fetch the personal schedule in real time (not cached). Requires campus net / VPN. */
 export function fetchSchedule(semester?: string): Promise<TjuScheduleResult> {
   return runTju<TjuScheduleResult>("schedule", { semester });
 }
 
 /**
- * 抓取全校公开课程库（实时，未缓存）。一学期数千门、多页爬取，较慢。
- * 需校园网/VPN。
+ * Fetch the full public course catalog for a semester (not cached).
+ * Crawls multiple pages — several thousand courses — so it is slow.
+ * Requires campus network / VPN.
  */
 export function fetchCourses(
   semester: string,
@@ -111,13 +117,23 @@ export function fetchCourses(
   return runTju<TjuCoursesResult>("courses", {
     semester,
     stuType,
-    timeoutMs: 180_000, // 全量爬取给足时间
+    timeoutMs: 180_000, // full crawl needs generous timeout
   });
 }
 
-/** 抓取课程大纲（markdown）。需校园网/VPN。 */
+/** Fetch a course syllabus as Markdown. Requires campus network / VPN. */
 export function fetchSyllabus(
   lessionId: string,
 ): Promise<{ lession_id: string; syllabus: string }> {
   return runTju<{ lession_id: string; syllabus: string }>("syllabus", { lessionId });
+}
+
+/** Fetch the current semester's grades. Requires campus network / VPN. */
+export function fetchScore(): Promise<TjuScoreResult> {
+  return runTju<TjuScoreResult>("score");
+}
+
+/** Fetch exam schedule for a semester. Requires campus network / VPN. */
+export function fetchExam(semester?: string): Promise<TjuExamResult> {
+  return runTju<TjuExamResult>("exam", { semester });
 }

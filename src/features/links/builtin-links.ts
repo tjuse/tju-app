@@ -1,11 +1,11 @@
 import type { Link } from "@/types";
 
 /**
- * 内置 TJU 常用链接 — 无需登录即可访问的入口。
- * 用户可在此基础上增删自定义链接（存数据库）。
+ * Built-in TJU quick links — publicly accessible portals (no login required).
+ * Users can add/remove custom links on top of these (stored locally).
  */
 export const builtInLinks: Omit<Link, "id">[] = [
-  // ─── 教务学习 ──────────────────────────────────────────────
+  // ─── Academic ────────────────────────────────────────────────
   {
     title: "教务处",
     url: "https://oaa.tju.edu.cn/",
@@ -39,7 +39,7 @@ export const builtInLinks: Omit<Link, "id">[] = [
     isBuiltIn: true,
   },
 
-  // ─── 身份门户 ──────────────────────────────────────────────
+  // ─── Identity portals ─────────────────────────────────────────
   {
     title: "统一身份认证",
     url: "https://sso.tju.edu.cn/cas/login",
@@ -65,7 +65,7 @@ export const builtInLinks: Omit<Link, "id">[] = [
     isBuiltIn: true,
   },
 
-  // ─── 校园生活 ──────────────────────────────────────────────
+  // ─── Campus life ──────────────────────────────────────────────
   {
     title: "校园卡服务",
     url: "https://card.tju.edu.cn/",
@@ -91,7 +91,7 @@ export const builtInLinks: Omit<Link, "id">[] = [
     isBuiltIn: true,
   },
 
-  // ─── 工具资源 ──────────────────────────────────────────────
+  // ─── Tools & resources ────────────────────────────────────────
   {
     title: "北洋维基",
     url: "https://wiki.tjubot.cn/",

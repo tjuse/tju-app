@@ -6,12 +6,19 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  // Bundle public course cache files into the serverless function so they are
+  // readable via fs.readFile(process.cwd()/data/cache/...) on Vercel.
+  // @vercel/nft cannot auto-trace files read at runtime via a dynamic path, so
+  // we list them explicitly here.
+  outputFileTracingIncludes: {
+    "/**": ["./data/cache/courses-*.json", "./data/cache/syllabus-*.json"],
+  },
 };
 
 const withSerwist = withSerwistInit({
   swSrc: "src/app/sw.ts",
   swDest: "public/sw.js",
-  // 开发模式下禁用 SW，避免缓存干扰开发
+  // Disable service worker in development to avoid cache interference.
   disable: process.env.NODE_ENV === "development",
 });
 

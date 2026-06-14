@@ -4,7 +4,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { TjuLibCourse } from "@/lib/tju/types";
 
-/** 收藏项：存课程快照（跨学期可离线查看），带收藏时间与学期。 */
+/**
+ * A favorited course: stores a full course snapshot (so it is viewable
+ * offline and cross-semester) plus the semester it was added from.
+ */
 export interface FavoriteCourse {
   lessionId: string;
   semester: string;
@@ -20,7 +23,7 @@ interface FavoritesState {
   list: () => FavoriteCourse[];
 }
 
-/** 收藏使用 lession_id 作为稳定键；缺失时回退 course_id+class_id。 */
+/** Stable key: prefer lession_id; fall back to course_id+class_id composite. */
 export function courseKey(course: TjuLibCourse): string {
   return course.lession_id ?? `${course.course_id ?? ""}-${course.class_id ?? ""}`;
 }

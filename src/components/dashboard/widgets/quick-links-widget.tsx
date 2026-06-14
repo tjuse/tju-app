@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { builtInLinks } from "@/features/links/builtin-links";
 
 export function QuickLinksWidget() {
-  // 概览页只展示前 6 个高频链接
+  // Show only the top 6 high-frequency links on the overview page
   const links = builtInLinks.slice(0, 6);
 
   return (
