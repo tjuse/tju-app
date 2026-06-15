@@ -46,15 +46,15 @@ export const semesters: Semester[] = [
   {
     id: "2025-2026-2",
     name: "2025-2026 学年 春季学期",
-    startDate: "2026-02-23",
+    startDate: "2026-03-09",
     endDate: "2026-07-12",
-    totalWeeks: 20,
+    totalWeeks: 18,
     events: [
       {
         id: "s26-start",
         title: "春季学期开学",
-        startDate: "2026-02-23",
-        endDate: "2026-02-23",
+        startDate: "2026-03-09",
+        endDate: "2026-03-09",
         type: "semester_start",
       },
       {

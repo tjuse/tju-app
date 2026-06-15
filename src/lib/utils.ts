@@ -61,16 +61,6 @@ export function slotToTime(slot: number): { start: string; end: string } {
 }
 
 /**
- * Calculate the current week number relative to a semester start date.
- */
-export function getCurrentWeek(semesterStart: Date): number {
-  const now = new Date();
-  const diffMs = now.getTime() - semesterStart.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  return Math.max(1, Math.ceil((diffDays + 1) / 7));
-}
-
-/**
  * Return today's weekday as 1=Monday … 7=Sunday.
  */
 export function getTodayWeekday(): number {

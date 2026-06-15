@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Semester } from "@/types";
+import { semesters } from "./calendar-data";
 import { daysUntil, getUpcomingEvents, getWeekOfSemester } from "./utils";
 
 const mockSemester: Semester = {
@@ -41,6 +42,28 @@ describe("getWeekOfSemester", () => {
 
   it("学期结束后返回 null", () => {
     expect(getWeekOfSemester(mockSemester, new Date("2026-02-01"))).toBeNull();
+  });
+});
+
+// Regression: real spring 2025-2026 semester anchor pinned against official academic calendar.
+// If the anchor date changes again, this test will fail and force a conscious fix.
+describe("getWeekOfSemester — 2025-2026 spring (real semester)", () => {
+  const springSemester = semesters.find((s) => s.id === "2025-2026-2")!;
+
+  it("2026-06-15 (Monday) should be week 15", () => {
+    expect(getWeekOfSemester(springSemester, new Date("2026-06-15"))).toBe(15);
+  });
+
+  it("2026-03-09 (opening day) should be week 1", () => {
+    expect(getWeekOfSemester(springSemester, new Date("2026-03-09"))).toBe(1);
+  });
+
+  it("2026-03-16 (second Monday) should be week 2", () => {
+    expect(getWeekOfSemester(springSemester, new Date("2026-03-16"))).toBe(2);
+  });
+
+  it("before semester start returns null", () => {
+    expect(getWeekOfSemester(springSemester, new Date("2026-03-08"))).toBeNull();
   });
 });
 
