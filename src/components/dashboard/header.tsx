@@ -7,12 +7,14 @@ interface HeaderProps {
 
 export function Header({ title, subtitle }: HeaderProps) {
   return (
-    <header className="flex h-16 items-center justify-between gap-4 border-[var(--color-border)] border-b px-5 md:px-8">
-      <div className="flex flex-col">
-        <h1 className="font-semibold text-[var(--color-text-high)] text-lg tracking-tight">
+    <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-[var(--color-border)] border-b bg-[color-mix(in_srgb,var(--color-bg-base)_90%,transparent)] px-5 backdrop-blur-sm md:px-8">
+      <div className="flex min-w-0 flex-col">
+        <h1 className="truncate font-semibold text-[var(--color-text-high)] text-base tracking-tight">
           {title}
         </h1>
-        {subtitle && <p className="text-[13px] text-[var(--color-text-mid)]">{subtitle}</p>}
+        {subtitle && (
+          <p className="truncate text-[12px] text-[var(--color-text-mid)]">{subtitle}</p>
+        )}
       </div>
       <ThemeToggle />
     </header>

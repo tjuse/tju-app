@@ -15,7 +15,7 @@ export default async function GradesPage() {
   return (
     <>
       <Header title="成绩" subtitle="历史成绩查询" />
-      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 md:px-8">
+      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-8">
         <FadeIn>
           <GradesView initial={cached} demoMode={demo} />
         </FadeIn>

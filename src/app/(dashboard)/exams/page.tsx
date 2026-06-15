@@ -18,7 +18,7 @@ export default async function ExamsPage() {
   return (
     <>
       <Header title="考试安排" subtitle="本学期考试时间与地点" />
-      <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-6 md:px-8">
+      <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-8 md:px-8">
         <FadeIn>
           <ExamsView
             semesters={semesters}

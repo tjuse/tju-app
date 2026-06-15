@@ -39,10 +39,7 @@ export function CourseCard({ course, semester, onOpen }: CourseCardProps) {
 
   return (
     <Card
-      className={cn(
-        "group relative p-4 transition-all",
-        clickable && "cursor-pointer hover:-translate-y-0.5 hover:border-[var(--color-accent)]/40",
-      )}
+      className={cn("group relative p-4", clickable && "card-interactive")}
       onClick={clickable ? () => onOpen(course) : undefined}
       onKeyDown={
         clickable

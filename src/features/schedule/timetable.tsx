@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { slotToTime } from "@/lib/utils";
 import type { Course } from "@/types";
 
@@ -86,18 +86,19 @@ export function Timetable({ courses, week }: TimetableProps) {
                     (course.endSlot - course.startSlot) * 4;
                   const color = colorFor(course, ci);
                   return (
-                    <motion.div
+                    <div
                       key={course.id}
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2, delay: ci * 0.03 }}
-                      className="absolute inset-x-0 overflow-hidden rounded-[var(--radius-md)] p-2"
-                      style={{
-                        top,
-                        height,
-                        backgroundColor: `${color}22`,
-                        borderLeft: `3px solid ${color}`,
-                      }}
+                      className="absolute inset-x-0 animate-fade-in-up overflow-hidden rounded-[var(--radius-md)] p-2"
+                      style={
+                        {
+                          top,
+                          height,
+                          backgroundColor: `${color}22`,
+                          borderLeft: `3px solid ${color}`,
+                          animationDelay: `${ci * 0.03}s`,
+                          "--fade-y": "4px",
+                        } as CSSProperties
+                      }
                     >
                       <p className="truncate font-medium text-[12px] text-[var(--color-text-high)] leading-tight">
                         {course.name}
@@ -107,7 +108,7 @@ export function Timetable({ courses, week }: TimetableProps) {
                           {course.location}
                         </p>
                       )}
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

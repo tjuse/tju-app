@@ -42,7 +42,7 @@ export function GradesView({ initial, demoMode }: Props) {
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          {data ? (
+          {data && (
             <p className="text-[13px] text-[var(--color-text-mid)]">
               <span className="font-medium text-[var(--color-text-high)]">{data.student.name}</span>
               {" · "}
@@ -59,8 +59,6 @@ export function GradesView({ initial, demoMode }: Props) {
                 </span>
               )}
             </p>
-          ) : (
-            <p className="text-[13px] text-[var(--color-text-low)]">暂无成绩数据</p>
           )}
         </div>
         {demoMode ? (

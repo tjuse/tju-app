@@ -48,6 +48,7 @@ describe("getWeekOfSemester", () => {
 // Regression: real spring 2025-2026 semester anchor pinned against official academic calendar.
 // If the anchor date changes again, this test will fail and force a conscious fix.
 describe("getWeekOfSemester — 2025-2026 spring (real semester)", () => {
+  // biome-ignore lint/style/noNonNullAssertion: test data is statically known to exist
   const springSemester = semesters.find((s) => s.id === "2025-2026-2")!;
 
   it("2026-06-15 (Monday) should be week 15", () => {

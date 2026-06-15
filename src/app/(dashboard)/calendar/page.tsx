@@ -14,7 +14,7 @@ export default function CalendarPage() {
   return (
     <>
       <Header title="校历" subtitle={current.name} />
-      <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-6 md:px-8">
+      <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-8 md:px-8">
         {/* 当前周大卡片 */}
         <FadeIn>
           <Card className="mb-6 flex items-center justify-between p-6">

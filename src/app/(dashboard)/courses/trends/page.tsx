@@ -33,7 +33,7 @@ export default async function TrendsPage() {
   return (
     <>
       <Header title="公共课表" subtitle={`开课趋势 · ${snapshots.length} 个学期数据`} />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
+      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
         <CoursesTabs />
         {snapshots.length < 2 ? (
           <Card className="flex flex-col items-center gap-3 py-20 text-center">
@@ -63,22 +63,34 @@ export default async function TrendsPage() {
 function TrendsContent({ snapshots }: { snapshots: SemesterSnapshot[] }) {
   const trend = computeCatalogTrend(snapshots);
 
+  // Show only the most recent 6 semesters in the summary tiles.
+  // The full 20-year history is visible in the charts below.
+  const recentTiles = trend.total.slice(-6);
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Summary tiles */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {trend.total.map((p) => (
-          <Card key={p.semester} className="p-4">
-            <p className="truncate text-[11px] text-[var(--color-text-low)]">
-              {semesterLabel(p.semester)}
-            </p>
-            <p className="mt-1 font-bold text-2xl text-[var(--color-text-high)] tabular-nums">
-              {p.count}
-            </p>
-            <p className="text-[11px] text-[var(--color-text-mid)]">门课程</p>
-          </Card>
-        ))}
+    <div className="flex flex-col gap-6">
+      {/* Recent summary tiles (last 6 semesters) */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[13px] text-[var(--color-text-mid)]">最近学期</p>
+          <p className="text-[12px] text-[var(--color-text-low)]">共 {trend.total.length} 个学期</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {recentTiles.map((p) => (
+            <Card key={p.semester} className="p-4">
+              <p className="truncate text-[11px] text-[var(--color-text-low)]">
+                {semesterLabel(p.semester)}
+              </p>
+              <p className="mt-1 font-bold text-xl text-[var(--color-text-high)] tabular-nums">
+                {p.count.toLocaleString()}
+              </p>
+              <p className="text-[11px] text-[var(--color-text-mid)]">门课程</p>
+            </Card>
+          ))}
+        </div>
       </div>
+
+      {/* Charts (full history) */}
       <TrendsCharts trend={trend} />
     </div>
   );

@@ -15,17 +15,14 @@ function getGreeting(hour: number): string {
 const WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
 export function Greeting({ name }: { name?: string }) {
-  const [now, setNow] = useState<Date | null>(null);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
+    // Re-sync to real time after hydration and update every 30 seconds
     setNow(new Date());
     const timer = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(timer);
   }, []);
-
-  if (!now) {
-    return <div className="h-8 w-48 skeleton" />;
-  }
 
   const dateStr = `${now.getMonth() + 1}月${now.getDate()}日 ${WEEKDAYS[now.getDay()]}`;
 

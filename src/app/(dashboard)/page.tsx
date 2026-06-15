@@ -15,7 +15,6 @@ import { readCachedSchedule } from "@/lib/tju/schedule-store";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardHome() {
-  // 从文件缓存读今日课程（无缓存则为空态，引导去课表页抓取）
   const cached = await readCachedSchedule();
   const currentWeek = getWeekOfSemester(getCurrentSemester()) ?? 1;
   const todayCourses = cached ? getTodayCourses(cached.courses, currentWeek) : [];
@@ -23,12 +22,12 @@ export default async function DashboardHome() {
   return (
     <>
       <Header title="概览" />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
+      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-8">
         <FadeIn>
           <Greeting />
         </FadeIn>
 
-        {/* Bento 风网格：左侧今日课程占两行，右侧本周/校历/链接/卡费 */}
+        {/* Bento grid */}
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <FadeIn delay={0.05} className="md:col-span-1 md:row-span-2">
             <TodayCoursesWidget courses={todayCourses} hasSchedule={cached !== null} />
