@@ -130,6 +130,12 @@ async function handleFetchScore(req: FetchScoreRequest): Promise<ExtensionRespon
   return { requestId: req.requestId, ok: true, data };
 }
 
+// Minimal base type for unknown request shapes in the fallback branch
+interface BaseRequest {
+  requestId: string;
+  type: string;
+}
+
 // ---------------------------------------------------------------------------
 // Message dispatcher
 // ---------------------------------------------------------------------------
@@ -170,8 +176,3 @@ chrome.runtime.onMessage.addListener(
     return true; // keep message channel open for async response
   },
 );
-
-interface BaseRequest {
-  requestId: string;
-  type: string;
-}

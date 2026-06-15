@@ -21,6 +21,34 @@ function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(join(FIXTURES, name), "utf8")) as T;
 }
 
+/**
+ * The class-view HTML (schedule_ug_class.html) is produced when the user
+ * selects "class" mode instead of "student" mode; the output format is
+ * identical so the same parser handles both.
+ */
+describe("parseSchedule — ug_class fixture (smoke)", () => {
+  const html = readHtml("schedule_ug_class.html");
+  const result = parseSchedule(html);
+
+  it("returns a non-empty course list", () => {
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it("every entry has class_id, course_id, name", () => {
+    for (const c of result) {
+      expect(typeof c.class_id).toBe("string");
+      expect(typeof c.course_id).toBe("string");
+      expect(typeof c.name).toBe("string");
+    }
+  });
+
+  it("credit is a Python-style decimal string", () => {
+    for (const c of result) {
+      expect(c.credit).toMatch(/^\d+\.\d+$/);
+    }
+  });
+});
+
 describe("parseSchedule — ug_std fixture", () => {
   const html = readHtml("schedule_ug_std.html");
   const expected = readJson<Record<string, unknown>[]>("serialized_schedule_ug_std.json");
