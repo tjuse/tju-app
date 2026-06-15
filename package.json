@@ -18,6 +18,7 @@
     "tju:courses": ".venv/bin/python scripts/tju_cli.py courses"
   },
   "dependencies": {
+    "@tju-app/eams-parsers": "workspace:*",
     "@anthropic-ai/sdk": "^0.104.1",
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-alert-dialog": "^1.1.16",

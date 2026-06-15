@@ -26,9 +26,14 @@
 
 ## 🛠 技术栈
 
-Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn 风格组件 · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm
+Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn 风格组件 · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm workspace
 
-课表数据源：**[`tju`](https://github.com/tjuse/tju-python)** Python 库（封装 SSO + EAMS），经 `scripts/tju_cli.py` 桥接。**无数据库、无 Docker**，文件 JSON 缓存。
+**数据源（两条路径）：**
+- **公共数据**（课程库）：**[`tju`](https://github.com/tjuse/tju-python)** Python 库经 `scripts/tju_cli.py` 桥接 → 静态 JSON 缓存提交到仓库
+- **私有数据**（课程表/成绩/考试）：**`packages/extension`** — MV3 浏览器扩展，复用用户已登录的 EAMS 会话（不存储凭据，无需重新登录）
+- **`packages/eams-parsers`** — 纯 TS HTML 解析库，供扩展使用（39 个与 tju-python 对齐的测试）
+
+**无数据库、无 Docker** — 公共数据文件 JSON 缓存；扩展获取的私有数据存 `sessionStorage`。
 
 ## 🚀 快速开始
 
@@ -65,12 +70,14 @@ pnpm tju:courses
 |---|---|
 | `pnpm dev` | 开发服务器（webpack） |
 | `pnpm build` | 生产构建 |
-| `pnpm typecheck` | TypeScript 检查 |
+| `pnpm typecheck` | TypeScript 检查（主应用） |
 | `pnpm lint` / `pnpm lint:fix` | Biome 检查 / 自动修复 |
 | `pnpm test` | 单元测试（Vitest） |
 | `pnpm test:e2e` | 端到端测试（Playwright） |
 | `pnpm py:setup` | 创建 .venv 并安装 tju |
-| `pnpm tju:schedule` | 命令行抓课表（调试） |
+| `pnpm tju:courses` | 抓取公共课表（调试） |
+| `pnpm --filter @tju-app/eams-parsers test` | 解析器对齐测试（39 个） |
+| `pnpm --filter @tju-app/extension build` | 打包扩展 → `packages/extension/dist/` |
 
 > **注**：构建用 `--webpack`（Serwist 暂不支持 Turbopack）。Biome 命令不要带 `.` 路径参数。
 

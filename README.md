@@ -26,9 +26,14 @@ Polished, interactive, all-in-one. Minimal modern design, dark-first, PWA-ready.
 
 ## 🛠 Tech Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style components · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm
+Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style components · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm workspace
 
-Data source: **[`tju`](https://github.com/tjuse/tju-python)** Python library (wraps TJU SSO + EAMS) via a thin `scripts/tju_cli.py` bridge. **No database, no Docker** — file-based JSON cache.
+**Data sources (two paths):**
+- **Public data** (course catalog): **[`tju`](https://github.com/tjuse/tju-python)** Python library via `scripts/tju_cli.py` → static JSON cache committed to the repo
+- **Private data** (schedule / grades / exams): **`packages/extension`** — MV3 browser extension that reuses the user's existing EAMS session (no credential storage, no CAS re-login)
+- **`packages/eams-parsers`** — pure TS HTML parsers shared by the extension and future callers (39 parity tests vs tju-python)
+
+**No database, no Docker** — file-based JSON cache for public data; `sessionStorage` for extension-fetched private data.
 
 ## 🚀 Quick Start
 
@@ -68,13 +73,14 @@ TJU_ENV_FILE=... .venv/bin/python scripts/tju_cli.py score
 |---|---|
 | `pnpm dev` | Development server (webpack) |
 | `pnpm build` | Production build |
-| `pnpm typecheck` | TypeScript check |
+| `pnpm typecheck` | TypeScript check (app) |
 | `pnpm lint` / `pnpm lint:fix` | Biome check / auto-fix |
-| `pnpm test` | Unit tests (Vitest) |
+| `pnpm test` | Unit tests (Vitest, app) |
 | `pnpm test:e2e` | End-to-end tests (Playwright) |
 | `pnpm py:setup` | Create .venv and install tju |
-| `pnpm tju:schedule` | Fetch personal schedule (debug) |
 | `pnpm tju:courses` | Fetch public course catalog (debug) |
+| `pnpm --filter @tju-app/eams-parsers test` | Parser parity tests (39 tests) |
+| `pnpm --filter @tju-app/extension build` | Bundle extension → `packages/extension/dist/` |
 
 > **Note:** Build uses `--webpack` because Serwist (PWA) is not yet compatible with Turbopack. Biome commands must not receive a `.` path argument.
 

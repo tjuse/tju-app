@@ -18,23 +18,39 @@ Current phase: **self-use first, architecture designed for future multi-user ope
 - **State:** Zustand (lightweight client state, e.g. favorites); `persist` middleware for localStorage
 - **Charts:** Recharts (stats, trends)
 - **Validation:** Zod (API inputs, forms, env vars)
-- **Data source:** **[`tju`](https://github.com/tjuse/tju-python)** Python library (wraps SSO + EAMS). Bridged via `scripts/tju_cli.py`, called by `child_process.spawn` in `src/lib/tju/client.ts`. No reimplementation of crawling logic.
-- **Storage:** **No database.** File JSON cache (`data/cache/`, see `src/lib/cache/file-cache.ts`) + browser `localStorage` for favorites.
+- **Data source (public):** **[`tju`](https://github.com/tjuse/tju-python)** Python library (wraps SSO + EAMS). Bridged via `scripts/tju_cli.py`, called by `child_process.spawn` in `src/lib/tju/client.ts`. Used for public data crawl only (course catalog); personal data (schedule/grades/exams) goes via the browser extension.
+- **Data source (private):** **`@tju-app/extension`** — MV3 browser extension that reuses the user's logged-in EAMS session. No credential storage; no CAS re-login needed.
+- **`@tju-app/eams-parsers`** — workspace-local TS library: pure HTML parsers (schedule, exam, score, course, profile, classroom, syllabus). 39 parity tests vs tju-python fixtures.
+- **Storage:** **No database.** File JSON cache (`data/cache/`, see `src/lib/cache/file-cache.ts`) for public data. Browser `sessionStorage` (via `src/lib/extension-bridge.ts`) for extension-fetched private data. Browser `localStorage` for favorites.
 - **PWA:** Serwist (`src/app/sw.ts`)
 - **AI:** `@anthropic-ai/sdk`, default model `claude-opus-4-8` (schedule screenshot recognition)
 - **Quality:** Biome (lint + format) · Vitest (unit) · Playwright (e2e)
-- **Package manager:** pnpm (JS) · venv + pip (Python, `requirements.txt`)
+- **Package manager:** pnpm workspace (JS) · venv + pip (Python, `requirements.txt`)
 
 > ⚠️ **Build uses webpack:** Next 16 defaults to Turbopack, but Serwist is incompatible. Both `dev` and `build` scripts pass `--webpack`.
 >
-> ⚠️ **No Docker / no database / self-hosted:** intentionally minimal. Live TJU fetching requires campus network / VPN — it cannot run on Vercel. The **public course catalog** (read-only data) is bundled as static JSON for the Vercel demo.
+> ⚠️ **Two-wall problem:** Vercel cannot fetch private TJU data — (1) no Python runtime and (2) no campus-network access. The browser extension solves both: it runs on the user's own machine with their existing EAMS session, bypassing both walls. Public data (course catalog) is still crawled offline and committed as static JSON.
 >
-> ⚠️ **Don't reinvent the wheel:** schedule, grades, exams all go through the `tju` library. To add new data: add a sub-command in `scripts/tju_cli.py` and a wrapper in `src/lib/tju/client.ts`.
+> ⚠️ **Public data** goes through the Python path. **Private data** (schedule/grades/exams) goes through the browser extension. Do not mix the two paths.
 
 ## Directory Layout
 
 ```
-scripts/tju_cli.py       ★ Python bridge: wraps tju, emits unified {ok,data} JSON
+pnpm-workspace.yaml      pnpm workspace root
+packages/
+  eams-parsers/          ★ @tju-app/eams-parsers — pure TS HTML parsers (no fetch, 39 tests)
+    src/parsers/         schedule, exam, score, course, profile, classroom, syllabus
+    src/consts.ts        EAMS URLs + SEMESTER map + weekday map
+    src/types.ts         Typed parser output interfaces
+    tests/               Parity tests vs tju-python fixtures (vitest)
+  extension/             ★ @tju-app/extension — MV3 browser extension
+    src/background/      Service worker: fetches EAMS via session cookies, parses with eams-parsers
+    src/content/         Content script: window.postMessage ↔ chrome.runtime bridge
+    src/popup/           Status popup + manual refresh trigger
+    src/shared/          messages.ts (protocol) + flows.ts (EAMS step descriptors)
+    manifest.json        MV3 manifest (host_permissions: *.tju.edu.cn)
+    build.mjs            esbuild bundler → dist/
+scripts/tju_cli.py       Python bridge: wraps tju, emits unified {ok,data} JSON (public data only)
 requirements.txt         Python deps (tju)
 data/cache/              File cache — public caches committed, personal ones git-ignored
 src/
@@ -56,6 +72,7 @@ src/
   lib/
     tju/                 ★ Data access: client.ts (spawn) / types.ts / *-store.ts (fetch+cache)
     cache/               File JSON cache (file-cache.ts)
+    extension-bridge.ts  ★ Client-side bridge to the browser extension (isExtensionAvailable, fetchSchedule, …)
     connectors/tju/      Card / electricity placeholders (not yet implemented)
     ai/                  Anthropic client + OCR schema
     runtime.ts           ★ Demo mode detection (isLiveFetchAvailable / isDemoMode)
@@ -63,11 +80,13 @@ src/
   types/                 Shared TypeScript types
 ```
 
-**Data flow (courses):** SSR page calls `readCachedCourses()` (reads file, no network) → client `CoursesBrowser` calls `GET /api/courses?...` for filter/paginate → user clicks refresh → `GET /api/courses?refresh=1` → guarded by `isLiveFetchAvailable()` → `refreshCourses()` → `client.ts` spawns `tju_cli.py` → writes cache → `router.refresh()`.
+**Data flow — public (courses):** SSR page calls `readCachedCourses()` (reads file, no network) → client `CoursesBrowser` calls `GET /api/courses?...` for filter/paginate → user clicks refresh → `GET /api/courses?refresh=1` → guarded by `isLiveFetchAvailable()` → `refreshCourses()` → `client.ts` spawns `tju_cli.py` → writes cache → `router.refresh()`.
+
+**Data flow — private (schedule/grades/exams via extension):** page client calls `isExtensionAvailable()` → if present, calls `fetchSchedule/fetchUGScore/fetchExam()` in `extension-bridge.ts` → `window.postMessage` → content script → `chrome.runtime.sendMessage` → background service worker fetches EAMS with existing cookies → parses with `eams-parsers` → returns typed data → page stores in `sessionStorage` and renders.
 
 **Demo mode:** `src/lib/runtime.ts` exports `isDemoMode()`. When `process.env.VERCEL` is set (or `TJU_LIVE=0`), all spawn-based routes return 503 with a user-friendly message instead of attempting to spawn Python.
 
-**Core principle:** new features follow the **feature module** pattern. UI must not depend directly on data-source details — only on types and functions exported by `lib/tju` and `features/*`.
+**Core principle:** new features follow the **feature module** pattern. UI must not depend directly on data-source details — only on types and functions exported by `lib/tju`, `lib/extension-bridge`, and `features/*`.
 
 ## Design System (must follow)
 
@@ -87,19 +106,26 @@ See `docs/DESIGN_SYSTEM.md` for details.
 ```bash
 pnpm dev          # development (webpack)
 pnpm build        # production build (webpack)
-pnpm typecheck    # tsc --noEmit
+pnpm typecheck    # tsc --noEmit (root app + all packages)
 pnpm lint         # biome check (do NOT pass "." as argument)
 pnpm lint:fix     # biome check --write
-pnpm test         # vitest run
+pnpm test         # vitest run (root app)
 pnpm test:e2e     # playwright
 pnpm py:setup     # create .venv and install tju (first run / new machine)
-pnpm tju:schedule # CLI: fetch personal schedule (debug, requires campus net)
 pnpm tju:courses  # CLI: fetch public course catalog (debug, requires campus net)
+
+# Workspace package commands
+pnpm --filter @tju-app/eams-parsers test      # 39 parity tests
+pnpm --filter @tju-app/eams-parsers typecheck
+pnpm --filter @tju-app/extension build        # bundle → packages/extension/dist/
+pnpm --filter @tju-app/extension typecheck
 ```
 
 > **Biome 2.x:** do NOT pass a `.` path argument (the dot is treated as ignored); relies on `.gitignore`, must be run inside the git repo.
 >
 > **Python:** `.venv` is created by `pnpm py:setup`. `scripts/tju_cli.py` always emits exactly one JSON line (`{ok,data}` or `{ok:false,error,code}`), exits 0 on success, exits 1 on failure.
+>
+> **Extension:** load `packages/extension/` as an unpacked extension in Chrome. Requires campus network / VPN in the browser to reach `http://classes.tju.edu.cn`. The extension never stores credentials — it reuses the browser's existing EAMS session cookies.
 
 ## Coding Conventions
 
@@ -115,11 +141,14 @@ pnpm tju:courses  # CLI: fetch public course catalog (debug, requires campus net
 | Phase | Status | Notes |
 |---|---|---|
 | Public course library | ✅ Done | `query_courses`, per-semester cache, filter/stats/trends/conflicts/favorites |
-| Personal schedule | ✅ Done | `schedule` CLI command, weekly timetable view |
+| Personal schedule (server) | ✅ Done | `schedule` CLI command, weekly timetable view (local only) |
 | Calendar + quick links | ✅ Done | Static data |
-| Grades + Exams | ✅ Done | `score`/`exam` CLI commands; local only (demo mode on Vercel) |
+| Grades + Exams (server) | ✅ Done | `score`/`exam` CLI commands; local only (demo mode on Vercel) |
+| **eams-parsers library** | ✅ Done | `packages/eams-parsers` — TS port of all tju-python parsers, 39 tests |
+| **Browser extension** | ✅ Done | `packages/extension` — MV3 extension + `extension-bridge.ts` client bridge |
 | Schedule screenshot import | 🚧 Partial | Backend OCR done (`/api/import/ocr`), frontend upload UI pending |
-| Card / electricity | 📋 Planned | tju does not cover these; independent connectors needed |
+| Extension → page wiring | 🚧 Partial | Bridge done; pages need to call `isExtensionAvailable()` and render extension data |
+| Card / electricity | 📋 Planned | Not covered by tju or the extension; independent connectors needed |
 
 Credentials are always resolved via `TJU_ENV_FILE` (local read-only .env). **Never write to `/data/workspace/tju-python` or any tju-python file.**
 

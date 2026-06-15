@@ -1,0 +1,24 @@
+{
+  "name": "@tju-app/eams-parsers",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework-agnostic TypeScript parsers for TJU EAMS HTML pages",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/turndown": "^5.0.5",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,6 +1,6 @@
 # Roadmap — tju.app
 
-> Architecture: **tju Python library for data fetching + file-based JSON cache + self-hosted**. No database, no Docker. Live features require campus network / VPN; public course data is bundled for the Vercel read-only demo.
+> Architecture: **pnpm workspace** — Next.js app (root) + `packages/eams-parsers` (TS parsers) + `packages/extension` (MV3 browser extension). Public data via Python crawl + static JSON; private data via browser extension session reuse. No database, no Docker.
 
 ## Completed ✅
 
@@ -29,11 +29,15 @@
 - [x] Historical semesters: semester dropdown (2021–2027), independent cache per semester
 - [x] **Vercel deployability:** `outputFileTracingIncludes` bundles public caches; `isLiveFetchAvailable()` / `isDemoMode()` guard all spawn routes; `maxDuration` ≤ 60s
 - [x] **English-ization:** all code comments, AGENTS.md, docs, .env.example in English; bilingual README (EN + ZH)
+- [x] **`packages/eams-parsers`:** pure TS port of all tju-python HTML parsers (schedule, exam, score UG/GS/exp, course, profile, classroom, syllabus); 39 parity tests; Python-identical output
+- [x] **`packages/extension`:** MV3 browser extension — background service worker (EAMS fetch via session cookies), content-script postMessage bridge, status popup; bundled with esbuild
+- [x] **`src/lib/extension-bridge.ts`:** client-side bridge — `isExtensionAvailable()`, `fetchSchedule/fetchUGScore/fetchGSScore/fetchExam()`, sessionStorage cache helpers
 
 > Note: `query_course_info` (teaching department) has a broken parser in the current tju version (HtmlParseError). Workaround: use syllabus + LibCourse fields instead.
 
 ## In Progress 🚧
 
+- [ ] **Extension → page wiring:** schedule/grades/exams pages need to call `isExtensionAvailable()` and render extension-fetched data alongside (or instead of) the Python cache
 - [ ] Schedule screenshot import **frontend**: upload → OCR → preview / edit confirm → write cache (backend `/api/import/ocr` is done)
 - [ ] Manual schedule entry / edit (overwrite individual courses)
 - [ ] ICS import (node-ical) / export (ics package)
@@ -42,7 +46,8 @@
 
 ## Future 📋
 
-- [ ] Campus card + electricity (not covered by `tju`; need independent connectors, see `lib/connectors/tju` placeholders)
-- [ ] Free classroom query (`tju free_classrooms`)
+- [ ] Campus card + electricity (not covered by `tju` or the extension; need independent connectors)
+- [ ] Free classroom query (eams-parsers `parseFreeClassroom` is ready; needs extension flow + UI)
 - [ ] Notification / reminder (class start alerts), settings center, more widgets
 - [ ] If opened to multi-user: auth, data isolation, privacy notice, rate limiting
+- [ ] Extension distribution via Chrome Web Store / Edge Add-ons

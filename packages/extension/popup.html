@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>TJU App Bridge</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        width: 260px;
+        padding: 16px;
+        margin: 0;
+        background: #0f172a;
+        color: #f1f5f9;
+      }
+      h1 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 12px;
+        color: #38bdf8;
+      }
+      #status {
+        font-size: 13px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+      #status.ok {
+        background: #052e16;
+        color: #86efac;
+      }
+      #status.error {
+        background: #450a0a;
+        color: #fca5a5;
+      }
+      button {
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 6px;
+        background: #0ea5e9;
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #334155;
+        color: #64748b;
+        cursor: default;
+      }
+      button:not(:disabled):hover {
+        background: #38bdf8;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TJU App Bridge</h1>
+    <div id="status" class="error">检测中…</div>
+    <button id="refresh" disabled>刷新我的数据</button>
+    <script src="dist/popup.js"></script>
+  </body>
+</html>
