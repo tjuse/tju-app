@@ -25,7 +25,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+          # Do NOT use cache: pnpm here — pnpm 9 changed "pnpm store path"
+          # to require package arguments, which breaks setup-node's cache probe.
+          # We cache the store manually below instead.
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm config get store-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
