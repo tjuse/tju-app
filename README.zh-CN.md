@@ -8,10 +8,6 @@
 
 [English README](./README.md) · [AGENTS.md](./AGENTS.md) · [路线图](./docs/ROADMAP.md)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftjuse%2Ftju-app)
-
-> **演示说明：** Vercel 部署为只读模式——公共课表、统计、趋势、冲突检测均通过内置缓存数据工作。个人功能（课程表、成绩、考试）需要本地配置有效的 TJU 凭据。
-
 </div>
 
 ---
@@ -36,9 +32,9 @@ Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · s
 
 ## 🚀 快速开始
 
-### Vercel 一键部署（演示模式）
+### 云端部署（演示模式）
 
-点击上方「Deploy with Vercel」按钮。课程库、统计、趋势、冲突检测开箱即用（内置演示数据）。个人数据功能在配置凭据前显示演示提示。
+在 **Vercel** 或 **Netlify** 上 import `https://github.com/tjuse/tju-app` 即可一键部署，无需额外配置（已内置 `netlify.toml`）。课程库、统计、趋势、冲突检测、课程对比开箱即用（内置演示数据）。个人功能（课程表、成绩、考试）在配置凭据前显示演示提示。
 
 ### 本地运行（全功能）
 

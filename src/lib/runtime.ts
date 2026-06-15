@@ -10,11 +10,13 @@
 
 /**
  * Whether real-time TJU data fetching (spawning Python via tju_cli.py) is
- * available. Returns false on Vercel or when TJU_LIVE=0 is set for local
- * testing of demo mode.
+ * available. Returns false on cloud platforms (Vercel, Netlify) or when
+ * TJU_LIVE=0 is set for local demo-mode testing.
  */
 export function isLiveFetchAvailable(): boolean {
-  return !process.env.VERCEL && process.env.TJU_LIVE !== "0";
+  if (process.env.TJU_LIVE === "0") return false;
+  if (process.env.VERCEL || process.env.NETLIFY) return false;
+  return true;
 }
 
 /** True when running in read-only demo mode (no live campus network). */

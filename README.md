@@ -8,10 +8,6 @@ Polished, interactive, all-in-one. Minimal modern design, dark-first, PWA-ready.
 
 [中文版 README](./README.zh-CN.md) · [AGENTS.md](./AGENTS.md) · [Roadmap](./docs/ROADMAP.md)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftjuse%2Ftju-app)
-
-> **Demo note:** The Vercel deploy is read-only — public course catalog, statistics, trends, and conflict detection all work from bundled cache data. Personal features (schedule, grades, exams) require local setup with valid TJU credentials.
-
 </div>
 
 ---
@@ -36,9 +32,9 @@ Data source: **[`tju`](https://github.com/tjuse/tju-python)** Python library (wr
 
 ## 🚀 Quick Start
 
-### Vercel (demo mode, read-only)
+### Cloud deploy (demo mode)
 
-Click the "Deploy with Vercel" button above. The course catalog, statistics, trends, and conflict detection work immediately from the bundled demo data. Personal data features show a demo-mode notice until credentials are configured.
+Deploy to **Vercel** or **Netlify** by importing `https://github.com/tjuse/tju-app`. No extra configuration needed — `netlify.toml` is included. The course catalog, statistics, trends, conflict detection, and course comparison work immediately from the bundled demo data. Personal features (schedule, grades, exams) show a demo notice until credentials are configured locally.
 
 ### Local (full features)
 
