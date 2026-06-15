@@ -27,7 +27,12 @@ function parseWeek(html: string): number[] {
     if (cleaned.includes("-")) {
       const isOdd = cleaned.includes("单");
       const isEven = cleaned.includes("双");
-      const stripped = cleaned.replace("[", "").replace("]", "").replace("单", "").replace("双", "").trim();
+      const stripped = cleaned
+        .replace("[", "")
+        .replace("]", "")
+        .replace("单", "")
+        .replace("双", "")
+        .trim();
       const parts = stripped.split("-").map((s) => Number.parseInt(s.trim(), 10));
       const from = parts[0] ?? 0;
       const to = parts[1] ?? 0;
@@ -54,7 +59,7 @@ function parseArrange(html: string): CourseArrangeRaw[] {
   const lines = html.trim().split("<br>");
 
   for (const rawLine of lines) {
-    const line = rawLine.trim() + " "; // trailing space ensures location capture
+    const line = `${rawLine.trim()} `; // trailing space ensures location capture
     if (line.trim() === "") continue;
 
     // Pattern: "teacher 星期X  1-2  location  ..."
@@ -154,7 +159,7 @@ export function parseCourse(html: string, semester: string): CoursePageResult {
 
       // Extract text: prefer anchor text, else strip tags
       const aMatch = /<a[^>]*>([\s\S]*?)<\/a>/.exec(raw);
-      let c: string = aMatch ? aMatch[1]!.trim() : raw.replace(/<[^>]+>/g, "").trim();
+      let c: string = aMatch ? (aMatch[1] ?? "").trim() : raw.replace(/<[^>]+>/g, "").trim();
 
       if (key === "lession_id") {
         item.lession_id = c;
@@ -235,12 +240,11 @@ export function parseCourse(html: string, semester: string): CoursePageResult {
       }
       if (key === "周学时") {
         item.week_hours = c ? Number.parseFloat(c) : null;
-        continue;
       }
     }
 
     // Attach arrange (timetable) from the JS map
-    const arrangeHtml = arrangeMap.get(item.lession_id as string ?? "") ?? "";
+    const arrangeHtml = arrangeMap.get((item.lession_id as string) ?? "") ?? "";
     item.arrange = arrangeHtml.trim() ? parseArrange(arrangeHtml) : [];
 
     result.push(item as CourseEntry);
@@ -284,5 +288,8 @@ const _td = new TurndownService();
  * Convert syllabus HTML to Markdown, matching Python's markdownify output.
  */
 export function parseSyllabus(html: string): string {
-  return _td.turndown(html).replace(/\n{3,}/g, "\n\n").trim();
+  return _td
+    .turndown(html)
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }

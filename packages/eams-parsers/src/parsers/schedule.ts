@@ -29,7 +29,7 @@ export function parseSchedule(html: string): ScheduleEntry[] {
   if (!taskMatch) throw new ParseError("Cannot find TaskActivity section");
 
   // Split on "var teachers" — each segment after the first is one slot block
-  const arrangeHtmls = taskMatch[1]!.split("var teachers");
+  const arrangeHtmls = (taskMatch[1] ?? "").split("var teachers");
 
   // Map: classID → list of arrange objects
   const arrangePairMap = new Map<string, Arrange[]>();
@@ -38,7 +38,7 @@ export function parseSchedule(html: string): ScheduleEntry[] {
     // Extract teacher names from: var actTeachers = [...];
     const rawTeachersMatch = /var actTeachers = ([^;]+);/.exec(arrangeItem);
     const teacherArray: string[] = rawTeachersMatch
-      ? [...rawTeachersMatch[1]!.matchAll(/"([^"]+)"/g)].map((m) => m[1] ?? "")
+      ? [...(rawTeachersMatch[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1] ?? "")
       : [];
 
     // Extract classID from line 14 of the semicolon-split list
@@ -46,13 +46,13 @@ export function parseSchedule(html: string): ScheduleEntry[] {
     const courseLine = (lineList[14] ?? "").split(",");
     const classIDMatch = /\((\w+)\)/.exec(courseLine[4] ?? "");
     if (!classIDMatch) continue;
-    const classID = classIDMatch[1]!;
+    const classID = classIDMatch[1] ?? "";
 
     // Extract location and week-bitmask: '"name","","location","01010..."'
     const threePairMatch = /"([^"]+)","[^"]*","([^"]*)","([01]+)"/.exec(arrangeItem);
     if (!threePairMatch) continue;
-    const location = threePairMatch[2]!.trim();
-    const rawWeeks = threePairMatch[3]!.trim();
+    const location = (threePairMatch[2] ?? "").trim();
+    const rawWeeks = (threePairMatch[3] ?? "").trim();
 
     // Convert bitmask to week-number array (1-indexed bit positions)
     const weekArray: number[] = [];
@@ -76,7 +76,7 @@ export function parseSchedule(html: string): ScheduleEntry[] {
   if (!tbodyMatch) return [];
 
   const courses: ScheduleEntry[] = [];
-  const trMatches = [...tbodyMatch[1]!.matchAll(/<tr([\s\S]+?)<\/tr>/g)];
+  const trMatches = [...(tbodyMatch[1] ?? "").matchAll(/<tr([\s\S]+?)<\/tr>/g)];
 
   for (const trMatch of trMatches) {
     const tr = trMatch[0];
@@ -100,7 +100,7 @@ export function parseSchedule(html: string): ScheduleEntry[] {
       const nameMain = /(.+?)<sup/.exec(name);
       const nameSup = /">(.+?)<\/s/.exec(name);
       if (nameMain && nameSup) {
-        name = nameMain[1]!.trim() + " " + nameSup[1]!.trim();
+        name = `${(nameMain[1] ?? "").trim()} ${(nameSup[1] ?? "").trim()}`;
       }
     }
 
@@ -114,7 +114,7 @@ export function parseSchedule(html: string): ScheduleEntry[] {
 
     const campusRaw = tds[9] ?? "";
     const campusMatch = /(.+?校区)/.exec(campusRaw);
-    const campus = campusMatch ? campusMatch[1]!.trim() : "";
+    const campus = campusMatch ? (campusMatch[1] ?? "").trim() : "";
 
     courses.push({
       class_id: serial,

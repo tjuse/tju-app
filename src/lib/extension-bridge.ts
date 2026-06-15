@@ -11,7 +11,7 @@
  * extension is present and the session is reachable.
  */
 
-import type { ScheduleEntry, UGScoreRecord, GSScoreRecord, ExamEntry } from "@tju-app/eams-parsers";
+import type { ExamEntry, GSScoreRecord, ScheduleEntry, UGScoreRecord } from "@tju-app/eams-parsers";
 
 // ---------------------------------------------------------------------------
 // Message types (duplicated from packages/extension/src/shared/messages.ts
@@ -65,7 +65,7 @@ function sendRequest<T>(req: ExtensionRequest, timeoutMs = 8000): Promise<T> {
 
     function handler(event: MessageEvent<unknown>): void {
       const msg = event.data as WindowMessage | undefined;
-      if (!msg || msg.source !== "tju-extension" || msg.direction !== "response") return;
+      if (msg?.source !== "tju-extension" || msg?.direction !== "response") return;
 
       const res = msg.payload as ExtensionResponse<T>;
       if (res.requestId !== req.requestId) return;

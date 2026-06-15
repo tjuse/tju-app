@@ -61,15 +61,15 @@ describe("parseSchedule — ug_std fixture", () => {
   it("first course has correct class_id, course_id, name", () => {
     const r = result[0];
     const e = expected[0] as Record<string, unknown>;
-    expect(r?.class_id).toBe(e["class_id"]);
-    expect(r?.course_id).toBe(e["course_id"]);
-    expect(r?.name).toBe(e["name"]);
+    expect(r?.class_id).toBe(e.class_id);
+    expect(r?.course_id).toBe(e.course_id);
+    expect(r?.name).toBe(e.name);
   });
 
   it("credit is a string matching Python str(float(x))", () => {
     for (let i = 0; i < result.length; i++) {
       expect(typeof result[i]?.credit).toBe("string");
-      expect(result[i]?.credit).toBe((expected[i] as Record<string, unknown>)["credit"]);
+      expect(result[i]?.credit).toBe((expected[i] as Record<string, unknown>).credit);
     }
   });
 
@@ -111,12 +111,12 @@ describe("parseSchedule — ug_std fixture", () => {
     for (let i = 0; i < result.length; i++) {
       const r = result[i];
       const e = expected[i] as Record<string, unknown>;
-      expect(r?.class_id).toBe(e["class_id"]);
-      expect(r?.course_id).toBe(e["course_id"]);
-      expect(r?.name).toBe(e["name"]);
-      expect(r?.credit).toBe(e["credit"]);
-      expect(r?.weeks).toBe(e["weeks"]);
-      expect(r?.campus).toBe(e["campus"]);
+      expect(r?.class_id).toBe(e.class_id);
+      expect(r?.course_id).toBe(e.course_id);
+      expect(r?.name).toBe(e.name);
+      expect(r?.credit).toBe(e.credit);
+      expect(r?.weeks).toBe(e.weeks);
+      expect(r?.campus).toBe(e.campus);
     }
   });
 });

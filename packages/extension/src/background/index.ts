@@ -11,27 +11,27 @@
  */
 
 import {
-  parseSchedule,
-  parseExamBatchId,
   parseExam,
-  parseUGScore,
+  parseExamBatchId,
   parseGSScore,
+  parseSchedule,
+  parseUGScore,
 } from "@tju-app/eams-parsers";
 
 import {
-  scheduleSteps,
-  extractScheduleIds,
   examSteps,
-  ugScoreStep,
+  extractScheduleIds,
   gsScoreStep,
+  scheduleSteps,
+  ugScoreStep,
 } from "../shared/flows.js";
 
 import type {
   ExtensionRequest,
   ExtensionResponse,
+  FetchExamRequest,
   FetchScheduleRequest,
   FetchScoreRequest,
-  FetchExamRequest,
 } from "../shared/messages.js";
 
 // ---------------------------------------------------------------------------
@@ -160,7 +160,11 @@ chrome.runtime.onMessage.addListener(
         } else if (req.type === "tju:fetchScore") {
           response = await handleFetchScore(req);
         } else {
-          response = { requestId: (req as BaseRequest).requestId, ok: false, error: `Unknown request type: ${(req as BaseRequest).type}` };
+          response = {
+            requestId: (req as BaseRequest).requestId,
+            ok: false,
+            error: `Unknown request type: ${(req as BaseRequest).type}`,
+          };
         }
         sendResponse(response);
       } catch (err) {

@@ -9,11 +9,11 @@
  */
 
 import {
-  EAMS_BASE,
   COURSETABLE_INDEX_PATH,
   COURSETABLE_PATH,
-  EXAM_POST_PATH,
+  EAMS_BASE,
   EXAM_PATH,
+  EXAM_POST_PATH,
   SCORE_HISTORY_PATH,
   SCORE_SEARCH_PATH,
   SEMESTER,
@@ -55,10 +55,10 @@ export function scheduleSteps(semesterId: string): {
       method: "POST",
       url: `${EAMS_BASE}${COURSETABLE_PATH}`,
       formData: {
-        "ignoreHead": "1",
+        ignoreHead: "1",
         "setting.kind": "std",
         "semester.id": semesterId,
-        "ids": ids,
+        ids: ids,
       },
     }),
   };

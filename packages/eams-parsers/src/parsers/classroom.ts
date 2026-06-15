@@ -22,20 +22,20 @@ export class DataError extends Error {
 // Known EAMS server-side error messages (keys quoted because some contain punctuation).
 // Note: the permission-denied marker uses an ASCII comma (,), not a fullwidth comma (，).
 const SERVER_ERRORS: Record<string, string> = {
-  "借用教室小节错误":
+  借用教室小节错误:
     "借用教室小节错误: the EAMS class-period schedule is unavailable for the requested date/time (likely outside an active teaching week or project is unconfigured).",
-  "请不要过快点击":
-    "Rate-limited by EAMS: too many requests in a short time. Retry after a delay.",
-  "对不起,您没有权限": "Permission denied (403): this account does not have access to the free classroom feature.",
+  请不要过快点击: "Rate-limited by EAMS: too many requests in a short time. Retry after a delay.",
+  "对不起,您没有权限":
+    "Permission denied (403): this account does not have access to the free classroom feature.",
 };
 
 // Mirrors FreeClassroom marshmallow model data_key mappings (classroom.py)
 const KEY_MAP: Record<string, string> = {
-  "校区": "campus",
-  "教学楼": "building",
-  "教室": "name",
-  "教室类型": "room_type",
-  "座位数": "seats",
+  校区: "campus",
+  教学楼: "building",
+  教室: "name",
+  教室类型: "room_type",
+  座位数: "seats",
 };
 
 /**

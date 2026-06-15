@@ -29,11 +29,11 @@ describe("parseProfile — profile_ug fixture", () => {
   });
 
   it("学号 (student ID) matches expected", () => {
-    expect(result["学号"]).toBe(expected["学号"]);
+    expect(result.学号).toBe(expected.学号);
   });
 
   it("姓名 (name) matches expected", () => {
-    expect(result["姓名"]).toBe(expected["姓名"]);
+    expect(result.姓名).toBe(expected.姓名);
   });
 
   it("full output matches expected JSON", () => {

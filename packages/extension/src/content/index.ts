@@ -9,14 +9,14 @@
  * forwarded, preventing message-spoofing by third-party content on the page.
  */
 
-import type { WindowMessage, ExtensionRequest, ExtensionResponse } from "../shared/messages.js";
+import type { ExtensionRequest, ExtensionResponse, WindowMessage } from "../shared/messages.js";
 
 window.addEventListener("message", (event: MessageEvent<unknown>) => {
   // Ignore messages from other frames or non-extension sources
   if (event.source !== window) return;
 
   const msg = event.data as WindowMessage | undefined;
-  if (!msg || msg.source !== "tju-extension" || msg.direction !== "request") return;
+  if (msg?.source !== "tju-extension" || msg?.direction !== "request") return;
 
   const req = msg.payload as ExtensionRequest;
 
@@ -29,7 +29,11 @@ window.addEventListener("message", (event: MessageEvent<unknown>) => {
         error: chrome.runtime.lastError.message ?? "Extension runtime error",
       };
       window.postMessage(
-        { source: "tju-extension", direction: "response", payload: errorResp } satisfies WindowMessage,
+        {
+          source: "tju-extension",
+          direction: "response",
+          payload: errorResp,
+        } satisfies WindowMessage,
         "*",
       );
       return;

@@ -7,12 +7,7 @@
  *   background.ts → sendResponse → content.ts → window.postMessage → Page
  */
 
-import type {
-  ExamEntry,
-  ScheduleEntry,
-  UGScoreRecord,
-  GSScoreRecord,
-} from "@tju-app/eams-parsers";
+import type { ExamEntry, GSScoreRecord, ScheduleEntry, UGScoreRecord } from "@tju-app/eams-parsers";
 
 // ---------------------------------------------------------------------------
 // Requests (page → background)

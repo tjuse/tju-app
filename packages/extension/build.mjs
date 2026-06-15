@@ -10,8 +10,8 @@
  * runtime in an extension context).
  */
 
-import * as esbuild from "esbuild";
 import { argv } from "node:process";
+import * as esbuild from "esbuild";
 
 const watch = argv.includes("--watch");
 
@@ -27,8 +27,8 @@ const sharedConfig = {
 
 const entryPoints = [
   { in: "src/background/index.ts", out: "background" },
-  { in: "src/content/index.ts",    out: "content" },
-  { in: "src/popup/index.ts",      out: "popup" },
+  { in: "src/content/index.ts", out: "content" },
+  { in: "src/popup/index.ts", out: "popup" },
 ];
 
 if (watch) {

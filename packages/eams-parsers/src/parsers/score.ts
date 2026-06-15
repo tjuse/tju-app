@@ -73,9 +73,7 @@ function parseGridTables(html: string): Array<{ keys: string[]; rows: Record<str
     const headHtml = parts[0] ?? "";
     const bodyHtml = parts[1] ?? "";
 
-    const keys = [...headHtml.matchAll(/<th.*?>(.+?)<\/th>/g)].map((m) =>
-      (m[1] ?? "").trim(),
-    );
+    const keys = [...headHtml.matchAll(/<th.*?>(.+?)<\/th>/g)].map((m) => (m[1] ?? "").trim());
 
     const rowHtmls = bodyHtml.split("</tr>");
     const rows: Record<string, string>[] = [];
@@ -137,14 +135,14 @@ export function parseUGScore(html: string): UGScoreRecord[] {
     tables.length >= 2 ? (tables[tables.length - 1] ?? courseTable) : courseTable;
 
   return (coursesTable.rows ?? []).map((raw) => ({
-    semester: scoreSemester(raw["学年学期"]),
-    course_id: raw["课程代码"] || null,
-    name: raw["课程名称"] || null,
-    course_type: raw["课程类别"] || null,
-    course_props: raw["课程性质"] ?? null,
-    credit: raw["学分"] ? Number.parseFloat(raw["学分"]) : null,
-    score: raw["总评成绩"] || null,
-    gpa: formatGPA(raw["绩点"]),
+    semester: scoreSemester(raw.学年学期),
+    course_id: raw.课程代码 || null,
+    name: raw.课程名称 || null,
+    course_type: raw.课程类别 || null,
+    course_props: raw.课程性质 ?? null,
+    credit: raw.学分 ? Number.parseFloat(raw.学分) : null,
+    score: raw.总评成绩 || null,
+    gpa: formatGPA(raw.绩点),
   }));
 }
 
@@ -200,7 +198,7 @@ export function parseExpScore(html: string): ExpScoreRecord[] {
   const tableHtml = tableMatch[1] ?? "";
   const headMatch = /<thead class="gridhead">([\s\S]*?)<\/thead>/.exec(tableHtml);
   const keys = headMatch
-    ? [...headMatch[1]!.matchAll(/<th.*?>(.+?)<\/th>/g)].map((m) => (m[1] ?? "").trim())
+    ? [...(headMatch[1] ?? "").matchAll(/<th.*?>(.+?)<\/th>/g)].map((m) => (m[1] ?? "").trim())
     : [];
 
   const bodyHtml = tableHtml.split("</thead>")[1] ?? "";
