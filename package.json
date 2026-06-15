@@ -14,7 +14,8 @@
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "py:setup": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
-    "tju:schedule": ".venv/bin/python scripts/tju_cli.py schedule"
+    "tju:schedule": ".venv/bin/python scripts/tju_cli.py schedule",
+    "tju:courses": ".venv/bin/python scripts/tju_cli.py courses"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

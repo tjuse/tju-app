@@ -22,7 +22,7 @@ function makeLabel(startYear: number, term: 1 | 2): string {
 }
 
 /** Generate semester options between fromYear and toYear, newest first. */
-export function listSemesters(fromYear = 2021, toYear = 2027): SemesterOption[] {
+export function listSemesters(fromYear = 2005, toYear = 2027): SemesterOption[] {
   const opts: SemesterOption[] = [];
   for (let y = toYear; y >= fromYear; y--) {
     for (const term of [2, 1] as const) {
