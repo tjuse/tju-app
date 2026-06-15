@@ -2,93 +2,49 @@
 
 # tju.app
 
-**天津大学校园 Dashboard** — 公共课表 · 课程表 · 校历 · 成绩 · 考试 · 常用链接
+**天津大学学生的个人校园仪表盘。**
 
-美观、可交互、功能大而全。极简现代设计，深色为主，PWA 可安装。
+课程库 · 课程表 · 校历 · 成绩 · 考试 · 常用链接
 
-[English README](./README.md) · [AGENTS.md](./AGENTS.md) · [路线图](./docs/ROADMAP.md)
+[English](./README.md)
 
 </div>
 
 ---
 
-## ✨ 特性
+## 你能做什么
 
-- 🎨 **一流 UI/UX** — 极简现代设计系统（Linear/Vercel 风），深色为主 + 北洋蓝强调色，流畅微动效
-- 📚 **公共课表** — 全校课程库（每学期 5000+ 门），历史学期检索，筛选/统计/趋势分析
-- ⭐ **收藏 + 冲突检测** — 收藏课程后自动检测时间冲突
-- 📅 **课程表** — 截图 AI 识别（Claude 视觉）/ 手动录入导入，周视图
-- 🗓 **校历** — 学期周次、考试周、假期一目了然
-- 🔗 **常用链接** — 内置 TJU 高频入口（教务、图书馆、SSO、邮件…）
-- 🎓 **成绩** — 完整历史成绩 + GPA 汇总（本地凭据）
-- 📝 **考试** — 考试时间/地点/座位安排（本地凭据）
-- 📱 **PWA** — 可安装、离线缓存，响应式适配手机/桌面
+**无需登录：**
 
-## 🛠 技术栈
+- **课程库** — 搜索每学期全校 5000+ 门课程，按校区、院系、学分、授课教师筛选，查看选课人数、课时数及完整大纲。
+- **收藏 & 冲突检测** — 收藏心仪课程，自动判断是否存在时间冲突。
+- **校历** — 逐周展示本学期教学周、考试周与假期安排。
+- **常用链接** — 一键直达教务系统、图书馆、邮件、SSO 等天大常用入口。
 
-Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn 风格组件 · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm workspace
+**配合浏览器扩展（个人数据，不保存密码）：**
 
-**数据源（两条路径）：**
-- **公共数据**（课程库）：**[`tju`](https://github.com/tjuse/tju-python)** Python 库经 `scripts/tju_cli.py` 桥接 → 静态 JSON 缓存提交到仓库
-- **私有数据**（课程表/成绩/考试）：**`packages/extension`** — MV3 浏览器扩展，复用用户已登录的 EAMS 会话（不存储凭据，无需重新登录）
-- **`packages/eams-parsers`** — 纯 TS HTML 解析库，供扩展使用（39 个与 tju-python 对齐的测试）
+- **个人课程表** — 直接从教务系统读取你的真实课表，以周视图呈现。
+- **成绩** — 完整历史成绩与 GPA 汇总。
+- **考试安排** — 每门考试的日期、时间、考场与座位号。
 
-**无数据库、无 Docker** — 公共数据文件 JSON 缓存；扩展获取的私有数据存 `sessionStorage`。
+## 隐私与安全
 
-## 🚀 快速开始
+浏览器扩展使用你**浏览器中已有的教务登录会话**来获取数据——和你在教务浏览器标签页里直接操作完全相同。**密码既不会被存储，也不会被传输到任何地方。** 应用无法读取你的登录凭据。
 
-### 云端部署（演示模式）
+个人数据（课程表、成绩、考试）仅保留在你的浏览器本地，不会上传至任何服务器。
 
-在 **Vercel** 或 **Netlify** 上 import `https://github.com/tjuse/tju-app` 即可一键部署，无需额外配置（已内置 `netlify.toml`）。课程库、统计、趋势、冲突检测、课程对比开箱即用（内置演示数据）。个人功能（课程表、成绩、考试）在配置凭据前显示演示提示。
+## 安装浏览器扩展
 
-### 本地运行（全功能）
+扩展在你的浏览器中运行，按需从教务系统拉取个人数据。
 
-```bash
-# 1. 安装 JS 依赖
-pnpm install
+1. 从 [Releases](../../releases) 页面下载最新版本并解压。
+2. 打开 Chrome 或 Edge，访问 `chrome://extensions`。
+3. 开启右上角的**开发者模式**。
+4. 点击**加载已解压的扩展程序**，选择解压后的文件夹。
+5. 访问 [tju.app](https://tju.app)，扩展会自动连接。
 
-# 2. 安装 Python 依赖（创建 .venv + 安装 tju）
-pnpm py:setup
+> 扩展需要你已在浏览器中登录教务系统（须在校园网或 VPN 下）。若会话过期，扩展会自动为你打开登录页面。
 
-# 3. 配置环境变量
-cp .env.example .env.local
-#   编辑 .env.local：
-#   - TJU_USER / TJU_PASS  — 学号与统一认证密码（实时抓取用）
-#   - TJU_ENV_FILE          — 或指向已有 .env 文件
-#   - ANTHROPIC_API_KEY     — 可选，课表截图识别
+## 免责声明
 
-# 4. 开发
-pnpm dev          # http://localhost:3000
-
-# 抓取当前学期公共课表（需校园网/VPN）
-pnpm tju:courses
-```
-
-## 常用命令
-
-| 命令 | 说明 |
-|---|---|
-| `pnpm dev` | 开发服务器（webpack） |
-| `pnpm build` | 生产构建 |
-| `pnpm typecheck` | TypeScript 检查（主应用） |
-| `pnpm lint` / `pnpm lint:fix` | Biome 检查 / 自动修复 |
-| `pnpm test` | 单元测试（Vitest） |
-| `pnpm test:e2e` | 端到端测试（Playwright） |
-| `pnpm py:setup` | 创建 .venv 并安装 tju |
-| `pnpm tju:courses` | 抓取公共课表（调试） |
-| `pnpm --filter @tju-app/eams-parsers test` | 解析器对齐测试（39 个） |
-| `pnpm --filter @tju-app/extension build` | 打包扩展 → `packages/extension/dist/` |
-
-> **注**：构建用 `--webpack`（Serwist 暂不支持 Turbopack）。Biome 命令不要带 `.` 路径参数。
-
-## 📁 项目结构 / 文档
-
-- [AGENTS.md](./AGENTS.md) — 协作约定
-- [docs/ROADMAP.md](./docs/ROADMAP.md) — 路线图
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — 架构
-- [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) — 设计系统
-- [docs/CONNECTORS.md](./docs/CONNECTORS.md) — TJU 数据接入
-
-## ⚠️ 说明
-
-非官方项目。需登录的功能仅抓取**用户本人授权**的数据；凭据只存 `.env.local`，绝不写日志或缓存文件。课表数据源 [`tju`](https://github.com/tjuse/tju-python) 为 GPL-3.0 协议。
+本项目为非官方项目，与天津大学无关。仅访问已登录用户本人有权限查看的数据。课程数据来源于开源项目 [tju](https://github.com/tjuse/tju-python)（GPL-3.0 协议）。请以天津大学官方发布的信息为准核实考试安排及校历。

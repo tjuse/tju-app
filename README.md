@@ -2,97 +2,49 @@
 
 # tju.app
 
-**Tianjin University Campus Dashboard** — Course Library · Schedule · Calendar · Grades · Exams · Quick Links
+**A personal campus dashboard for Tianjin University students.**
 
-Polished, interactive, all-in-one. Minimal modern design, dark-first, PWA-ready.
+Course Library · Schedule · Academic Calendar · Grades · Exams · Quick Links
 
-[中文版 README](./README.zh-CN.md) · [AGENTS.md](./AGENTS.md) · [Roadmap](./docs/ROADMAP.md)
+[中文版](./README.zh-CN.md)
 
 </div>
 
 ---
 
-## ✨ Features
+## What you can do
 
-- 🎨 **World-class UI/UX** — minimal modern design (Linear/Vercel aesthetic), dark-first + Beiyang Blue accent, smooth micro-animations
-- 📚 **Public Course Library** — full TJU course catalog (5,000+ courses per semester), semester history, advanced filters, statistics, trends across semesters
-- ⭐ **Favorites + Conflict Detection** — star courses, then auto-detect schedule conflicts in your selection
-- 📅 **Personal Schedule** — import via screenshot AI recognition (Claude Vision) or manual entry; weekly view
-- 🗓 **Academic Calendar** — semester weeks, exam periods, holidays at a glance
-- 🔗 **Quick Links** — curated TJU portals (EAMS, library, SSO, mail, …)
-- 🎓 **Grades** — full grade history with GPA summary (requires credentials locally)
-- 📝 **Exams** — upcoming exam schedule with date / time / location / seat (requires credentials locally)
-- 📱 **PWA** — installable, offline-ready, responsive for mobile and desktop
+**No login required:**
 
-## 🛠 Tech Stack
+- **Course Library** — Search all 5,000+ courses offered each semester. Filter by campus, department, credit, or teacher. View enrollment numbers, credit hours, and full syllabi.
+- **Favorites & Conflict Detection** — Star courses and instantly see if any of them overlap in the weekly schedule.
+- **Academic Calendar** — Week-by-week view of the semester: teaching weeks, exam period, and holidays.
+- **Quick Links** — One-click access to EAMS, library, mail, SSO, and other TJU portals.
 
-Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 · shadcn-style components · Zustand · Recharts · Serwist (PWA) · Anthropic SDK · Biome · Vitest / Playwright · pnpm workspace
+**With the browser extension (personal data, no password stored):**
 
-**Data sources (two paths):**
-- **Public data** (course catalog): **[`tju`](https://github.com/tjuse/tju-python)** Python library via `scripts/tju_cli.py` → static JSON cache committed to the repo
-- **Private data** (schedule / grades / exams): **`packages/extension`** — MV3 browser extension that reuses the user's existing EAMS session (no credential storage, no CAS re-login)
-- **`packages/eams-parsers`** — pure TS HTML parsers shared by the extension and future callers (39 parity tests vs tju-python)
+- **Personal Schedule** — Your real timetable fetched directly from EAMS, displayed in a weekly view.
+- **Grades** — Full course grade history and GPA.
+- **Exam Schedule** — Date, time, location, and seat number for every upcoming exam.
 
-**No database, no Docker** — file-based JSON cache for public data; `sessionStorage` for extension-fetched private data.
+## Privacy & security
 
-## 🚀 Quick Start
+The browser extension accesses EAMS using your existing browser session — the same session you use when you're already logged into EAMS in that browser tab. **No passwords are stored or transmitted anywhere.** The app cannot see your credentials.
 
-### Cloud deploy (demo mode)
+Personal data (schedule, grades, exams) stays in your browser and is never sent to any server.
 
-Deploy to **Vercel** or **Netlify** by importing `https://github.com/tjuse/tju-app`. No extra configuration needed — `netlify.toml` is included. The course catalog, statistics, trends, conflict detection, and course comparison work immediately from the bundled demo data. Personal features (schedule, grades, exams) show a demo notice until credentials are configured locally.
+## Installing the browser extension
 
-### Local (full features)
+The extension runs in your browser and fetches your personal EAMS data on demand.
 
-```bash
-# 1. Install JS dependencies
-pnpm install
+1. Download the latest release from the [Releases](../../releases) page and unzip it.
+2. Open Chrome (or Edge) and go to `chrome://extensions`.
+3. Enable **Developer mode** (top-right toggle).
+4. Click **Load unpacked** and select the unzipped folder.
+5. Visit [tju.app](https://tju.app) — the extension will connect automatically.
 
-# 2. Install Python dependencies (creates .venv + installs tju)
-pnpm py:setup
+> The extension requires you to be logged into EAMS in your browser (campus network or VPN). If your session expires, the extension will open the login page for you.
 
-# 3. Configure environment variables
-cp .env.example .env.local
-#   Edit .env.local:
-#   - TJU_USER / TJU_PASS  — student ID and unified-auth password (for live EAMS fetching)
-#   - TJU_ENV_FILE          — or point to an existing .env file with those credentials
-#   - ANTHROPIC_API_KEY     — optional, for schedule-screenshot OCR import
+## Disclaimer
 
-# 4. Start development server
-pnpm dev          # http://localhost:3000
-
-# Fetch the current semester's public course catalog (requires campus network / VPN)
-pnpm tju:courses
-
-# Debug: run the Python CLI directly
-TJU_ENV_FILE=... .venv/bin/python scripts/tju_cli.py score
-```
-
-## 📋 Commands
-
-| Command | Description |
-|---|---|
-| `pnpm dev` | Development server (webpack) |
-| `pnpm build` | Production build |
-| `pnpm typecheck` | TypeScript check (app) |
-| `pnpm lint` / `pnpm lint:fix` | Biome check / auto-fix |
-| `pnpm test` | Unit tests (Vitest, app) |
-| `pnpm test:e2e` | End-to-end tests (Playwright) |
-| `pnpm py:setup` | Create .venv and install tju |
-| `pnpm tju:courses` | Fetch public course catalog (debug) |
-| `pnpm --filter @tju-app/eams-parsers test` | Parser parity tests (39 tests) |
-| `pnpm --filter @tju-app/extension build` | Bundle extension → `packages/extension/dist/` |
-
-> **Note:** Build uses `--webpack` because Serwist (PWA) is not yet compatible with Turbopack. Biome commands must not receive a `.` path argument.
-
-## 📁 Project Structure
-
-- [AGENTS.md](./AGENTS.md) — collaboration conventions (read first)
-- [docs/ROADMAP.md](./docs/ROADMAP.md) — phased feature roadmap
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — architecture overview
-- [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) — design system tokens and rules
-- [docs/CONNECTORS.md](./docs/CONNECTORS.md) — TJU data source integration details
-- [docs/DEV_PLAN.md](./docs/DEV_PLAN.md) — development task breakdown
-
-## ⚠️ Disclaimer
-
-Unofficial project. Login-required features only fetch data authorized by the user; credentials are stored locally in `.env.local` only — never logged or cached to disk in readable form. Course data (`tju`) is GPL-3.0 licensed. Calendar data requires manual verification against official TJU publications each semester.
+This is an unofficial project and is not affiliated with Tianjin University. It accesses only data that the logged-in user is authorized to view. Course catalog data is sourced from the open-source [tju](https://github.com/tjuse/tju-python) library (GPL-3.0). Please verify exam and calendar information against official TJU publications.
