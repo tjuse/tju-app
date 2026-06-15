@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # 构建/类型检查所需的占位 env（不连真实服务；课表抓取需校园网，CI 不跑）
+      # Placeholder env for build/typecheck — no real service connection;
+      # live TJU fetching requires campus network and is not run in CI.
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # Reads pnpm version from packageManager field in package.json
 
       - uses: actions/setup-node@v4
         with:
