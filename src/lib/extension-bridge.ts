@@ -18,7 +18,12 @@ import type { ExamEntry, GSScoreRecord, ScheduleEntry, UGScoreRecord } from "@tj
 // so the app doesn't need to import from the extension package at build time)
 // ---------------------------------------------------------------------------
 
-type RequestType = "tju:ping" | "tju:fetchSchedule" | "tju:fetchScore" | "tju:fetchExam";
+type RequestType =
+  | "tju:ping"
+  | "tju:fetchSchedule"
+  | "tju:fetchScore"
+  | "tju:fetchExam"
+  | "tju:fetchSyllabus";
 
 interface ExtensionRequest {
   type: RequestType;
@@ -143,6 +148,16 @@ export async function fetchExam(semesterId: string): Promise<ExamEntry[]> {
     requestId: nextId(),
     semester: semesterId,
   });
+}
+
+/** Fetch a public course syllabus. Returns raw HTML (convert to MD in-page). */
+export async function fetchSyllabusHtml(lessionId: string): Promise<string> {
+  const res = await sendRequest<{ html: string }>({
+    type: "tju:fetchSyllabus",
+    requestId: nextId(),
+    lessionId,
+  });
+  return res.html;
 }
 
 // ---------------------------------------------------------------------------

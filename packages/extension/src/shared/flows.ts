@@ -10,6 +10,7 @@
  */
 
 import {
+  COURSE_SYLLABUS_PATH,
   COURSETABLE_GET_PATH,
   COURSETABLE_INDEX_PATH,
   COURSETABLE_PATH,
@@ -112,7 +113,18 @@ export function extractScheduleIds(html: string): string | null {
 // Exam flow
 // ---------------------------------------------------------------------------
 
-export function examSteps(semesterId: string): {
+/**
+ * Build the fetch-exam steps for a semester.
+ *
+ * The EAMS exam page (`semesterForm`) submits BOTH `project.id` (UG=1 / GS=22)
+ * and `semester.id`. Omitting `project.id` makes EAMS ignore the semester switch
+ * and return the currently-active batch, so the exam list came back for the
+ * wrong semester. We now send both, matching the form.
+ */
+export function examSteps(
+  semesterId: string,
+  isGs: boolean,
+): {
   batchStep: Step;
   tableStep: (batchId: string) => Step;
 } {
@@ -120,7 +132,7 @@ export function examSteps(semesterId: string): {
     batchStep: {
       method: "POST",
       url: `${EAMS_BASE}${EXAM_POST_PATH}`,
-      formData: { "semester.id": semesterId },
+      formData: { "project.id": projectIdFor(isGs), "semester.id": semesterId },
     },
     tableStep: (batchId: string) => ({
       method: "GET",
@@ -154,6 +166,23 @@ export function scoreSteps(isGs: boolean): { warmupStep: Step; historyStep: Step
       url: `${EAMS_BASE}${SCORE_HISTORY_PATH}`,
       params: { projectType: "MAJOR" },
     },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Syllabus flow (public course library) — same endpoint as tju-python
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the syllabus step. Like courseTable, tju-python sends `lesson.id` via
+ * `params=` (query string), so we put it in the query string too. Returns raw
+ * HTML; the page converts it to Markdown (turndown needs a DOM).
+ */
+export function syllabusStep(lessionId: string): Step {
+  return {
+    method: "POST",
+    url: `${EAMS_BASE}${COURSE_SYLLABUS_PATH}`,
+    params: { "lesson.id": lessionId },
   };
 }
 

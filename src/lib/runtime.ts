@@ -10,13 +10,22 @@
 
 /**
  * Whether real-time TJU data fetching (spawning Python via tju_cli.py) is
- * available. Returns false on cloud platforms (Vercel, Netlify) or when
- * TJU_LIVE=0 is set for local demo-mode testing.
+ * available — i.e. we are running in local development with a Python venv.
+ *
+ * IMPORTANT: platform vars like `NETLIFY` / `VERCEL` are only set at *build*
+ * time, not inside the serverless function runtime, so checking them at request
+ * time wrongly returned true on deployed sites and tried to spawn Python
+ * (`spawn .venv/bin/python ENOENT`). We instead key off NODE_ENV, which is
+ * "production" for any deployed build and "development" only under `next dev`.
+ *
+ *   TJU_LIVE=1 → force on   (e.g. `pnpm start` locally with a venv)
+ *   TJU_LIVE=0 → force off
+ *   otherwise  → on only in local development
  */
 export function isLiveFetchAvailable(): boolean {
+  if (process.env.TJU_LIVE === "1") return true;
   if (process.env.TJU_LIVE === "0") return false;
-  if (process.env.VERCEL || process.env.NETLIFY) return false;
-  return true;
+  return process.env.NODE_ENV !== "production";
 }
 
 /** True when running in read-only demo mode (no live campus network). */

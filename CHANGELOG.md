@@ -6,6 +6,34 @@ browser extension are documented here. Both ship together under a single version
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.4 - 2026-06-16
+
+### tju.app (web dashboard)
+
+#### Fixed
+- Course syllabus showed "spawn .venv/bin/python ENOENT" on the deployed site.
+  Root cause: `isLiveFetchAvailable()` keyed off `NETLIFY` / `VERCEL` env vars,
+  which are only set at *build* time — at request time they were undefined, so
+  the server wrongly tried to spawn Python. It now keys off `NODE_ENV`
+  (production = deployed = no Python). This was also the original cause of the
+  first schedule ENOENT.
+- Course syllabus now falls back to the browser extension when it isn't in the
+  committed cache, so syllabi load on the deployed site (converted to Markdown
+  in-page) instead of failing.
+
+### Browser Extension — TJU App Bridge
+
+#### Fixed
+- Exam returned the wrong semester's data. The EAMS `semesterForm` submits both
+  `project.id` (UG=1 / GS=22) and `semester.id`; omitting `project.id` made EAMS
+  ignore the semester switch and return the active batch. We now send both, and
+  read the batch id from the page's `bg.Go(...examBatch.id=N...)` content loader
+  (which reflects the selected semester).
+
+#### Added
+- Syllabus fetching (`tju:fetchSyllabus`): returns raw HTML for the page to
+  convert to Markdown (turndown needs a DOM, unavailable in the service worker).
+
 ## v0.1.3 - 2026-06-16
 
 ### Browser Extension — TJU App Bridge

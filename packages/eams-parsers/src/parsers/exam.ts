@@ -13,10 +13,16 @@ export class ParseError extends Error {
 }
 
 /**
- * Extract the examBatch.id from the POST response HTML.
- * Needed as the first step of the two-request exam flow.
+ * Extract the examBatch.id from the stdExamTable POST response HTML.
+ *
+ * The page loads the selected semester's exam table via a script call like:
+ *   bg.Go('/eams/stdExamTable!examTable.action?examBatch.id=322','contentDiv')
+ * We prefer that bg.Go batch id (it reflects the currently-selected semester),
+ * and fall back to the first generic examBatch.id occurrence.
  */
 export function parseExamBatchId(html: string): string {
+  const go = /!examTable\.action\?examBatch\.id=(\d+)/.exec(html);
+  if (go) return go[1] ?? "";
   const m = /examBatch\.id=(\d+)/.exec(html);
   if (!m) throw new ParseError("Cannot find examBatch.id in response");
   return m[1] ?? "";

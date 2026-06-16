@@ -13,7 +13,12 @@ import type { ExamEntry, GSScoreRecord, ScheduleEntry, UGScoreRecord } from "@tj
 // Requests (page → background)
 // ---------------------------------------------------------------------------
 
-export type RequestType = "tju:fetchSchedule" | "tju:fetchScore" | "tju:fetchExam" | "tju:ping";
+export type RequestType =
+  | "tju:fetchSchedule"
+  | "tju:fetchScore"
+  | "tju:fetchExam"
+  | "tju:fetchSyllabus"
+  | "tju:ping";
 
 export interface BaseRequest {
   type: RequestType;
@@ -46,11 +51,17 @@ export interface FetchExamRequest extends BaseRequest {
   semester: string; // EAMS semester ID
 }
 
+export interface FetchSyllabusRequest extends BaseRequest {
+  type: "tju:fetchSyllabus";
+  lessionId: string;
+}
+
 export type ExtensionRequest =
   | PingRequest
   | FetchScheduleRequest
   | FetchScoreRequest
-  | FetchExamRequest;
+  | FetchExamRequest
+  | FetchSyllabusRequest;
 
 // ---------------------------------------------------------------------------
 // Responses (background → page)
@@ -73,6 +84,8 @@ export type ExtensionResponse<T = unknown> = SuccessResponse<T> | ErrorResponse;
 export type ScheduleResponse = ExtensionResponse<ScheduleEntry[]>;
 export type ScoreResponse = ExtensionResponse<ScoreResult>;
 export type ExamResponse = ExtensionResponse<ExamEntry[]>;
+/** Raw syllabus HTML — converted to Markdown in the page (needs a DOM). */
+export type SyllabusResponse = ExtensionResponse<{ html: string }>;
 export type PingResponse = ExtensionResponse<{ version: string }>;
 
 // ---------------------------------------------------------------------------

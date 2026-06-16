@@ -1,5 +1,6 @@
 "use client";
 
+import { parseSyllabus } from "@tju-app/eams-parsers";
 import { BookText, Building2, Clock, MapPin, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -7,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchSyllabusHtml, isExtensionAvailable } from "@/lib/extension-bridge";
 import type { TjuLibCourse } from "@/lib/tju/types";
 import { arrangeLabel } from "./course-card";
 import { FavoriteButton } from "./favorite-button";
@@ -32,19 +34,38 @@ export function CourseDetailDialog({ course, semester, open, onOpenChange }: Pro
     setSyllabus(null);
     setError(null);
     setLoading(true);
-    fetch(`/api/courses/syllabus?lessionId=${lessionId}`)
-      .then(async (res) => {
+
+    async function load(id: string): Promise<void> {
+      // 1) Try the committed cache (works on any deployment, no extension).
+      try {
+        const res = await fetch(`/api/courses/syllabus?lessionId=${id}`);
         const body = await res.json();
         if (cancelled) return;
-        if (!res.ok) setError(body.error ?? "大纲获取失败");
-        else setSyllabus(body.data.syllabus as string);
-      })
+        if (res.ok) {
+          setSyllabus(body.data.syllabus as string);
+          return;
+        }
+      } catch {
+        // fall through to the extension
+      }
+      // 2) Cache miss / demo mode → fetch live via the browser extension.
+      if (await isExtensionAvailable()) {
+        const html = await fetchSyllabusHtml(id);
+        if (cancelled) return;
+        setSyllabus(parseSyllabus(html));
+        return;
+      }
+      if (!cancelled) setError("该课程大纲暂未缓存，安装并登录扩展后可在线获取。");
+    }
+
+    load(lessionId)
       .catch(() => {
-        if (!cancelled) setError("网络错误");
+        if (!cancelled) setError("大纲获取失败");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };

@@ -26,6 +26,7 @@ import {
   parseIdentity,
   scheduleSteps,
   scoreSteps,
+  syllabusStep,
 } from "../shared/flows.js";
 
 import type {
@@ -34,6 +35,7 @@ import type {
   FetchExamRequest,
   FetchScheduleRequest,
   FetchScoreRequest,
+  FetchSyllabusRequest,
 } from "../shared/messages.js";
 
 // ---------------------------------------------------------------------------
@@ -126,7 +128,8 @@ async function handleFetchSchedule(req: FetchScheduleRequest): Promise<Extension
 }
 
 async function handleFetchExam(req: FetchExamRequest): Promise<ExtensionResponse> {
-  const flows = examSteps(req.semester);
+  const { isGs } = await getIdentity();
+  const flows = examSteps(req.semester, isGs);
 
   const batchHtml = await eamsFetch(flows.batchStep);
   const batchId = parseExamBatchId(batchHtml);
@@ -153,6 +156,13 @@ async function handleFetchScore(req: FetchScoreRequest): Promise<ExtensionRespon
   };
 }
 
+async function handleFetchSyllabus(req: FetchSyllabusRequest): Promise<ExtensionResponse> {
+  // Return raw HTML; the page converts it to Markdown (turndown needs a DOM,
+  // which a service worker does not have).
+  const html = await eamsFetch(syllabusStep(req.lessionId));
+  return { requestId: req.requestId, ok: true, data: { html } };
+}
+
 // Minimal base type for unknown request shapes in the fallback branch
 interface BaseRequest {
   requestId: string;
@@ -168,7 +178,7 @@ chrome.runtime.onMessage.addListener(
     const req = message as ExtensionRequest;
 
     if (req.type === "tju:ping") {
-      sendResponse({ requestId: req.requestId, ok: true, data: { version: "0.1.3" } });
+      sendResponse({ requestId: req.requestId, ok: true, data: { version: "0.1.4" } });
       return false;
     }
 
@@ -182,6 +192,8 @@ chrome.runtime.onMessage.addListener(
           response = await handleFetchExam(req);
         } else if (req.type === "tju:fetchScore") {
           response = await handleFetchScore(req);
+        } else if (req.type === "tju:fetchSyllabus") {
+          response = await handleFetchSyllabus(req);
         } else {
           response = {
             requestId: (req as BaseRequest).requestId,
