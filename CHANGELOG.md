@@ -6,6 +6,41 @@ browser extension are documented here. Both ship together under a single version
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.2 - 2026-06-16
+
+Fixes graduate-account support across schedule and grades, where the flows had
+diverged from the upstream Python client.
+
+### Browser Extension — TJU App Bridge
+
+#### Fixed
+- Schedule fetch failed with "Cannot find TaskActivity section" for graduate
+  accounts: the flow hardcoded the undergraduate `projectId=1` and read the
+  course IDs from the wrong page. It now auto-detects undergraduate vs graduate
+  (via `dataQuery.action`), uses `projectId=22` for graduates, performs the
+  undergraduate-only warm-up request, and reads IDs from `!innerIndex.action` —
+  matching tju-python.
+- Grades fetch for graduate accounts returned `HTTP 500` from `person!search`
+  because it sent an empty `semesterId`. Both undergraduate and graduate grades
+  now use the all-history endpoint (`person!historyCourseGrade`) after the
+  required warm-up request, as in tju-python.
+- Grades no longer require a manual 本科/研究生 toggle (which defaulted to
+  undergraduate and showed wrong columns for graduates). The student type is
+  detected automatically and shown as a label.
+- "Extension context invalidated" error after the extension was updated while a
+  page stayed open: the content script now guards `chrome.runtime` calls and
+  asks the user to refresh the page instead of throwing.
+
+#### Changed
+- Redesigned the popup to match the tju.app visual style (dark, Beiyang Blue
+  accent, status indicator).
+
+### tju.app (web dashboard)
+
+#### Changed
+- Grades page auto-detects undergraduate vs graduate from the extension instead
+  of a manual toggle.
+
 ## v0.1.1 - 2026-06-16
 
 ### Browser Extension — TJU App Bridge

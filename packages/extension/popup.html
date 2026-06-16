@@ -4,58 +4,134 @@
     <meta charset="utf-8" />
     <title>TJU App Bridge</title>
     <style>
+      /* Tokens mirror tju.app globals.css (dark-first · Beiyang Blue accent). */
+      :root {
+        --bg-base: #0a0a0b;
+        --bg-subtle: #18181b;
+        --border: #27272a;
+        --border-strong: #3f3f46;
+        --text-high: #f4f4f5;
+        --text-mid: #a1a1aa;
+        --text-low: #52525b;
+        --accent: #3b82f6;
+        --accent-hover: #60a5fa;
+        --success: #22c55e;
+        --danger: #ef4444;
+        --radius-md: 10px;
+        --radius-sm: 6px;
+      }
+      * {
+        box-sizing: border-box;
+      }
       body {
-        font-family: system-ui, sans-serif;
-        width: 260px;
-        padding: 16px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        width: 280px;
         margin: 0;
-        background: #0f172a;
-        color: #f1f5f9;
+        padding: 16px;
+        background: var(--bg-base);
+        color: var(--text-high);
+        -webkit-font-smoothing: antialiased;
       }
-      h1 {
-        font-size: 14px;
-        font-weight: 600;
-        margin: 0 0 12px;
-        color: #38bdf8;
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
       }
-      #status {
+      .brand .mark {
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--accent), #1d4ed8);
+        color: #fff;
         font-size: 13px;
-        padding: 8px 10px;
-        border-radius: 6px;
+        font-weight: 700;
+      }
+      .brand .title {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .brand .title span {
+        color: var(--text-low);
+        font-weight: 500;
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--bg-subtle);
         margin-bottom: 12px;
+        color: var(--text-mid);
       }
-      #status.ok {
-        background: #052e16;
-        color: #86efac;
+      .status .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 9999px;
+        background: var(--text-low);
+        flex: none;
       }
-      #status.error {
-        background: #450a0a;
-        color: #fca5a5;
+      .status.ok {
+        color: var(--text-high);
+      }
+      .status.ok .dot {
+        background: var(--success);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 22%, transparent);
+      }
+      .status.error .dot {
+        background: var(--danger);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent);
       }
       button {
         width: 100%;
-        padding: 8px;
+        padding: 9px 12px;
         border: none;
-        border-radius: 6px;
-        background: #0ea5e9;
+        border-radius: var(--radius-md);
+        background: var(--accent);
         color: #fff;
         font-size: 13px;
+        font-weight: 500;
         cursor: pointer;
+        transition:
+          background 0.15s ease,
+          opacity 0.15s ease;
       }
       button:disabled {
-        background: #334155;
-        color: #64748b;
+        background: var(--bg-subtle);
+        border: 1px solid var(--border);
+        color: var(--text-low);
         cursor: default;
       }
       button:not(:disabled):hover {
-        background: #38bdf8;
+        background: var(--accent-hover);
+      }
+      .hint {
+        margin: 12px 0 0;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--text-low);
+        text-align: center;
       }
     </style>
   </head>
   <body>
-    <h1>TJU App Bridge</h1>
-    <div id="status" class="error">检测中…</div>
+    <div class="brand">
+      <div class="mark">天</div>
+      <div class="title">TJU App <span>Bridge</span></div>
+    </div>
+    <div id="status" class="status">
+      <span class="dot"></span>
+      <span id="status-text">检测中…</span>
+    </div>
     <button id="refresh" type="button" disabled>刷新我的数据</button>
+    <p class="hint">在 tju.app 的课表 / 成绩 / 考试页面使用</p>
     <script src="dist/popup.js"></script>
   </body>
 </html>

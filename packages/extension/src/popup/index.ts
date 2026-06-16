@@ -39,13 +39,12 @@ function isAppUrl(url: string): boolean {
 
 document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.getElementById("status");
+  const statusTextEl = document.getElementById("status-text");
   const refreshBtn = document.getElementById("refresh") as HTMLButtonElement | null;
 
   function setStatus(text: string, ok: boolean): void {
-    if (statusEl) {
-      statusEl.textContent = text;
-      statusEl.className = ok ? "ok" : "error";
-    }
+    if (statusTextEl) statusTextEl.textContent = text;
+    if (statusEl) statusEl.className = `status ${ok ? "ok" : "error"}`;
   }
 
   // Check whether the active tab is a TJU App page.

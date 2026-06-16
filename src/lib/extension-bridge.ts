@@ -46,6 +46,14 @@ interface WindowMessage {
   payload: ExtensionRequest | ExtensionResponse;
 }
 
+export type StudentType = "undergraduate" | "graduate";
+
+/** Score result with the student type auto-detected by the extension. */
+export interface ScoreResult {
+  studentType: StudentType;
+  records: UGScoreRecord[] | GSScoreRecord[];
+}
+
 // ---------------------------------------------------------------------------
 // Core: post a request and await the matching response
 // ---------------------------------------------------------------------------
@@ -117,21 +125,14 @@ export async function fetchSchedule(semesterId: string): Promise<ScheduleEntry[]
   });
 }
 
-/** Fetch undergraduate academic score history. */
-export async function fetchUGScore(): Promise<UGScoreRecord[]> {
-  return sendRequest<UGScoreRecord[]>({
+/**
+ * Fetch academic score history. The extension auto-detects whether the account
+ * is undergraduate or graduate and returns the matching records + studentType.
+ */
+export async function fetchScore(): Promise<ScoreResult> {
+  return sendRequest<ScoreResult>({
     type: "tju:fetchScore",
     requestId: nextId(),
-    level: "UG",
-  });
-}
-
-/** Fetch graduate academic score history. */
-export async function fetchGSScore(): Promise<GSScoreRecord[]> {
-  return sendRequest<GSScoreRecord[]>({
-    type: "tju:fetchScore",
-    requestId: nextId(),
-    level: "GS",
   });
 }
 
@@ -151,8 +152,7 @@ export async function fetchExam(semesterId: string): Promise<ExamEntry[]> {
 
 const STORAGE_KEYS = {
   schedule: "tju:schedule",
-  scoreUG: "tju:score:ug",
-  scoreGS: "tju:score:gs",
+  score: "tju:score",
   exam: "tju:exam",
 } as const;
 
@@ -165,17 +165,13 @@ export function loadScheduleCache(semesterId: string): ScheduleEntry[] | null {
   return raw ? (JSON.parse(raw) as ScheduleEntry[]) : null;
 }
 
-export function saveScoreCache(level: "UG" | "GS", data: UGScoreRecord[] | GSScoreRecord[]): void {
-  const key = level === "UG" ? STORAGE_KEYS.scoreUG : STORAGE_KEYS.scoreGS;
-  sessionStorage.setItem(key, JSON.stringify(data));
+export function saveScoreCache(data: ScoreResult): void {
+  sessionStorage.setItem(STORAGE_KEYS.score, JSON.stringify(data));
 }
 
-export function loadScoreCache(level: "UG"): UGScoreRecord[] | null;
-export function loadScoreCache(level: "GS"): GSScoreRecord[] | null;
-export function loadScoreCache(level: "UG" | "GS"): UGScoreRecord[] | GSScoreRecord[] | null {
-  const key = level === "UG" ? STORAGE_KEYS.scoreUG : STORAGE_KEYS.scoreGS;
-  const raw = sessionStorage.getItem(key);
-  return raw ? (JSON.parse(raw) as UGScoreRecord[] | GSScoreRecord[]) : null;
+export function loadScoreCache(): ScoreResult | null {
+  const raw = sessionStorage.getItem(STORAGE_KEYS.score);
+  return raw ? (JSON.parse(raw) as ScoreResult) : null;
 }
 
 export function saveExamCache(semesterId: string, data: ExamEntry[]): void {

@@ -5,17 +5,19 @@
  * dataset, without performing any actual fetching.  The background service
  * worker wires these descriptors to the actual fetch() calls.
  *
- * Ported from tju-python/src/tju/client/api/*.py
+ * Ported from tju-python/src/tju/client/api/*.py — including the undergraduate
+ * vs graduate branching (projectId 1 vs 22) that the earlier version omitted.
  */
 
 import {
+  COURSETABLE_GET_PATH,
   COURSETABLE_INDEX_PATH,
   COURSETABLE_PATH,
   EAMS_BASE,
   EXAM_PATH,
   EXAM_POST_PATH,
+  ID_PATH,
   SCORE_HISTORY_PATH,
-  SCORE_SEARCH_PATH,
   SEMESTER,
 } from "@tju-app/eams-parsers";
 
@@ -28,28 +30,60 @@ export interface Step {
   formData?: Record<string, string>;
 }
 
+/** undergraduate=1 (major), graduate=22. (minor=2 is not exposed here.) */
+function projectIdFor(isGs: boolean): string {
+  return isGs ? "22" : "1";
+}
+
+// ---------------------------------------------------------------------------
+// Identity (student type / minor) — mirrors Client.stu_type in tju-python
+// ---------------------------------------------------------------------------
+
+/** POST dataQuery.action and inspect the HTML for 研究 (graduate) / 辅修 (minor). */
+export function identityStep(): Step {
+  return {
+    method: "POST",
+    url: `${EAMS_BASE}${ID_PATH}`,
+    params: { entityId: "" },
+  };
+}
+
+export interface Identity {
+  isGs: boolean;
+  hasMinor: boolean;
+}
+
+export function parseIdentity(html: string): Identity {
+  return { isGs: html.includes("研究"), hasMinor: html.includes("辅修") };
+}
+
 // ---------------------------------------------------------------------------
 // Schedule flow
 // ---------------------------------------------------------------------------
 
 /**
- * Build the fetch-schedule step list for a given semester.
+ * Build the fetch-schedule steps for a semester.
  *
- * Step 1: GET courseTableForStd?projectId=1 (UG) — extract "ids","<classIds>"
- * Step 2: POST courseTable with {ignoreHead:1, setting.kind:std, semester.id, ids}
- *
- * The caller must execute step 1, extract `ids` from the response HTML, then
- * execute step 2 and parse the returned HTML with parseSchedule().
+ * UG: GET !index (warm-up) → GET !innerIndex → extract ids → POST !courseTable.
+ * GS: (no warm-up) GET !innerIndex → extract ids → POST !courseTable.
  */
-export function scheduleSteps(semesterId: string): {
-  indexStep: Step;
+export function scheduleSteps(
+  semesterId: string,
+  isGs: boolean,
+): {
+  warmupStep: Step | null;
+  idsStep: Step;
   tableStep: (ids: string) => Step;
 } {
+  const projectId = projectIdFor(isGs);
   return {
-    indexStep: {
+    warmupStep: isGs
+      ? null
+      : { method: "GET", url: `${EAMS_BASE}${COURSETABLE_INDEX_PATH}`, params: { projectId } },
+    idsStep: {
       method: "GET",
-      url: `${EAMS_BASE}${COURSETABLE_INDEX_PATH}`,
-      params: { projectId: "1" },
+      url: `${EAMS_BASE}${COURSETABLE_GET_PATH}`,
+      params: { projectId },
     },
     tableStep: (ids: string) => ({
       method: "POST",
@@ -57,8 +91,9 @@ export function scheduleSteps(semesterId: string): {
       formData: {
         ignoreHead: "1",
         "setting.kind": "std",
+        startWeek: "",
         "semester.id": semesterId,
-        ids: ids,
+        ids,
       },
     }),
   };
@@ -74,12 +109,6 @@ export function extractScheduleIds(html: string): string | null {
 // Exam flow
 // ---------------------------------------------------------------------------
 
-/**
- * Build the fetch-exam step list for a given semester.
- *
- * Step 1: POST stdExamTable with {semester.id} — extract batch ID
- * Step 2: GET !examTable with {examBatch.id}
- */
 export function examSteps(semesterId: string): {
   batchStep: Step;
   tableStep: (batchId: string) => Step;
@@ -99,30 +128,29 @@ export function examSteps(semesterId: string): {
 }
 
 // ---------------------------------------------------------------------------
-// Score flow
+// Score flow (all-history) — same endpoint for UG and GS
 // ---------------------------------------------------------------------------
 
 /**
- * Build the fetch-score step for UG (undergraduate).
- * Single GET to historyCourseGrade with projectType=MAJOR.
+ * Build the all-history score steps.
+ *
+ * Mirrors tju-python score() with semester=None: a warm-up GET to the course
+ * table index (with the right projectId) followed by GET !historyCourseGrade.
+ * The same endpoint serves both UG and GS — the caller picks the parser.
  */
-export function ugScoreStep(): Step {
+export function scoreSteps(isGs: boolean): { warmupStep: Step; historyStep: Step } {
+  const projectId = projectIdFor(isGs);
   return {
-    method: "GET",
-    url: `${EAMS_BASE}${SCORE_HISTORY_PATH}`,
-    params: { projectType: "MAJOR" },
-  };
-}
-
-/**
- * Build the fetch-score step for GS (graduate).
- * GET !search with semesterId and projectType=MAJOR.
- */
-export function gsScoreStep(semesterId: string): Step {
-  return {
-    method: "GET",
-    url: `${EAMS_BASE}${SCORE_SEARCH_PATH}`,
-    params: { semesterId, projectType: "MAJOR" },
+    warmupStep: {
+      method: "GET",
+      url: `${EAMS_BASE}${COURSETABLE_INDEX_PATH}`,
+      params: { projectId },
+    },
+    historyStep: {
+      method: "GET",
+      url: `${EAMS_BASE}${SCORE_HISTORY_PATH}`,
+      params: { projectType: "MAJOR" },
+    },
   };
 }
 

@@ -32,7 +32,13 @@ export interface FetchScheduleRequest extends BaseRequest {
 
 export interface FetchScoreRequest extends BaseRequest {
   type: "tju:fetchScore";
-  level: "UG" | "GS"; // undergraduate or graduate
+  // Student type is auto-detected by the background worker; no level needed.
+}
+
+/** Score result with the auto-detected student type so the UI can render it. */
+export interface ScoreResult {
+  studentType: "undergraduate" | "graduate";
+  records: UGScoreRecord[] | GSScoreRecord[];
 }
 
 export interface FetchExamRequest extends BaseRequest {
@@ -65,7 +71,7 @@ export interface ErrorResponse {
 export type ExtensionResponse<T = unknown> = SuccessResponse<T> | ErrorResponse;
 
 export type ScheduleResponse = ExtensionResponse<ScheduleEntry[]>;
-export type ScoreResponse = ExtensionResponse<UGScoreRecord[] | GSScoreRecord[]>;
+export type ScoreResponse = ExtensionResponse<ScoreResult>;
 export type ExamResponse = ExtensionResponse<ExamEntry[]>;
 export type PingResponse = ExtensionResponse<{ version: string }>;
 

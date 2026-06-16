@@ -3,20 +3,19 @@
 import type { GSScoreRecord, UGScoreRecord } from "@tju-app/eams-parsers";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  fetchGSScore,
-  fetchUGScore,
+  fetchScore,
   isExtensionAvailable,
   loadScoreCache,
+  type ScoreResult,
   saveScoreCache,
 } from "@/lib/extension-bridge";
 import type { TjuScoreRecord } from "@/lib/tju/types";
 import { cn } from "@/lib/utils";
-
-type Level = "UG" | "GS";
 
 interface ClientScoreData {
   studentType: "undergraduate" | "graduate";
@@ -52,8 +51,16 @@ function mapGS(r: GSScoreRecord): TjuScoreRecord {
   };
 }
 
+/** Convert an extension ScoreResult into the view's shape, mapping by type. */
+function toClient(result: ScoreResult, cachedAt: string): ClientScoreData {
+  const scores =
+    result.studentType === "graduate"
+      ? (result.records as GSScoreRecord[]).map(mapGS)
+      : (result.records as UGScoreRecord[]).map(mapUG);
+  return { studentType: result.studentType, scores, cachedAt };
+}
+
 export function GradesView() {
-  const [level, setLevel] = useState<Level>("UG");
   const [data, setData] = useState<ClientScoreData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,18 +68,12 @@ export function GradesView() {
 
   // Hydrate from sessionStorage + detect the extension on mount.
   useEffect(() => {
-    const ug = loadScoreCache("UG");
-    const gs = loadScoreCache("GS");
-    if (ug) {
-      setData({ studentType: "undergraduate", scores: ug.map(mapUG), cachedAt: "" });
-    } else if (gs) {
-      setLevel("GS");
-      setData({ studentType: "graduate", scores: gs.map(mapGS), cachedAt: "" });
-    }
+    const cached = loadScoreCache();
+    if (cached) setData(toClient(cached, ""));
     isExtensionAvailable().then(setExtensionReady);
   }, []);
 
-  const refresh = useCallback(async (lvl: Level) => {
+  const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -82,23 +83,9 @@ export function GradesView() {
         setError("未检测到 tju.app 浏览器扩展，请先安装扩展并登录教务系统。");
         return;
       }
-      if (lvl === "UG") {
-        const records = await fetchUGScore();
-        saveScoreCache("UG", records);
-        setData({
-          studentType: "undergraduate",
-          scores: records.map(mapUG),
-          cachedAt: new Date().toISOString(),
-        });
-      } else {
-        const records = await fetchGSScore();
-        saveScoreCache("GS", records);
-        setData({
-          studentType: "graduate",
-          scores: records.map(mapGS),
-          cachedAt: new Date().toISOString(),
-        });
-      }
+      const result = await fetchScore();
+      saveScoreCache(result);
+      setData(toClient(result, new Date().toISOString()));
     } catch (e) {
       setError(e instanceof Error ? e.message : "获取失败，请重试。");
     } finally {
@@ -108,38 +95,21 @@ export function GradesView() {
 
   // Let the extension popup's "刷新" button trigger a refresh on this page.
   useEffect(() => {
-    const handler = () => void refresh(level);
+    const handler = () => void refresh();
     window.addEventListener("tju-extension:refresh", handler);
     return () => window.removeEventListener("tju-extension:refresh", handler);
-  }, [refresh, level]);
-
-  function handleLevelChange(lvl: Level) {
-    setLevel(lvl);
-    setData(null);
-  }
+  }, [refresh]);
 
   return (
     <div className="flex flex-col gap-5">
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-[var(--radius-md)] border border-[var(--color-border)] p-0.5">
-          {(["UG", "GS"] as const).map((lvl) => (
-            <button
-              key={lvl}
-              type="button"
-              onClick={() => handleLevelChange(lvl)}
-              className={cn(
-                "rounded-[calc(var(--radius-md)-2px)] px-3 py-1 text-[13px] transition-colors",
-                level === lvl
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "text-[var(--color-text-mid)] hover:text-[var(--color-text-high)]",
-              )}
-            >
-              {lvl === "UG" ? "本科" : "研究生"}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {data && (
+            <Badge variant="secondary" className="text-[12px]">
+              {data.studentType === "graduate" ? "研究生" : "本科生"}
+            </Badge>
+          )}
           {data?.cachedAt && (
             <span className="text-[12px] text-[var(--color-text-low)]">
               更新于{" "}
@@ -151,11 +121,11 @@ export function GradesView() {
               })}
             </span>
           )}
-          <Button variant="outline" size="sm" onClick={() => refresh(level)} disabled={loading}>
-            <RefreshCw className={cn("size-4", loading && "animate-spin")} />
-            {loading ? "获取中…" : "从教务刷新"}
-          </Button>
         </div>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+          <RefreshCw className={cn("size-4", loading && "animate-spin")} />
+          {loading ? "获取中…" : "从教务刷新"}
+        </Button>
       </div>
 
       {error && (
@@ -167,7 +137,7 @@ export function GradesView() {
       {loading ? (
         <SkeletonTable />
       ) : !data ? (
-        <EmptyState extensionReady={extensionReady} onRefresh={() => refresh(level)} />
+        <EmptyState extensionReady={extensionReady} onRefresh={refresh} />
       ) : (
         <ScoreTable scores={data.scores} studentType={data.studentType} />
       )}

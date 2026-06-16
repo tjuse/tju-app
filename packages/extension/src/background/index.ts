@@ -21,9 +21,11 @@ import {
 import {
   examSteps,
   extractScheduleIds,
-  gsScoreStep,
+  type Identity,
+  identityStep,
+  parseIdentity,
   scheduleSteps,
-  ugScoreStep,
+  scoreSteps,
 } from "../shared/flows.js";
 
 import type {
@@ -89,16 +91,33 @@ async function eamsFetch(opts: FetchOptions): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
+// Identity (undergraduate vs graduate) — detected once, then cached
+// ---------------------------------------------------------------------------
+
+let identityCache: Identity | null = null;
+
+async function getIdentity(): Promise<Identity> {
+  if (identityCache) return identityCache;
+  const html = await eamsFetch(identityStep());
+  identityCache = parseIdentity(html);
+  return identityCache;
+}
+
+// ---------------------------------------------------------------------------
 // Data-fetch handlers
 // ---------------------------------------------------------------------------
 
 async function handleFetchSchedule(req: FetchScheduleRequest): Promise<ExtensionResponse> {
-  const flows = scheduleSteps(req.semester);
+  const { isGs } = await getIdentity();
+  const flows = scheduleSteps(req.semester, isGs);
 
-  const indexHtml = await eamsFetch(flows.indexStep);
+  // UG needs a warm-up GET to the index page first; GS skips it.
+  if (flows.warmupStep) await eamsFetch(flows.warmupStep);
+
+  const indexHtml = await eamsFetch(flows.idsStep);
   const ids = extractScheduleIds(indexHtml);
   if (!ids) {
-    throw new Error("Could not extract course IDs from schedule index page.");
+    throw new Error("无法从教务系统获取课表标识（ids），请确认已登录且学期正确。");
   }
 
   const tableHtml = await eamsFetch(flows.tableStep(ids));
@@ -118,16 +137,20 @@ async function handleFetchExam(req: FetchExamRequest): Promise<ExtensionResponse
 }
 
 async function handleFetchScore(req: FetchScoreRequest): Promise<ExtensionResponse> {
-  if (req.level === "UG") {
-    const html = await eamsFetch(ugScoreStep());
-    const data = parseUGScore(html);
-    return { requestId: req.requestId, ok: true, data };
-  }
+  const { isGs } = await getIdentity();
+  const flows = scoreSteps(isGs);
 
-  // GS score requires a semesterId — for now fetch first available by omitting it
-  const html = await eamsFetch(gsScoreStep(""));
-  const data = parseGSScore(html);
-  return { requestId: req.requestId, ok: true, data };
+  // Warm-up GET to the course-table index sets up the session for the history
+  // endpoint (matches tju-python). Then fetch the all-history grade page.
+  await eamsFetch(flows.warmupStep);
+  const html = await eamsFetch(flows.historyStep);
+
+  const records = isGs ? parseGSScore(html) : parseUGScore(html);
+  return {
+    requestId: req.requestId,
+    ok: true,
+    data: { studentType: isGs ? "graduate" : "undergraduate", records },
+  };
 }
 
 // Minimal base type for unknown request shapes in the fallback branch
@@ -145,7 +168,7 @@ chrome.runtime.onMessage.addListener(
     const req = message as ExtensionRequest;
 
     if (req.type === "tju:ping") {
-      sendResponse({ requestId: req.requestId, ok: true, data: { version: "0.1.1" } });
+      sendResponse({ requestId: req.requestId, ok: true, data: { version: "0.1.2" } });
       return false;
     }
 
