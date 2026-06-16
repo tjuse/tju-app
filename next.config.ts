@@ -3,8 +3,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // The personal-data pages import runtime values + types from the workspace
+  // parser package (raw TS source), so Next must transpile it.
+  transpilePackages: ["@tju-app/eams-parsers"],
   experimental: {
     optimizePackageImports: ["lucide-react"],
+  },
+  // eams-parsers uses NodeNext-style ".js" import specifiers that point at ".ts"
+  // source files. Webpack needs to be told to resolve ".js" → ".ts".
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      ".js": [".ts", ".tsx", ".js"],
+      ".mjs": [".mts", ".mjs"],
+    };
+    return config;
   },
   // Bundle public course cache files into the serverless function so they are
   // readable via fs.readFile(process.cwd()/data/cache/...) on Vercel.

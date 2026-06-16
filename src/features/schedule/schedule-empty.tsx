@@ -4,11 +4,18 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useRefreshSchedule } from "./use-refresh-schedule";
 
-/** 无课表缓存时的空态：引导从教务抓取，或后续手动/导入。 */
-export function ScheduleEmpty() {
-  const { refreshing, error, refresh } = useRefreshSchedule();
+interface Props {
+  onRefresh: () => void;
+  refreshing: boolean;
+  error: string | null;
+  /** null = still detecting, true = installed, false = not installed. */
+  extensionReady: boolean | null;
+}
+
+/** 无课表时的空态：引导安装扩展或从教务抓取。 */
+export function ScheduleEmpty({ onRefresh, refreshing, error, extensionReady }: Props) {
+  const notInstalled = extensionReady === false;
 
   return (
     <>
@@ -24,12 +31,13 @@ export function ScheduleEmpty() {
         <div>
           <p className="font-medium text-[var(--color-text-high)]">还没有课表</p>
           <p className="mt-1 max-w-sm text-[13px] text-[var(--color-text-mid)] text-pretty">
-            点击下方按钮从教务系统（EAMS）抓取你的课表。需配置 TJU_USER/TJU_PASS 并连接校园网或
-            VPN。
+            {notInstalled
+              ? "需要安装 tju.app 浏览器扩展，并在浏览器中登录教务系统（校园网 / VPN），即可在此显示你的课表。"
+              : "点击下方按钮，通过浏览器扩展从教务系统（EAMS）抓取你的课表。需已登录教务系统。"}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={refresh} disabled={refreshing}>
+          <Button onClick={onRefresh} disabled={refreshing}>
             <Download className={cn("size-4", refreshing && "animate-pulse")} />
             {refreshing ? "抓取中…" : "从教务抓取课表"}
           </Button>

@@ -1,40 +1,63 @@
 "use client";
 
+import { SEMESTER } from "@tju-app/eams-parsers";
 import { Calendar, Clock, MapPin, RefreshCw } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { SemesterOption } from "@/features/courses/semesters";
-import type { ExamWithMeta } from "@/lib/tju/exam-store";
+import {
+  fetchExam,
+  isExtensionAvailable,
+  loadExamCache,
+  saveExamCache,
+} from "@/lib/extension-bridge";
 import type { TjuExamEntry } from "@/lib/tju/types";
 import { cn } from "@/lib/utils";
 
 interface Props {
   semesters: SemesterOption[];
   initialSemester: string;
-  initial: ExamWithMeta | null;
-  demoMode: boolean;
 }
 
-export function ExamsView({ semesters, initialSemester, initial, demoMode }: Props) {
+interface ClientExamData {
+  exams: TjuExamEntry[];
+  cachedAt: string;
+}
+
+export function ExamsView({ semesters, initialSemester }: Props) {
   const [semester, setSemester] = useState(initialSemester);
-  const [data, setData] = useState<ExamWithMeta | null>(initial);
+  const [data, setData] = useState<ClientExamData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [extensionReady, setExtensionReady] = useState<boolean | null>(null);
+
+  // Hydrate from sessionStorage + detect the extension when the semester changes.
+  useEffect(() => {
+    const cached = loadExamCache(semester);
+    setData(cached ? { exams: cached, cachedAt: "" } : null);
+    isExtensionAvailable().then(setExtensionReady);
+  }, [semester]);
 
   const refresh = useCallback(async (sem: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/exam?semester=${sem}&refresh=1`);
-      const body = await res.json();
-      if (!res.ok) setError(body.error ?? "获取失败");
-      else setData(body.data as ExamWithMeta);
-    } catch {
-      setError("网络错误，请重试");
+      const available = await isExtensionAvailable();
+      setExtensionReady(available);
+      if (!available) {
+        setError("未检测到 tju.app 浏览器扩展，请先安装扩展并登录教务系统。");
+        return;
+      }
+      const semesterId = SEMESTER[sem] ?? "";
+      const exams = await fetchExam(semesterId);
+      saveExamCache(sem, exams);
+      setData({ exams, cachedAt: new Date().toISOString() });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "获取失败，请重试。");
     } finally {
       setLoading(false);
     }
@@ -62,16 +85,10 @@ export function ExamsView({ semesters, initialSemester, initial, demoMode }: Pro
           ))}
         </Select>
 
-        {demoMode ? (
-          <Badge variant="secondary" className="text-[12px]">
-            演示模式 · 仅本地可刷新
-          </Badge>
-        ) : (
-          <Button variant="outline" size="sm" onClick={() => refresh(semester)} disabled={loading}>
-            <RefreshCw className={cn("size-4", loading && "animate-spin")} />
-            {loading ? "获取中…" : "从教务刷新"}
-          </Button>
-        )}
+        <Button variant="outline" size="sm" onClick={() => refresh(semester)} disabled={loading}>
+          <RefreshCw className={cn("size-4", loading && "animate-spin")} />
+          {loading ? "获取中…" : "从教务刷新"}
+        </Button>
 
         {data?.cachedAt && (
           <span className="text-[12px] text-[var(--color-text-low)]">
@@ -100,7 +117,7 @@ export function ExamsView({ semesters, initialSemester, initial, demoMode }: Pro
           ))}
         </div>
       ) : !data ? (
-        <EmptyState demoMode={demoMode} onRefresh={() => refresh(semester)} />
+        <EmptyState extensionReady={extensionReady} onRefresh={() => refresh(semester)} />
       ) : data.exams.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] py-16 text-center">
           <p className="text-[var(--color-text-mid)]">该学期暂无考试安排</p>
@@ -181,18 +198,25 @@ function ExamCard({ exam }: { exam: TjuExamEntry }) {
   );
 }
 
-function EmptyState({ demoMode, onRefresh }: { demoMode: boolean; onRefresh: () => void }) {
+function EmptyState({
+  extensionReady,
+  onRefresh,
+}: {
+  extensionReady: boolean | null;
+  onRefresh: () => void;
+}) {
+  const notInstalled = extensionReady === false;
   return (
     <div className="flex flex-col items-center gap-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] py-20 text-center">
       <p className="font-medium text-[var(--color-text-high)]">暂无考试数据</p>
-      {demoMode ? (
+      {notInstalled ? (
         <p className="max-w-sm text-[13px] text-[var(--color-text-mid)] text-pretty">
-          演示模式下无法获取个人考试安排。请在本地/校园网环境下配置凭据后刷新。
+          需要安装 tju.app 浏览器扩展，并在浏览器中登录教务系统后，才能查看个人考试安排。
         </p>
       ) : (
         <>
           <p className="text-[13px] text-[var(--color-text-mid)]">
-            点击「从教务刷新」获取考试安排（需校园网/VPN 及有效凭据）。
+            点击「从教务刷新」通过浏览器扩展获取考试安排（需已登录教务系统）。
           </p>
           <Button onClick={onRefresh}>从教务获取考试安排</Button>
         </>

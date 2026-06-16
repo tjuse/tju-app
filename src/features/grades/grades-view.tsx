@@ -1,76 +1,154 @@
 "use client";
 
+import type { GSScoreRecord, UGScoreRecord } from "@tju-app/eams-parsers";
 import { RefreshCw } from "lucide-react";
-import { useCallback, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ScoreWithMeta } from "@/lib/tju/score-store";
+import {
+  fetchGSScore,
+  fetchUGScore,
+  isExtensionAvailable,
+  loadScoreCache,
+  saveScoreCache,
+} from "@/lib/extension-bridge";
 import type { TjuScoreRecord } from "@/lib/tju/types";
 import { cn } from "@/lib/utils";
 
-interface Props {
-  /** Server-side pre-fetched data (null in demo mode or on cache miss). */
-  initial: ScoreWithMeta | null;
-  /** True when the app is running in demo/Vercel mode. */
-  demoMode: boolean;
+type Level = "UG" | "GS";
+
+interface ClientScoreData {
+  studentType: "undergraduate" | "graduate";
+  scores: TjuScoreRecord[];
+  cachedAt: string;
 }
 
-export function GradesView({ initial, demoMode }: Props) {
-  const [data, setData] = useState<ScoreWithMeta | null>(initial);
+function mapUG(r: UGScoreRecord): TjuScoreRecord {
+  return {
+    semester: r.semester,
+    course_id: r.course_id,
+    name: r.name,
+    course_type: r.course_type,
+    credit: r.credit,
+    score: r.score,
+    course_props: r.course_props,
+    gpa: r.gpa ? Number.parseFloat(r.gpa) : null,
+  };
+}
+
+function mapGS(r: GSScoreRecord): TjuScoreRecord {
+  return {
+    semester: r.semester,
+    course_id: r.course_id,
+    name: r.name,
+    course_type: r.course_type,
+    credit: r.credit,
+    score: r.score,
+    class_id: r.class_id,
+    exam_status: r.exam_status,
+    is_in_plan: r.is_in_plan,
+    is_credited: r.is_credited,
+  };
+}
+
+export function GradesView() {
+  const [level, setLevel] = useState<Level>("UG");
+  const [data, setData] = useState<ClientScoreData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [extensionReady, setExtensionReady] = useState<boolean | null>(null);
 
-  const refresh = useCallback(async () => {
+  // Hydrate from sessionStorage + detect the extension on mount.
+  useEffect(() => {
+    const ug = loadScoreCache("UG");
+    const gs = loadScoreCache("GS");
+    if (ug) {
+      setData({ studentType: "undergraduate", scores: ug.map(mapUG), cachedAt: "" });
+    } else if (gs) {
+      setLevel("GS");
+      setData({ studentType: "graduate", scores: gs.map(mapGS), cachedAt: "" });
+    }
+    isExtensionAvailable().then(setExtensionReady);
+  }, []);
+
+  const refresh = useCallback(async (lvl: Level) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/score?refresh=1");
-      const body = await res.json();
-      if (!res.ok) setError(body.error ?? "获取失败");
-      else setData(body.data as ScoreWithMeta);
-    } catch {
-      setError("网络错误，请重试");
+      const available = await isExtensionAvailable();
+      setExtensionReady(available);
+      if (!available) {
+        setError("未检测到 tju.app 浏览器扩展，请先安装扩展并登录教务系统。");
+        return;
+      }
+      if (lvl === "UG") {
+        const records = await fetchUGScore();
+        saveScoreCache("UG", records);
+        setData({
+          studentType: "undergraduate",
+          scores: records.map(mapUG),
+          cachedAt: new Date().toISOString(),
+        });
+      } else {
+        const records = await fetchGSScore();
+        saveScoreCache("GS", records);
+        setData({
+          studentType: "graduate",
+          scores: records.map(mapGS),
+          cachedAt: new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "获取失败，请重试。");
     } finally {
       setLoading(false);
     }
   }, []);
 
+  function handleLevelChange(lvl: Level) {
+    setLevel(lvl);
+    setData(null);
+  }
+
   return (
     <div className="flex flex-col gap-5">
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          {data && (
-            <p className="text-[13px] text-[var(--color-text-mid)]">
-              <span className="font-medium text-[var(--color-text-high)]">{data.student.name}</span>
-              {" · "}
-              {data.student_type === "graduate" ? "研究生" : "本科生"}
-              {data.cachedAt && (
-                <span className="ml-2 text-[var(--color-text-low)]">
-                  · 更新于{" "}
-                  {new Date(data.cachedAt).toLocaleString("zh-CN", {
-                    month: "numeric",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+        <div className="inline-flex rounded-[var(--radius-md)] border border-[var(--color-border)] p-0.5">
+          {(["UG", "GS"] as const).map((lvl) => (
+            <button
+              key={lvl}
+              type="button"
+              onClick={() => handleLevelChange(lvl)}
+              className={cn(
+                "rounded-[calc(var(--radius-md)-2px)] px-3 py-1 text-[13px] transition-colors",
+                level === lvl
+                  ? "bg-[var(--color-accent)] text-white"
+                  : "text-[var(--color-text-mid)] hover:text-[var(--color-text-high)]",
               )}
-            </p>
-          )}
+            >
+              {lvl === "UG" ? "本科" : "研究生"}
+            </button>
+          ))}
         </div>
-        {demoMode ? (
-          <Badge variant="secondary" className="text-[12px]">
-            演示模式 · 仅本地可刷新
-          </Badge>
-        ) : (
-          <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+        <div className="flex items-center gap-3">
+          {data?.cachedAt && (
+            <span className="text-[12px] text-[var(--color-text-low)]">
+              更新于{" "}
+              {new Date(data.cachedAt).toLocaleString("zh-CN", {
+                month: "numeric",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          )}
+          <Button variant="outline" size="sm" onClick={() => refresh(level)} disabled={loading}>
             <RefreshCw className={cn("size-4", loading && "animate-spin")} />
             {loading ? "获取中…" : "从教务刷新"}
           </Button>
-        )}
+        </div>
       </div>
 
       {error && (
@@ -82,9 +160,9 @@ export function GradesView({ initial, demoMode }: Props) {
       {loading ? (
         <SkeletonTable />
       ) : !data ? (
-        <EmptyState demoMode={demoMode} onRefresh={refresh} />
+        <EmptyState extensionReady={extensionReady} onRefresh={() => refresh(level)} />
       ) : (
-        <ScoreTable scores={data.scores} studentType={data.student_type} />
+        <ScoreTable scores={data.scores} studentType={data.studentType} />
       )}
     </div>
   );
@@ -101,9 +179,9 @@ function ScoreTable({
   const bySemester = new Map<string, TjuScoreRecord[]>();
   for (const s of scores) {
     const key = s.semester ?? "未知学期";
-    if (!bySemester.has(key)) bySemester.set(key, []);
-    // biome-ignore lint/style/noNonNullAssertion: key was just set above
-    bySemester.get(key)!.push(s);
+    const list = bySemester.get(key) ?? [];
+    list.push(s);
+    bySemester.set(key, list);
   }
 
   const totalCredit = scores.reduce((s, r) => s + (r.credit ?? 0), 0);
@@ -236,18 +314,25 @@ function SkeletonTable() {
   );
 }
 
-function EmptyState({ demoMode, onRefresh }: { demoMode: boolean; onRefresh: () => void }) {
+function EmptyState({
+  extensionReady,
+  onRefresh,
+}: {
+  extensionReady: boolean | null;
+  onRefresh: () => void;
+}) {
+  const notInstalled = extensionReady === false;
   return (
     <div className="flex flex-col items-center gap-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] py-20 text-center">
       <p className="font-medium text-[var(--color-text-high)]">暂无成绩数据</p>
-      {demoMode ? (
+      {notInstalled ? (
         <p className="max-w-sm text-[13px] text-[var(--color-text-mid)] text-pretty">
-          演示模式下无法获取个人成绩。请在本地/校园网环境下配置凭据后刷新。
+          需要安装 tju.app 浏览器扩展，并在浏览器中登录教务系统后，才能查看个人成绩。
         </p>
       ) : (
         <>
           <p className="text-[13px] text-[var(--color-text-mid)]">
-            点击「从教务刷新」获取成绩（需校园网/VPN 及有效凭据）。
+            点击「从教务刷新」通过浏览器扩展获取成绩（需已登录教务系统）。
           </p>
           <Button onClick={onRefresh}>从教务获取成绩</Button>
         </>

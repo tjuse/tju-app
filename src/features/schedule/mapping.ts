@@ -3,6 +3,7 @@
  * arrange segments) to the app's flat Course[] (one entry per segment),
  * suitable for timetable rendering.
  */
+import type { ScheduleEntry } from "@tju-app/eams-parsers";
 import type { TjuCourse, TjuScheduleResult } from "@/lib/tju/types";
 import type { Course } from "@/types";
 
@@ -87,4 +88,29 @@ export function mapTjuCourse(course: TjuCourse, semester?: string): Course[] {
 /** Map an entire tju schedule result to a flat Course[]. */
 export function mapTjuSchedule(result: TjuScheduleResult): Course[] {
   return result.courses.flatMap((c) => mapTjuCourse(c, result.semester));
+}
+
+/** Adapt a browser-extension ScheduleEntry to the tju library's TjuCourse shape. */
+function scheduleEntryToTjuCourse(e: ScheduleEntry): TjuCourse {
+  return {
+    class_id: e.class_id || null,
+    course_id: e.course_id || null,
+    name: e.name || null,
+    credit: e.credit ? Number.parseFloat(e.credit) : null,
+    campus: e.campus || null,
+    weeks: e.weeks || null,
+    teacher: e.teacher ?? null,
+    arrange: (e.arrange ?? []).map((a) => ({
+      teacher: a.teacher ?? null,
+      week: a.week ?? null,
+      unit: a.unit ?? null,
+      weekday: a.weekday ?? null,
+      location: a.location ?? null,
+    })),
+  };
+}
+
+/** Map browser-extension schedule entries to a flat Course[] for the timetable. */
+export function mapScheduleEntries(entries: ScheduleEntry[], semester: string): Course[] {
+  return entries.flatMap((e) => mapTjuCourse(scheduleEntryToTjuCourse(e), semester));
 }

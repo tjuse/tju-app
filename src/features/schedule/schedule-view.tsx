@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Course } from "@/types";
 import { Timetable } from "./timetable";
-import { useRefreshSchedule } from "./use-refresh-schedule";
 
 interface ScheduleViewProps {
   courses: Course[];
@@ -15,6 +14,9 @@ interface ScheduleViewProps {
   currentWeek: number;
   studentName?: string | null;
   cachedAt?: string;
+  onRefresh: () => void;
+  refreshing: boolean;
+  error: string | null;
 }
 
 const MAX_WEEK = 25;
@@ -25,9 +27,11 @@ export function ScheduleView({
   currentWeek,
   studentName,
   cachedAt,
+  onRefresh,
+  refreshing,
+  error,
 }: ScheduleViewProps) {
   const [week, setWeek] = useState(Math.min(Math.max(currentWeek, 1), MAX_WEEK));
-  const { refreshing, error, refresh } = useRefreshSchedule();
 
   const cachedLabel = cachedAt
     ? new Date(cachedAt).toLocaleString("zh-CN", {
@@ -76,7 +80,7 @@ export function ScheduleView({
           {cachedLabel && (
             <span className="text-[12px] text-[var(--color-text-low)]">更新于 {cachedLabel}</span>
           )}
-          <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
+          <Button variant="outline" size="sm" onClick={onRefresh} disabled={refreshing}>
             <RefreshCw className={cn("size-4", refreshing && "animate-spin")} />
             {refreshing ? "抓取中…" : "从教务刷新"}
           </Button>
