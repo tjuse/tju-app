@@ -3,21 +3,17 @@ import { Header } from "@/components/dashboard/header";
 import { ComingSoonWidget } from "@/components/dashboard/widgets/coming-soon-widget";
 import { Greeting } from "@/components/dashboard/widgets/greeting";
 import { QuickLinksWidget } from "@/components/dashboard/widgets/quick-links-widget";
-import { TodayCoursesWidget } from "@/components/dashboard/widgets/today-courses-widget";
+import { TodayCoursesClient } from "@/components/dashboard/widgets/today-courses-client";
 import { UpcomingEventsWidget } from "@/components/dashboard/widgets/upcoming-events-widget";
 import { WeekWidget } from "@/components/dashboard/widgets/week-widget";
 import { FadeIn } from "@/components/motion/fade-in";
 import { getCurrentSemester } from "@/features/calendar/calendar-data";
 import { getWeekOfSemester } from "@/features/calendar/utils";
-import { getTodayCourses } from "@/features/schedule/utils";
-import { readCachedSchedule } from "@/lib/tju/schedule-store";
+import { currentSemesterCode } from "@/features/courses/semesters";
 
-export const dynamic = "force-dynamic";
-
-export default async function DashboardHome() {
-  const cached = await readCachedSchedule();
+export default function DashboardHome() {
   const currentWeek = getWeekOfSemester(getCurrentSemester()) ?? 1;
-  const todayCourses = cached ? getTodayCourses(cached.courses, currentWeek) : [];
+  const semesterCode = currentSemesterCode();
 
   return (
     <>
@@ -30,7 +26,7 @@ export default async function DashboardHome() {
         {/* Bento grid */}
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <FadeIn delay={0.05} className="md:col-span-1 md:row-span-2">
-            <TodayCoursesWidget courses={todayCourses} hasSchedule={cached !== null} />
+            <TodayCoursesClient semesterCode={semesterCode} currentWeek={currentWeek} />
           </FadeIn>
 
           <FadeIn delay={0.1}>

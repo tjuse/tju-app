@@ -5,14 +5,7 @@
  */
 import { spawn } from "node:child_process";
 import path from "node:path";
-import {
-  type TjuCliResponse,
-  type TjuCoursesResult,
-  TjuError,
-  type TjuExamResult,
-  type TjuScheduleResult,
-  type TjuScoreResult,
-} from "./types";
+import { type TjuCliResponse, type TjuCoursesResult, TjuError } from "./types";
 
 const PROJECT_ROOT = process.cwd();
 const SCRIPT = path.join(PROJECT_ROOT, "scripts", "tju_cli.py");
@@ -100,11 +93,6 @@ async function runTju<T>(command: string, opts: RunOptions = {}): Promise<T> {
   });
 }
 
-/** Fetch the personal schedule in real time (not cached). Requires campus net / VPN. */
-export function fetchSchedule(semester?: string): Promise<TjuScheduleResult> {
-  return runTju<TjuScheduleResult>("schedule", { semester });
-}
-
 /**
  * Fetch the full public course catalog for a semester (not cached).
  * Crawls multiple pages — several thousand courses — so it is slow.
@@ -126,14 +114,4 @@ export function fetchSyllabus(
   lessionId: string,
 ): Promise<{ lession_id: string; syllabus: string }> {
   return runTju<{ lession_id: string; syllabus: string }>("syllabus", { lessionId });
-}
-
-/** Fetch the current semester's grades. Requires campus network / VPN. */
-export function fetchScore(): Promise<TjuScoreResult> {
-  return runTju<TjuScoreResult>("score");
-}
-
-/** Fetch exam schedule for a semester. Requires campus network / VPN. */
-export function fetchExam(semester?: string): Promise<TjuExamResult> {
-  return runTju<TjuExamResult>("exam", { semester });
 }

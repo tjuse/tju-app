@@ -1,11 +1,12 @@
 name: Extension Release
 
-# Build and publish the browser extension as a downloadable zip whenever an
-# extension tag is pushed, e.g. `ext-v0.1.0`.
+# Build and publish the browser extension as a downloadable zip whenever a
+# version tag is pushed, e.g. `v0.1.0`. (The Next.js app itself deploys from
+# main on Netlify/Vercel and is not tag-released, so tags are extension-only.)
 on:
   push:
     tags:
-      - "ext-v*"
+      - "v*"
 
 permissions:
   contents: write
@@ -34,7 +35,7 @@ jobs:
       - name: Package extension
         id: package
         run: |
-          version="${GITHUB_REF_NAME#ext-v}"
+          version="${GITHUB_REF_NAME#v}"
           out="tju-app-extension-${version}.zip"
           staging="$(mktemp -d)"
           cp manifest.json popup.html "$staging/"
@@ -49,5 +50,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" \
             "packages/extension/${{ steps.package.outputs.zip }}" \
-            --title "Browser Extension ${GITHUB_REF_NAME#ext-}" \
+            --title "$GITHUB_REF_NAME" \
             --notes "Unzip and load it via chrome://extensions → 开发者模式 → 加载已解压的扩展程序. Requires you to be logged into TJU EAMS in the same browser."

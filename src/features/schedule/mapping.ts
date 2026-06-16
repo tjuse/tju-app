@@ -4,7 +4,7 @@
  * suitable for timetable rendering.
  */
 import type { ScheduleEntry } from "@tju-app/eams-parsers";
-import type { TjuCourse, TjuScheduleResult } from "@/lib/tju/types";
+import type { TjuCourse } from "@/lib/tju/types";
 import type { Course } from "@/types";
 
 /**
@@ -83,11 +83,6 @@ export function mapTjuCourse(course: TjuCourse, semester?: string): Course[] {
       return mapped;
     })
     .filter((c): c is Course => c !== null);
-}
-
-/** Map an entire tju schedule result to a flat Course[]. */
-export function mapTjuSchedule(result: TjuScheduleResult): Course[] {
-  return result.courses.flatMap((c) => mapTjuCourse(c, result.semester));
 }
 
 /** Adapt a browser-extension ScheduleEntry to the tju library's TjuCourse shape. */
