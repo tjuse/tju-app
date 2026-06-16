@@ -146,8 +146,9 @@ export async function fetchExam(semesterId: string): Promise<ExamEntry[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Storage helpers — persist extension-fetched data in sessionStorage so the
-// data survives page navigations within the same browser tab.
+// Storage helpers — persist extension-fetched data in localStorage so it
+// survives page navigations, tab closes and browser restarts (until refreshed).
+// (sessionStorage was used before, which cleared on tab/browser close.)
 // ---------------------------------------------------------------------------
 
 const STORAGE_KEYS = {
@@ -156,29 +157,45 @@ const STORAGE_KEYS = {
   exam: "tju:exam",
 } as const;
 
+/** Safe localStorage read (returns null if unavailable or unparsable). */
+function readStore<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Safe localStorage write (silently ignores quota/availability errors). */
+function writeStore(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore (private mode, quota, etc.)
+  }
+}
+
 export function saveScheduleCache(semesterId: string, data: ScheduleEntry[]): void {
-  sessionStorage.setItem(`${STORAGE_KEYS.schedule}:${semesterId}`, JSON.stringify(data));
+  writeStore(`${STORAGE_KEYS.schedule}:${semesterId}`, data);
 }
 
 export function loadScheduleCache(semesterId: string): ScheduleEntry[] | null {
-  const raw = sessionStorage.getItem(`${STORAGE_KEYS.schedule}:${semesterId}`);
-  return raw ? (JSON.parse(raw) as ScheduleEntry[]) : null;
+  return readStore<ScheduleEntry[]>(`${STORAGE_KEYS.schedule}:${semesterId}`);
 }
 
 export function saveScoreCache(data: ScoreResult): void {
-  sessionStorage.setItem(STORAGE_KEYS.score, JSON.stringify(data));
+  writeStore(STORAGE_KEYS.score, data);
 }
 
 export function loadScoreCache(): ScoreResult | null {
-  const raw = sessionStorage.getItem(STORAGE_KEYS.score);
-  return raw ? (JSON.parse(raw) as ScoreResult) : null;
+  return readStore<ScoreResult>(STORAGE_KEYS.score);
 }
 
 export function saveExamCache(semesterId: string, data: ExamEntry[]): void {
-  sessionStorage.setItem(`${STORAGE_KEYS.exam}:${semesterId}`, JSON.stringify(data));
+  writeStore(`${STORAGE_KEYS.exam}:${semesterId}`, data);
 }
 
 export function loadExamCache(semesterId: string): ExamEntry[] | null {
-  const raw = sessionStorage.getItem(`${STORAGE_KEYS.exam}:${semesterId}`);
-  return raw ? (JSON.parse(raw) as ExamEntry[]) : null;
+  return readStore<ExamEntry[]>(`${STORAGE_KEYS.exam}:${semesterId}`);
 }

@@ -6,6 +6,24 @@ browser extension are documented here. Both ship together under a single version
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.3 - 2026-06-16
+
+### Browser Extension — TJU App Bridge
+
+#### Fixed
+- Schedule still failed with "Cannot find TaskActivity section": the
+  `courseTable` POST sent its parameters in the request body, but EAMS expects
+  them in the URL query string (tju-python uses `params=`, not `data=`). The
+  parameters are now sent as the query string, so the timetable HTML returns
+  correctly.
+
+### tju.app (web dashboard)
+
+#### Fixed
+- Extension-fetched data (schedule / grades / exams / today's courses) is now
+  persisted in `localStorage` instead of `sessionStorage`, so it survives tab
+  closes and browser restarts instead of disappearing.
+
 ## v0.1.2 - 2026-06-16
 
 Fixes graduate-account support across schedule and grades, where the flows had

@@ -85,10 +85,13 @@ export function scheduleSteps(
       url: `${EAMS_BASE}${COURSETABLE_GET_PATH}`,
       params: { projectId },
     },
+    // NOTE: tju-python issues this POST with `params=` — i.e. the values go in
+    // the URL query string, not the request body. EAMS ignores a form body here,
+    // so sending them as formData returns a page with no TaskActivity section.
     tableStep: (ids: string) => ({
       method: "POST",
       url: `${EAMS_BASE}${COURSETABLE_PATH}`,
-      formData: {
+      params: {
         ignoreHead: "1",
         "setting.kind": "std",
         startWeek: "",
