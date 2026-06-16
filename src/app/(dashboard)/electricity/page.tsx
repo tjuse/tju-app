@@ -9,7 +9,7 @@ export default function ElectricityPage() {
   return (
     <>
       <Header title="电费" subtitle="宿舍电费余额与用量" />
-      <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-8 md:px-8">
         <FadeIn>
           <Card className="flex flex-col items-center gap-4 py-20 text-center">
             <div className="flex size-14 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--color-accent-subtle)]">

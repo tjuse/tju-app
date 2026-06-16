@@ -18,7 +18,7 @@ export default function DashboardHome() {
   return (
     <>
       <Header title="概览" />
-      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
         <FadeIn>
           <Greeting />
         </FadeIn>

@@ -98,6 +98,9 @@ Minimal modern (Linear/Vercel aesthetic) · **dark-first** · generous whitespac
 - Entrance animation: `<FadeIn>` (opacity + micro translateY, ~220ms ease-out). Lists use stagger with `delay` prop.
 - Accessibility: WCAG AA contrast, `:focus-visible`, keyboard reachable, `prefers-reduced-motion` degraded.
 - All colors via CSS variables (`var(--color-*)`). **Never hardcode hex values** (chart palettes in `stats-charts.tsx` are the only exception).
+- **No left-edge accent bars (forbidden).** Never highlight a block (schedule course cell, list item, card, alert, etc.) with a colored *left border / left edge stripe* (`border-l-*`, `borderLeft`). It looks dated and ugly. To convey a category color, fill the whole block with a low-opacity tint plus a full subtle border, or use a small inline color dot — never an edge bar.
+- **Content width.** Page containers use a centered `max-w-*` wrapper; keep main content comfortably wide (avoid oversized side gutters). Current tiers: dense data pages (courses/schedule/stats/trends/compare/conflict/favorites) `max-w-7xl`; standard pages (home/grades/links) `max-w-6xl`; reading/narrow pages (calendar/exams) `max-w-5xl`; placeholder pages `max-w-4xl`.
+- **No native form controls for selection.** Use the custom `Select` (`src/components/ui/select.tsx`) instead of a raw `<select>`, so the dropdown list follows the design tokens. Native `<select>` option lists cannot be themed.
 
 See `docs/DESIGN_SYSTEM.md` for details.
 

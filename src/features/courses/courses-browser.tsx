@@ -134,8 +134,8 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <Select
             value={semester}
-            onChange={(e) => {
-              setSemester(e.target.value);
+            onChange={(v) => {
+              setSemester(v);
               resetPage();
             }}
             aria-label="选择学期"
@@ -168,8 +168,8 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <Select
             value={stuType}
-            onChange={(e) => {
-              setStuType(e.target.value as StuTypeFilter);
+            onChange={(v) => {
+              setStuType(v as StuTypeFilter);
               resetPage();
             }}
             aria-label="学生类型"
@@ -181,8 +181,8 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
 
           <Select
             value={campus}
-            onChange={(e) => {
-              setCampus(e.target.value);
+            onChange={(v) => {
+              setCampus(v);
               resetPage();
             }}
             aria-label="校区"
@@ -197,8 +197,8 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
 
           <Select
             value={courseType}
-            onChange={(e) => {
-              setCourseType(e.target.value);
+            onChange={(v) => {
+              setCourseType(v);
               resetPage();
             }}
             aria-label="课程类别"
@@ -214,8 +214,8 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
 
           <Select
             value={weekday}
-            onChange={(e) => {
-              setWeekday(e.target.value);
+            onChange={(v) => {
+              setWeekday(v);
               resetPage();
             }}
             aria-label="上课星期"
@@ -228,11 +228,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
             ))}
           </Select>
 
-          <Select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as CourseSort)}
-            aria-label="排序"
-          >
+          <Select value={sort} onChange={(v) => setSort(v as CourseSort)} aria-label="排序">
             <option value="default">默认排序</option>
             <option value="credit-desc">学分高→低</option>
             <option value="credit-asc">学分低→高</option>

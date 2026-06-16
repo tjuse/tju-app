@@ -24,7 +24,7 @@ export default async function StatsPage({
   return (
     <>
       <Header title="公共课表" subtitle={`课程统计 · ${semesterLabel(semester)}`} />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
         <CoursesTabs />
         {!cached ? (
           <Card className="flex flex-col items-center gap-3 py-20 text-center">

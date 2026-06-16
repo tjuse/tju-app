@@ -19,7 +19,7 @@ export default function LinksPage() {
   return (
     <>
       <Header title="常用链接" subtitle="天津大学校内高频入口" />
-      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
         <div className="flex flex-col gap-8">
           {Object.entries(grouped).map(([category, links], gi) => (
             <FadeIn key={category} delay={gi * 0.05}>

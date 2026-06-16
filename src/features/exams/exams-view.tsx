@@ -81,7 +81,7 @@ export function ExamsView({ semesters, initialSemester }: Props) {
       <div className="flex flex-wrap items-center gap-3">
         <Select
           value={semester}
-          onChange={(e) => handleSemesterChange(e.target.value)}
+          onChange={handleSemesterChange}
           aria-label="选择学期"
           className="min-w-44"
         >

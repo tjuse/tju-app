@@ -27,8 +27,8 @@ export interface Course {
   teacher?: string | null;
   location?: string | null;
   weekday: number; // 1=Monday … 7=Sunday
-  startSlot: number; // 1–11
-  endSlot: number; // 1–11 (inclusive)
+  startSlot: number; // 1–12
+  endSlot: number; // 1–12 (inclusive)
   weeks: number[]; // Teaching weeks
   color?: string | null;
   source: "manual" | "ics" | "ocr" | "tju"; // tju = fetched via tju library

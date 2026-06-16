@@ -17,7 +17,7 @@ export default async function CoursesPage() {
   return (
     <>
       <Header title="公共课表" subtitle="全校开课课程库 · 可按学期检索" />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
         <CoursesTabs />
         <FadeIn>
           <CoursesBrowser semesters={semesters} initialSemester={semester} initial={initial} />

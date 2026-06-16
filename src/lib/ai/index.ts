@@ -26,8 +26,8 @@ export const ParsedCourseSchema = z.object({
   teacher: z.string().optional(),
   location: z.string().optional(),
   weekday: z.number().int().min(1).max(7),
-  startSlot: z.number().int().min(1).max(11),
-  endSlot: z.number().int().min(1).max(11),
+  startSlot: z.number().int().min(1).max(12),
+  endSlot: z.number().int().min(1).max(12),
   weeks: z.array(z.number().int().min(1).max(30)),
   color: z.string().optional(),
 });
@@ -61,7 +61,7 @@ export async function parseScheduleImage(
       {
         name: "extract_courses",
         description:
-          "从课表截图中提取所有课程信息，返回结构化课程列表。weekday: 1=周一…7=周日；startSlot/endSlot: 节次（1-11）；weeks: 上课周次数组。",
+          "从课表截图中提取所有课程信息，返回结构化课程列表。weekday: 1=周一…7=周日；startSlot/endSlot: 节次（1-12）；weeks: 上课周次数组。",
         input_schema: {
           type: "object" as const,
           properties: {
@@ -74,8 +74,8 @@ export async function parseScheduleImage(
                   teacher: { type: "string", description: "教师姓名（可选）" },
                   location: { type: "string", description: "上课地点（可选）" },
                   weekday: { type: "number", description: "星期几，1=周一，7=周日" },
-                  startSlot: { type: "number", description: "开始节次（1-11）" },
-                  endSlot: { type: "number", description: "结束节次（含，1-11）" },
+                  startSlot: { type: "number", description: "开始节次（1-12）" },
+                  endSlot: { type: "number", description: "结束节次（含，1-12）" },
                   weeks: {
                     type: "array",
                     items: { type: "number" },

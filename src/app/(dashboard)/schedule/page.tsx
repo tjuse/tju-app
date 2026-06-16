@@ -15,7 +15,7 @@ export default function SchedulePage() {
   return (
     <>
       <Header title="课程表" subtitle={`${semester.name} · 第 ${currentWeek} 周`} />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
         <FadeIn>
           <ScheduleClient
             semesterCode={semesterCode}

@@ -5,7 +5,10 @@ import { slotToTime } from "@/lib/utils";
 import type { Course } from "@/types";
 
 const WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
-const SLOTS = Array.from({ length: 11 }, (_, i) => i + 1);
+const SLOTS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+/** Height of one class period, in px. Drives both the grid lines and blocks. */
+const ROW_H = 58;
 
 // 课程色板（北洋蓝为主，辅以协调色）
 const COLORS = ["#3b82f6", "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#6366f1"];
@@ -28,11 +31,13 @@ export function Timetable({ courses, week }: TimetableProps) {
     return d === 0 ? 7 : d;
   })();
 
+  const bodyHeight = SLOTS.length * ROW_H;
+
   return (
     <div className="overflow-x-auto">
-      <div className="min-w-[720px]">
+      <div className="min-w-[760px]">
         {/* 表头 */}
-        <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-1">
+        <div className="grid grid-cols-[56px_repeat(7,1fr)] gap-1">
           <div />
           {WEEKDAYS.map((day, i) => (
             <div
@@ -48,19 +53,27 @@ export function Timetable({ courses, week }: TimetableProps) {
           ))}
         </div>
 
-        {/* 课表主体 */}
-        <div className="relative mt-1 grid grid-cols-[48px_repeat(7,1fr)] gap-1">
-          {/* 时间列 */}
-          <div className="flex flex-col gap-1">
+        {/* 课表主体：日历式时间轴 */}
+        <div className="mt-1 grid grid-cols-[56px_repeat(7,1fr)] gap-1">
+          {/* 时间列：每节课起止时间，节次之间以横线分隔 */}
+          <div className="relative" style={{ height: bodyHeight }}>
             {SLOTS.map((slot) => {
-              const { start } = slotToTime(slot);
+              const { start, end } = slotToTime(slot);
               return (
                 <div
                   key={slot}
-                  className="flex h-16 flex-col items-center justify-center text-[var(--color-text-low)]"
+                  className="absolute inset-x-0 flex flex-col justify-between border-[var(--color-border)]/60 border-t py-1 pr-1 text-right"
+                  style={{ top: (slot - 1) * ROW_H, height: ROW_H }}
                 >
-                  <span className="font-medium text-[12px]">{slot}</span>
-                  <span className="text-[10px] tabular-nums">{start}</span>
+                  <span className="font-medium text-[10px] text-[var(--color-text-mid)] tabular-nums">
+                    {start}
+                  </span>
+                  <span className="font-semibold text-[12px] text-[var(--color-text-low)] leading-none">
+                    {slot}
+                  </span>
+                  <span className="text-[10px] text-[var(--color-text-low)] tabular-nums">
+                    {end}
+                  </span>
                 </div>
               );
             })}
@@ -70,38 +83,50 @@ export function Timetable({ courses, week }: TimetableProps) {
           {WEEKDAYS.map((day, dayIndex) => {
             const weekday = dayIndex + 1;
             const dayCourses = visible.filter((c) => c.weekday === weekday);
+            const isToday = weekday === todayWeekday;
             return (
-              <div key={day} className="relative flex flex-col gap-1">
+              <div
+                key={day}
+                className={`relative rounded-[var(--radius-sm)] ${
+                  isToday ? "bg-[var(--color-accent-subtle)]/40" : "bg-[var(--color-bg-base)]"
+                }`}
+                style={{ height: bodyHeight }}
+              >
+                {/* 时间分隔横线（与时间列对齐，营造日历网格） */}
                 {SLOTS.map((slot) => (
                   <div
                     key={slot}
-                    className="h-16 rounded-[var(--radius-sm)] border border-[var(--color-border)]/50 bg-[var(--color-bg-base)]"
+                    className="absolute inset-x-0 border-[var(--color-border)]/40 border-t"
+                    style={{ top: (slot - 1) * ROW_H, height: ROW_H }}
                   />
                 ))}
-                {/* 课程块绝对定位覆盖 */}
+
+                {/* 课程块：整块填充，无左边缘高亮 */}
                 {dayCourses.map((course, ci) => {
-                  const top = (course.startSlot - 1) * (64 + 4);
-                  const height =
-                    (course.endSlot - course.startSlot + 1) * 64 +
-                    (course.endSlot - course.startSlot) * 4;
+                  const top = (course.startSlot - 1) * ROW_H + 2;
+                  const height = (course.endSlot - course.startSlot + 1) * ROW_H - 4;
                   const color = colorFor(course, ci);
                   return (
                     <div
                       key={course.id}
-                      className="absolute inset-x-0 animate-fade-in-up overflow-hidden rounded-[var(--radius-md)] p-2"
+                      className="absolute inset-x-0.5 animate-fade-in-up overflow-hidden rounded-[var(--radius-md)] border p-2"
                       style={
                         {
                           top,
                           height,
-                          backgroundColor: `${color}22`,
-                          borderLeft: `3px solid ${color}`,
+                          backgroundColor: `${color}1f`,
+                          borderColor: `${color}59`,
                           animationDelay: `${ci * 0.03}s`,
                           "--fade-y": "4px",
                         } as CSSProperties
                       }
                     >
-                      <p className="truncate font-medium text-[12px] text-[var(--color-text-high)] leading-tight">
-                        {course.name}
+                      <p className="flex items-center gap-1 truncate font-medium text-[12px] text-[var(--color-text-high)] leading-tight">
+                        <span
+                          className="inline-block size-1.5 shrink-0 rounded-full"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="truncate">{course.name}</span>
                       </p>
                       {course.location && (
                         <p className="mt-0.5 truncate text-[10px] text-[var(--color-text-mid)]">

@@ -33,7 +33,7 @@ export default async function TrendsPage() {
   return (
     <>
       <Header title="公共课表" subtitle={`开课趋势 · ${snapshots.length} 个学期数据`} />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
         <CoursesTabs />
         {snapshots.length < 2 ? (
           <Card className="flex flex-col items-center gap-3 py-20 text-center">
