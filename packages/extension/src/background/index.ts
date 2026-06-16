@@ -145,7 +145,7 @@ chrome.runtime.onMessage.addListener(
     const req = message as ExtensionRequest;
 
     if (req.type === "tju:ping") {
-      sendResponse({ requestId: req.requestId, ok: true, data: { version: "0.1.0" } });
+      sendResponse({ requestId: req.requestId, ok: true, data: { version: "0.1.1" } });
       return false;
     }
 

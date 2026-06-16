@@ -63,6 +63,13 @@ export function ExamsView({ semesters, initialSemester }: Props) {
     }
   }, []);
 
+  // Let the extension popup's "刷新" button trigger a refresh on this page.
+  useEffect(() => {
+    const handler = () => void refresh(semester);
+    window.addEventListener("tju-extension:refresh", handler);
+    return () => window.removeEventListener("tju-extension:refresh", handler);
+  }, [refresh, semester]);
+
   function handleSemesterChange(sem: string) {
     setSemester(sem);
     setData(null);

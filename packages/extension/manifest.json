@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "TJU App Bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fetches private TJU EAMS data (schedule/grades/exams) from your campus session and shares it with tju-app.",
-  "permissions": ["storage", "tabs", "scripting"],
+  "permissions": ["storage", "tabs"],
   "host_permissions": ["*://*.tju.edu.cn/*", "https://sso.tju.edu.cn/*"],
   "background": {
     "service_worker": "dist/background.js",

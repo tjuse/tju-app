@@ -106,6 +106,13 @@ export function GradesView() {
     }
   }, []);
 
+  // Let the extension popup's "刷新" button trigger a refresh on this page.
+  useEffect(() => {
+    const handler = () => void refresh(level);
+    window.addEventListener("tju-extension:refresh", handler);
+    return () => window.removeEventListener("tju-extension:refresh", handler);
+  }, [refresh, level]);
+
   function handleLevelChange(lvl: Level) {
     setLevel(lvl);
     setData(null);

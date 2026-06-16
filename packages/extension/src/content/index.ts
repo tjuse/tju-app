@@ -45,3 +45,12 @@ window.addEventListener("message", (event: MessageEvent<unknown>) => {
     );
   });
 });
+
+// Relay the popup's "refresh" trigger to the page. The page listens for the
+// "tju-extension:refresh" window event and re-fetches via the bridge.
+chrome.runtime.onMessage.addListener((message: unknown) => {
+  const msg = message as { type?: string } | undefined;
+  if (msg?.type === "tju:trigger-refresh") {
+    window.dispatchEvent(new CustomEvent("tju-extension:refresh"));
+  }
+});

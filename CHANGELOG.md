@@ -6,6 +6,26 @@ browser extension are documented here. Both ship together under a single version
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.1 - 2026-06-16
+
+### Browser Extension — TJU App Bridge
+
+#### Fixed
+- The popup showed "请在 TJU App 页面使用" on the deployed site
+  (`*.netlify.app` / `*.vercel.app`) because it only recognised `tju.app`
+  and `localhost`. It now derives the allowed origins from the manifest's
+  content-script matches, so the popup and the actual injection can never
+  drift apart again.
+- The popup's "刷新我的数据" button was a no-op: it dispatched an event no
+  page listened for. The popup now messages the content script, which
+  relays a `tju-extension:refresh` event that the schedule / grades / exams
+  pages listen for and act on.
+
+#### Changed
+- Replaced the `chrome.scripting.executeScript` refresh trigger with a
+  message to the already-injected content script, and dropped the now
+  unnecessary `scripting` permission.
+
 ## v0.1.0 - 2026-06-16
 
 First public release. The web app serves the public course catalog with no login,

@@ -62,6 +62,13 @@ export function ScheduleClient({ semesterCode, semesterName, currentWeek }: Prop
     }
   }, [semesterCode]);
 
+  // Let the extension popup's "刷新" button trigger a refresh on this page.
+  useEffect(() => {
+    const handler = () => void refresh();
+    window.addEventListener("tju-extension:refresh", handler);
+    return () => window.removeEventListener("tju-extension:refresh", handler);
+  }, [refresh]);
+
   if (courses && courses.length > 0) {
     return (
       <ScheduleView
