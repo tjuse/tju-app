@@ -1,8 +1,10 @@
-name: Extension Release
+name: Release
 
-# Build and publish the browser extension as a downloadable zip whenever a
-# version tag is pushed, e.g. `v0.1.0`. (The Next.js app itself deploys from
-# main on Netlify/Vercel and is not tag-released, so tags are extension-only.)
+# A single version tag (e.g. `v0.1.0`) cuts one release covering BOTH the
+# tju.app web dashboard and the TJU App Bridge extension: the notes come from
+# the matching CHANGELOG.md section, and the built extension zip is attached as
+# a downloadable asset. (The web app itself deploys from main on Netlify/Vercel;
+# the tag marks the version and ships the extension + unified changelog.)
 on:
   push:
     tags:
@@ -44,6 +46,20 @@ jobs:
           echo "zip=$out" >> "$GITHUB_OUTPUT"
         working-directory: packages/extension
 
+      - name: Extract changelog section
+        run: |
+          notes="$(awk -v h="## $GITHUB_REF_NAME" \
+            'index($0,h)==1{f=1;next} /^## /&&f{f=0} f' CHANGELOG.md)"
+          if [ -z "$notes" ]; then
+            notes="See CHANGELOG.md."
+          fi
+          {
+            echo "$notes"
+            echo ""
+            echo "---"
+            echo "**Browser extension:** download the attached \`tju-app-extension-*.zip\`, unzip it, then load it via chrome://extensions → 开发者模式 → 加载已解压的扩展程序. You must be logged into TJU EAMS in the same browser."
+          } > release-notes.md
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -51,4 +67,4 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             "packages/extension/${{ steps.package.outputs.zip }}" \
             --title "$GITHUB_REF_NAME" \
-            --notes "Unzip and load it via chrome://extensions → 开发者模式 → 加载已解压的扩展程序. Requires you to be logged into TJU EAMS in the same browser."
+            --notes-file release-notes.md
