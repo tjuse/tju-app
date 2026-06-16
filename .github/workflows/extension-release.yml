@@ -1,0 +1,53 @@
+name: Extension Release
+
+# Build and publish the browser extension as a downloadable zip whenever an
+# extension tag is pushed, e.g. `ext-v0.1.0`.
+on:
+  push:
+    tags:
+      - "ext-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build · Package · Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # Reads pnpm version from the packageManager field in package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build extension
+        run: pnpm --filter @tju-app/extension build
+
+      - name: Package extension
+        id: package
+        run: |
+          version="${GITHUB_REF_NAME#ext-v}"
+          out="tju-app-extension-${version}.zip"
+          staging="$(mktemp -d)"
+          cp manifest.json popup.html "$staging/"
+          cp -r dist "$staging/dist"
+          (cd "$staging" && zip -r "$OLDPWD/$out" .)
+          echo "zip=$out" >> "$GITHUB_OUTPUT"
+        working-directory: packages/extension
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "packages/extension/${{ steps.package.outputs.zip }}" \
+            --title "Browser Extension ${GITHUB_REF_NAME#ext-}" \
+            --notes "Unzip and load it via chrome://extensions → 开发者模式 → 加载已解压的扩展程序. Requires you to be logged into TJU EAMS in the same browser."
