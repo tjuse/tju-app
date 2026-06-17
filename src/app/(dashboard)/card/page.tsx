@@ -8,7 +8,7 @@ export const metadata = { title: "校园卡" };
 
 export default function CardPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-5 md:px-8">
       <PageHeader title="校园卡" subtitle="余额与消费流水" icon={CreditCard} />
       <FadeIn>
         <Card>

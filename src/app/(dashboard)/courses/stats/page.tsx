@@ -24,7 +24,7 @@ export default async function StatsPage({
   const cached = await readCachedCourses(semester);
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-5 md:px-8">
       <PageHeader
         title="公共课表"
         subtitle={`课程统计 · ${semesterLabel(semester)}`}

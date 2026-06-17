@@ -18,7 +18,7 @@ const WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "�
  * Editorial masthead — eyebrow + serif greeting + monospaced dateline.
  * Time re-syncs after hydration and ticks every 30s.
  */
-export function Greeting({ name }: { name?: string }) {
+export function Greeting({ name, subtitle }: { name?: string; subtitle?: string }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -39,11 +39,14 @@ export function Greeting({ name }: { name?: string }) {
   });
 
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 className="font-display font-semibold text-2xl text-[var(--color-text-high)] tracking-tight">
-        {getGreeting(now.getHours())}
-        {name ? <span className="text-[var(--color-text-mid)]">，{name}</span> : ""}
-      </h2>
+    <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+      <div className="min-w-0">
+        <h2 className="font-display font-semibold text-[1.875rem] text-[var(--color-text-high)] leading-tight tracking-tight">
+          {getGreeting(now.getHours())}
+          {name ? <span className="text-[var(--color-text-mid)]">，{name}</span> : ""}
+        </h2>
+        {subtitle && <p className="mt-1 text-[13px] text-[var(--color-text-mid)]">{subtitle}</p>}
+      </div>
       <div className="flex items-center gap-2 font-mono text-[12px] text-[var(--color-text-mid)]">
         <span>
           {year}-{month}-{day}

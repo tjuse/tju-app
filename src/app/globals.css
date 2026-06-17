@@ -18,10 +18,10 @@
   --font-mono: var(--font-mono-latin), ui-monospace, "JetBrains Mono", monospace;
 
   /* ─── 圆角 —— 控制台风偏小 ────────────────────────────────────── */
-  --radius-sm: 5px;
-  --radius-md: 7px;
-  --radius-lg: 9px;
-  --radius-xl: 12px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
   --radius-full: 9999px;
 
   /* ─── 色彩 Token —— 浅色（默认） ──────────────────────────────── */
@@ -53,8 +53,8 @@
   --color-danger: #c93b34;
   --color-info: #00468c;
 
-  /* 卡片阴影（控制台风轻微浮起） */
-  --shadow-card: 0 1px 2px rgba(17, 24, 39, 0.05), 0 1px 1px rgba(17, 24, 39, 0.03);
+  /* 卡片阴影（控制台风极轻，近乎无） */
+  --shadow-card: 0 1px 1px rgba(17, 24, 39, 0.04);
 }
 
 /* ─── 深色模式（next-themes 切换 .dark）—— 中性深灰 ───────────────── */
@@ -74,7 +74,7 @@
   --color-accent-hover: #6ea4ea;
   --color-accent-muted: #173255;
   --color-accent-subtle: #11233a;
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 /* ─── 基础重置 ───────────────────────────────────────────────────── */
@@ -184,6 +184,40 @@
   .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
+  }
+
+  /* 紧凑卡片标题栏：固定行高 + 底部发丝线，控制台风 */
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding-inline: 0.875rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* 表格式数据行：~40px 行高、左主文右数值、发丝分隔 */
+  .data-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 2.5rem;
+    padding-block: 0.375rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .data-row:last-child {
+    border-bottom: 0;
+  }
+
+  /* 状态点 */
+  .status-dot {
+    display: inline-block;
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
   }
 
   /* 分组小标题：侧栏分区/栏目 */

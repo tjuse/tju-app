@@ -17,7 +17,7 @@ export default function LinksPage() {
   }, {});
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-5 md:px-8">
       <PageHeader title="常用链接" subtitle="天津大学校内高频入口" icon={Link2} />
       <div className="flex flex-col gap-7">
         {Object.entries(grouped).map(([category, links], gi) => (

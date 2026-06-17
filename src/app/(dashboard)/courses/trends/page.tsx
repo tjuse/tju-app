@@ -33,7 +33,7 @@ export default async function TrendsPage() {
   ).filter((s): s is SemesterSnapshot => s !== null);
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-5 md:px-8">
       <PageHeader
         title="公共课表"
         subtitle={`开课趋势 · ${snapshots.length} 个学期数据`}

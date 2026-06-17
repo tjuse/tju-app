@@ -25,7 +25,19 @@ export default function DashboardHome() {
 
   const progress = week ? Math.round((week / semester.totalWeeks) * 100) : 0;
   const upcoming = getUpcomingEvents(semester, new Date(), 99);
-  const examCount = upcoming.filter((e) => e.type === "exam").length;
+  const exams = upcoming.filter((e) => e.type === "exam");
+  const examCount = exams.length;
+  const nextExam = exams[0];
+  const nextEvent = upcoming[0];
+
+  // Genuine ascending series: cumulative progress through the weeks elapsed.
+  const weekSeries = week ? Array.from({ length: Math.max(week, 2) }, (_, i) => i + 1) : undefined;
+  const progressSeries = week
+    ? Array.from({ length: Math.max(week, 2) }, (_, i) =>
+        Math.round(((i + 1) / semester.totalWeeks) * 100),
+      )
+    : undefined;
+  const perWeek = Math.round(100 / semester.totalWeeks);
 
   const stats: LedgerStat[] = [
     {
@@ -34,8 +46,18 @@ export default function DashboardHome() {
       unit: week ? `/ ${semester.totalWeeks}` : undefined,
       icon: CalendarRange,
       tone: "accent",
+      status: { tone: week ? "success" : "neutral" },
+      series: weekSeries,
     },
-    { label: "学期进度", value: String(progress), unit: "%", icon: TrendingUp, tone: "success" },
+    {
+      label: "学期进度",
+      value: String(progress),
+      unit: "%",
+      icon: TrendingUp,
+      tone: "success",
+      delta: week ? { label: `+${perWeek}% / 周`, dir: "up" } : undefined,
+      series: progressSeries,
+    },
     {
       label: "临近考试",
       value: String(examCount),
@@ -43,6 +65,8 @@ export default function DashboardHome() {
       icon: NotebookPen,
       tone: "warning",
       accent: examCount > 0,
+      status: { tone: examCount > 0 ? "warning" : "neutral" },
+      footnote: nextExam ? `下一场 ${nextExam.startDate}` : "本学期暂无考试",
     },
     {
       label: "校历纪事",
@@ -50,20 +74,22 @@ export default function DashboardHome() {
       unit: "项",
       icon: CalendarClock,
       tone: "accent",
+      delta: { label: "待办", dir: "flat" },
+      footnote: nextEvent ? `最近 ${nextEvent.title}` : undefined,
     },
   ];
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-[1400px] flex-1 px-5 py-5 md:px-8">
       <FadeIn>
-        <Greeting />
+        <Greeting subtitle={`${semester.name} · ${week ? `第 ${week} 周` : "假期中"}`} />
       </FadeIn>
 
-      <FadeIn delay={0.05} className="mt-5">
+      <FadeIn delay={0.05} className="mt-4">
         <StatLedger items={stats} />
       </FadeIn>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="mt-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
         <FadeIn delay={0.1}>
           <TodayCoursesClient semesterCode={semesterCode} currentWeek={currentWeek} />
         </FadeIn>
@@ -75,7 +101,7 @@ export default function DashboardHome() {
         </FadeIn>
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="mt-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
         <FadeIn delay={0.22}>
           <ComingSoonWidget title="校园卡" icon={CreditCard} hint="余额与消费，Phase 2 上线" />
         </FadeIn>

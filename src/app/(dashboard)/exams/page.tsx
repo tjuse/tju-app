@@ -11,7 +11,7 @@ export default function ExamsPage() {
   const semesters = listSemesters();
 
   return (
-    <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-5 md:px-8">
       <PageHeader title="考试安排" subtitle="本学期考试时间与地点" icon={NotebookPen} />
       <FadeIn>
         <ExamsView semesters={semesters} initialSemester={semester} />

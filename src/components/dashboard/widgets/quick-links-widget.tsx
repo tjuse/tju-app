@@ -4,38 +4,37 @@ import { Card } from "@/components/ui/card";
 import { builtInLinks } from "@/features/links/builtin-links";
 
 export function QuickLinksWidget() {
-  // Show only the top 6 high-frequency links on the overview page
-  const links = builtInLinks.slice(0, 6);
+  // Show only the top high-frequency links on the overview page
+  const links = builtInLinks.slice(0, 7);
 
   return (
     <Card className="flex h-full flex-col p-0">
-      <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
-        <h3 className="flex items-center gap-2 font-display font-semibold text-[15px] text-[var(--color-text-high)]">
-          <span className="flex size-6 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
-            <Compass className="size-3.5" />
+      <div className="panel-head">
+        <h3 className="flex items-center gap-2 font-semibold text-[13px] text-[var(--color-text-high)]">
+          <span className="flex size-5 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+            <Compass className="size-3" />
           </span>
           常用入口
         </h3>
         <Link
           href="/links"
-          className="text-[12px] text-[var(--color-text-low)] transition-colors hover:text-[var(--color-accent)]"
+          className="text-[11px] text-[var(--color-text-low)] transition-colors hover:text-[var(--color-accent)]"
         >
           全部
         </Link>
       </div>
-      <div className="rule-hair mx-5" />
 
-      <ul className="flex-1 px-2 py-1">
+      <ul className="flex-1 px-1.5 py-1">
         {links.map((link) => (
           <li key={link.url}>
             <a
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 py-2 text-[13px] transition-colors hover:bg-[var(--color-bg-muted)]"
+              className="group flex h-8 items-center justify-between gap-2 rounded-[var(--radius-md)] px-2 text-[13px] transition-colors hover:bg-[var(--color-bg-muted)]"
             >
               <span className="truncate text-[var(--color-text-high)]">{link.title}</span>
-              <ArrowUpRight className="size-4 shrink-0 text-[var(--color-text-low)] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--color-accent)]" />
+              <ArrowUpRight className="size-3.5 shrink-0 text-[var(--color-text-low)] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--color-accent)]" />
             </a>
           </li>
         ))}

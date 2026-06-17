@@ -16,7 +16,7 @@ export default async function CoursesPage() {
   const initial = await queryCachedCourses(semester, { page: 1, pageSize: 30 });
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-5 md:px-8">
       <PageHeader title="公共课表" subtitle="全校开课课程库 · 可按学期检索" icon={Library} />
       <CoursesTabs />
       <FadeIn>

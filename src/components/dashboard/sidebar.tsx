@@ -34,7 +34,7 @@ export function Sidebar() {
       <Link
         href={item.href}
         className={cn(
-          "group flex h-8 items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 text-[13px] transition-colors",
+          "group flex h-7 items-center gap-2.5 rounded-[var(--radius-md)] px-2 text-[13px] transition-colors",
           active
             ? "bg-[var(--color-accent-subtle)] font-medium text-[var(--color-accent)]"
             : "text-[var(--color-text-mid)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text-high)]",
@@ -42,7 +42,7 @@ export function Sidebar() {
       >
         <Icon
           className={cn(
-            "size-[17px] shrink-0",
+            "size-[15px] shrink-0",
             active ? "text-[var(--color-accent)]" : "text-[var(--color-text-low)]",
           )}
         />
@@ -86,8 +86,8 @@ export function Sidebar() {
         )}
       >
         {/* Brand */}
-        <div className="flex h-14 items-center gap-2.5 border-[var(--color-border)] border-b px-3">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-accent)] font-display font-bold text-[13px] text-white">
+        <div className="flex h-12 items-center gap-2.5 border-[var(--color-border)] border-b px-3">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-accent)] font-display font-bold text-[12px] text-white">
             北
           </div>
           <span
@@ -102,7 +102,7 @@ export function Sidebar() {
 
         {/* Search */}
         {!collapsed && (
-          <div className="px-3 pt-3">
+          <div className="px-2.5 pt-2.5">
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-[var(--color-text-low)]" />
               <input
@@ -110,18 +110,18 @@ export function Sidebar() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="快速搜索"
                 aria-label="搜索导航"
-                className="h-8 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-base)] pr-2.5 pl-8 text-[13px] text-[var(--color-text-high)] placeholder:text-[var(--color-text-low)] focus-visible:border-[var(--color-accent)] focus-visible:outline-none"
+                className="h-7 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-base)] pr-2.5 pl-8 text-[13px] text-[var(--color-text-high)] placeholder:text-[var(--color-text-low)] focus-visible:border-[var(--color-accent)] focus-visible:outline-none"
               />
             </div>
           </div>
         )}
 
         {/* Nav */}
-        <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 py-3">
+        <nav className="flex flex-1 flex-col gap-3 overflow-y-auto px-2 py-2.5">
           {groups.map((group, gi) => (
-            <div key={group.label ?? `g${gi}`} className="flex flex-col gap-0.5">
+            <div key={group.label ?? `g${gi}`} className="flex flex-col gap-px">
               {group.label && !collapsed && (
-                <div className="nav-section px-2.5 pt-1 pb-1">{group.label}</div>
+                <div className="nav-section px-2 pt-1 pb-1.5">{group.label}</div>
               )}
               {group.items.map((item) => (
                 <NavLink key={item.href} item={item} />

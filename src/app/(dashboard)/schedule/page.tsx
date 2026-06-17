@@ -14,7 +14,7 @@ export default function SchedulePage() {
   const semesterCode = currentSemesterCode();
 
   return (
-    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-5 md:px-8">
       <PageHeader
         title="课程表"
         subtitle={`${semester.name} · 第 ${currentWeek} 周`}

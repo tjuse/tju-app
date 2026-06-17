@@ -45,20 +45,20 @@ export default function CalendarPage() {
   const week = getWeekOfSemester(current);
 
   return (
-    <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-5 md:px-8">
       <PageHeader title="校历" subtitle={current.name} icon={CalendarDays} />
-      {/* 当前周大卡片 */}
+      {/* 当前周卡片 */}
       <FadeIn>
-        <Card className="mb-6 flex items-center justify-between p-6">
+        <Card className="mb-3 flex items-center justify-between p-4">
           <div>
-            <p className="text-[13px] text-[var(--color-text-mid)]">{current.name}</p>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="gradient-text font-display font-semibold text-5xl">
+            <p className="text-[12px] text-[var(--color-text-mid)]">{current.name}</p>
+            <div className="mt-1.5 flex items-baseline gap-2">
+              <span className="gradient-text font-display font-semibold text-3xl tracking-tight">
                 {week ? `第 ${week} 周` : "假期中"}
               </span>
             </div>
           </div>
-          <div className="text-right text-[13px] text-[var(--color-text-low)]">
+          <div className="text-right font-mono text-[12px] text-[var(--color-text-low)] tabular-nums">
             <p>{current.startDate}</p>
             <p>~ {current.endDate}</p>
             <p className="mt-1">共 {current.totalWeeks} 周</p>
@@ -67,7 +67,7 @@ export default function CalendarPage() {
       </FadeIn>
 
       {/* 各学期事件 */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
         {semesters.map((semester, si) => (
           <FadeIn key={semester.id} delay={si * 0.05}>
             <Card>
