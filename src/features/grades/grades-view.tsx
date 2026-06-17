@@ -177,20 +177,20 @@ function ScoreTable({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Card className="p-4">
           <p className="text-[12px] text-[var(--color-text-mid)]">课程数</p>
-          <p className="mt-1 font-bold text-2xl text-[var(--color-text-high)] tabular-nums">
+          <p className="mt-1 font-display font-semibold text-2xl text-[var(--color-text-high)] tabular-nums">
             {scores.length}
           </p>
         </Card>
         <Card className="p-4">
           <p className="text-[12px] text-[var(--color-text-mid)]">总学分</p>
-          <p className="mt-1 font-bold text-2xl text-[var(--color-text-high)] tabular-nums">
+          <p className="mt-1 font-display font-semibold text-2xl text-[var(--color-text-high)] tabular-nums">
             {totalCredit.toFixed(1)}
           </p>
         </Card>
         {avgScore && (
           <Card className="p-4">
             <p className="text-[12px] text-[var(--color-text-mid)]">平均成绩</p>
-            <p className="mt-1 font-bold text-2xl text-[var(--color-text-high)] tabular-nums">
+            <p className="mt-1 font-display font-semibold text-2xl text-[var(--color-text-high)] tabular-nums">
               {avgScore}
             </p>
           </Card>

@@ -3,53 +3,78 @@
 /*
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * tju.app — Design System
- * 极简现代（Linear/Vercel 风）· 深色为主 · 天大北洋蓝强调色
+ * 中性·高密度 控制台风（参考 Cloudflare dashboard）· 浅色为主 · 北洋蓝强调
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  */
 
 @theme {
-  /* ─── 色彩 Token ──────────────────────────────────────────────── */
+  /* ─── 字体 ────────────────────────────────────────────────────── */
+  --font-display:
+    var(--font-sans-latin), ui-sans-serif, system-ui, "PingFang SC", "Noto Sans CJK SC",
+    "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  --font-sans:
+    var(--font-sans-latin), ui-sans-serif, system-ui, -apple-system, "PingFang SC",
+    "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  --font-mono: var(--font-mono-latin), ui-monospace, "JetBrains Mono", monospace;
 
-  /* 背景分层（深色） */
-  --color-bg-base:    #0a0a0b;  /* 最底层背景 */
-  --color-bg-subtle:  #111113;  /* 卡片背景 */
-  --color-bg-muted:   #18181b;  /* 悬停态、次层 */
-  --color-bg-overlay: #1f1f24;  /* 弹窗、下拉 */
+  /* ─── 圆角 —— 控制台风偏小 ────────────────────────────────────── */
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 9px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
 
-  /* 边框 */
-  --color-border:        #27272a;  /* 默认边框（低对比） */
-  --color-border-strong: #3f3f46;  /* 强调边框 */
+  /* ─── 色彩 Token —— 浅色（默认） ──────────────────────────────── */
+  /* 背景：中性灰底 + 白卡片 */
+  --color-bg-base: #f6f6f7;
+  --color-bg-subtle: #ffffff;
+  --color-bg-muted: #eeeef0;
+  --color-bg-overlay: #ffffff;
+
+  /* 边框（浅灰发丝） */
+  --color-border: #e5e5e8;
+  --color-border-strong: #d2d2d7;
 
   /* 文本三档 */
-  --color-text-high:   #f4f4f5;  /* 主内容 */
-  --color-text-mid:    #a1a1aa;  /* 次要内容 */
-  --color-text-low:    #52525b;  /* 占位/禁用 */
+  --color-text-high: #1b1b1f;
+  --color-text-mid: #64646e;
+  --color-text-low: #9a9aa3;
 
-  /* 天大北洋蓝 — 强调色系 */
-  --color-accent:        #3b82f6;  /* 深色背景下可见的亮版北洋蓝 */
-  --color-accent-hover:  #60a5fa;
-  --color-accent-muted:  #1d3a6e;  /* 低饱和背景用 */
-  --color-accent-subtle: #172554;  /* 极淡背景 */
+  /* 北洋蓝 —— 品牌锚色 + 唯一强调色（可整体替换主题色） */
+  --color-brand: #00468c;
+  --color-accent: #00468c;
+  --color-accent-hover: #0a3a70;
+  --color-accent-muted: #cfe0f3;
+  --color-accent-subtle: #eef4fc;
 
   /* 状态色 */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger:  #ef4444;
-  --color-info:    #3b82f6;
+  --color-success: #1a8f4c;
+  --color-warning: #b7791f;
+  --color-danger: #c93b34;
+  --color-info: #00468c;
 
-  /* ─── 字体 ────────────────────────────────────────────────────── */
-  --font-sans:
-    var(--font-geist-sans), "Inter", ui-sans-serif, system-ui, -apple-system,
-    "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC",
-    "Microsoft YaHei", sans-serif;
-  --font-mono: var(--font-geist-mono), "JetBrains Mono", ui-monospace, monospace;
+  /* 卡片阴影（控制台风轻微浮起） */
+  --shadow-card: 0 1px 2px rgba(17, 24, 39, 0.05), 0 1px 1px rgba(17, 24, 39, 0.03);
+}
 
-  /* ─── 圆角 ────────────────────────────────────────────────────── */
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;   /* 主要卡片 */
-  --radius-xl:   24px;
-  --radius-full: 9999px;
+/* ─── 深色模式（next-themes 切换 .dark）—— 中性深灰 ───────────────── */
+.dark {
+  color-scheme: dark;
+  --color-bg-base: #0c0d10;
+  --color-bg-subtle: #151619;
+  --color-bg-muted: #1e2025;
+  --color-bg-overlay: #22252c;
+  --color-border: #292c33;
+  --color-border-strong: #3c4049;
+  --color-text-high: #ececee;
+  --color-text-mid: #9a9ca4;
+  --color-text-low: #5f626b;
+  --color-brand: #00468c;
+  --color-accent: #4f8fe0;
+  --color-accent-hover: #6ea4ea;
+  --color-accent-muted: #173255;
+  --color-accent-subtle: #11233a;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── 基础重置 ───────────────────────────────────────────────────── */
@@ -61,7 +86,7 @@
   }
 
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html {
@@ -70,6 +95,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    font-variant-numeric: tabular-nums;
   }
 
   body {
@@ -78,24 +104,6 @@
     font-family: var(--font-sans);
     min-height: 100dvh;
     overflow-x: hidden;
-  }
-
-  /* 浅色模式（next-themes 切换 .light class） */
-  .light {
-    color-scheme: light;
-    --color-bg-base: #ffffff;
-    --color-bg-subtle: #f9f9fb;
-    --color-bg-muted: #f3f4f6;
-    --color-bg-overlay: #ffffff;
-    --color-border: #e5e7eb;
-    --color-border-strong: #d1d5db;
-    --color-text-high: #09090b;
-    --color-text-mid: #6b7280;
-    --color-text-low: #9ca3af;
-    --color-accent: #1d4ed8;
-    --color-accent-hover: #1e40af;
-    --color-accent-muted: #dbeafe;
-    --color-accent-subtle: #eff6ff;
   }
 
   ::selection {
@@ -110,18 +118,22 @@
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: var(--color-border-strong);
+    border: 3px solid transparent;
+    background-clip: padding-box;
     border-radius: var(--radius-full);
   }
   ::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-low);
+    background-clip: padding-box;
+    border: 3px solid transparent;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -137,20 +149,21 @@
 
 /* ─── 工具类扩展 ─────────────────────────────────────────────────── */
 @layer utilities {
+  /* 卡片：白底、发丝边、轻微阴影 */
   .card {
     background-color: var(--color-bg-subtle);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
     transition:
       border-color 150ms ease-out,
-      box-shadow 150ms ease-out;
+      box-shadow 150ms ease-out,
+      background-color 150ms ease-out;
   }
-
   .card:hover {
     border-color: var(--color-border-strong);
   }
 
-  /* Interactive card / surface — calm highlight on hover, no movement */
   .card-interactive {
     cursor: pointer;
     transition:
@@ -158,15 +171,33 @@
       border-color 150ms ease-out,
       box-shadow 150ms ease-out;
   }
-
   .card-interactive:hover {
-    background-color: var(--color-bg-muted);
     border-color: var(--color-border-strong);
+    box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
   }
 
-  /* 深色下微弱内发光 */
+  /* 兼容旧用法（已并入 .card 的阴影），保留为空操作以免破坏调用点 */
   .card-glow {
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    box-shadow: var(--shadow-card);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  /* 分组小标题：侧栏分区/栏目 */
+  .nav-section {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--color-text-low);
+  }
+
+  /* 发丝分隔线 */
+  .rule-hair {
+    height: 1px;
+    background: var(--color-border);
   }
 
   .text-balance {
@@ -176,15 +207,13 @@
     text-wrap: pretty;
   }
 
-  /* 渐变文本（北洋蓝） */
   .gradient-text {
-    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+    background: linear-gradient(120deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* 骨架屏 */
   .skeleton {
     background: linear-gradient(
       90deg,
@@ -196,7 +225,6 @@
     animation: skeleton-shimmer 1.5s ease-in-out infinite;
     border-radius: var(--radius-md);
   }
-
   @keyframes skeleton-shimmer {
     0% {
       background-position: 200% 0;
@@ -209,9 +237,10 @@
   /* 课程大纲 markdown 排版 */
   .prose-tju :where(h1, h2, h3, h4) {
     color: var(--color-text-high);
+    font-family: var(--font-display);
     font-weight: 600;
-    margin: 1em 0 0.4em;
-    font-size: 0.95rem;
+    margin: 1.1em 0 0.4em;
+    font-size: 1rem;
   }
   .prose-tju p {
     margin: 0.5em 0;
@@ -243,15 +272,14 @@
     text-decoration: underline;
   }
 
-  /* 入场动效（纯 CSS，无需 JS 即可显示 —— 比 framer 更稳健） */
+  /* 入场动效 */
   .animate-fade-in-up {
-    animation: fade-in-up 0.32s ease-out both;
+    animation: fade-in-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-
   @keyframes fade-in-up {
     from {
       opacity: 0;
-      transform: translateY(var(--fade-y, 8px));
+      transform: translateY(var(--fade-y, 6px));
     }
     to {
       opacity: 1;

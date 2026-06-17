@@ -1,6 +1,6 @@
-import { ArrowUpRight, Link2 } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { builtInLinks } from "@/features/links/builtin-links";
 
 export function QuickLinksWidget() {
@@ -8,35 +8,35 @@ export function QuickLinksWidget() {
   const links = builtInLinks.slice(0, 6);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Link2 className="size-4 text-[var(--color-accent)]" />
+    <Card className="flex h-full flex-col p-0">
+      <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
+        <h3 className="font-display font-semibold text-[15px] text-[var(--color-text-high)]">
           常用入口
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {links.map((link) => (
+        </h3>
+        <Link
+          href="/links"
+          className="text-[12px] text-[var(--color-text-low)] transition-colors hover:text-[var(--color-accent)]"
+        >
+          全部
+        </Link>
+      </div>
+      <div className="rule-hair mx-5" />
+
+      <ul className="flex-1 px-2 py-1">
+        {links.map((link) => (
+          <li key={link.url}>
             <a
-              key={link.url}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-base)] px-3 py-2.5 text-sm transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-bg-muted)]"
+              className="group flex items-center justify-between gap-2 rounded-[var(--radius-md)] px-3 py-2 text-[13px] transition-colors hover:bg-[var(--color-bg-muted)]"
             >
               <span className="truncate text-[var(--color-text-high)]">{link.title}</span>
-              <ArrowUpRight className="size-3.5 shrink-0 text-[var(--color-text-low)] transition-colors group-hover:text-[var(--color-accent)]" />
+              <ArrowUpRight className="size-4 shrink-0 text-[var(--color-text-low)] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--color-accent)]" />
             </a>
-          ))}
-        </div>
-        <Link
-          href="/links"
-          className="mt-3 inline-block text-[13px] text-[var(--color-accent)] hover:underline"
-        >
-          查看全部链接 →
-        </Link>
-      </CardContent>
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 }

@@ -14,6 +14,10 @@ function getGreeting(hour: number): string {
 
 const WEEKDAYS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
+/**
+ * Editorial masthead — eyebrow + serif greeting + monospaced dateline.
+ * Time re-syncs after hydration and ticks every 30s.
+ */
 export function Greeting({ name }: { name?: string }) {
   const [now, setNow] = useState(() => new Date());
 
@@ -24,15 +28,31 @@ export function Greeting({ name }: { name?: string }) {
     return () => clearInterval(timer);
   }, []);
 
-  const dateStr = `${now.getMonth() + 1}月${now.getDate()}日 ${WEEKDAYS[now.getDay()]}`;
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const weekday = WEEKDAYS[now.getDay()];
+  const time = now.toLocaleTimeString("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 
   return (
-    <div>
-      <h2 className="font-semibold text-2xl text-[var(--color-text-high)] tracking-tight">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 className="font-display font-semibold text-2xl text-[var(--color-text-high)] tracking-tight">
         {getGreeting(now.getHours())}
-        {name ? `，${name}` : ""}
+        {name ? <span className="text-[var(--color-text-mid)]">，{name}</span> : ""}
       </h2>
-      <p className="mt-1 text-[var(--color-text-mid)] text-sm">{dateStr}</p>
+      <div className="flex items-center gap-2 font-mono text-[12px] text-[var(--color-text-mid)]">
+        <span>
+          {year}-{month}-{day}
+        </span>
+        <span className="text-[var(--color-text-low)]">·</span>
+        <span>{weekday}</span>
+        <span className="text-[var(--color-text-low)]">·</span>
+        <span className="tabular-nums text-[var(--color-accent)]">{time}</span>
+      </div>
     </div>
   );
 }

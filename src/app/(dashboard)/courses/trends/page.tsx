@@ -1,5 +1,7 @@
+import { TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { Header } from "@/components/dashboard/header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Card } from "@/components/ui/card";
 import { CoursesTabs } from "@/features/courses/courses-tabs";
@@ -31,32 +33,31 @@ export default async function TrendsPage() {
   ).filter((s): s is SemesterSnapshot => s !== null);
 
   return (
-    <>
-      <Header title="公共课表" subtitle={`开课趋势 · ${snapshots.length} 个学期数据`} />
-      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
-        <CoursesTabs />
-        {snapshots.length < 2 ? (
-          <Card className="flex flex-col items-center gap-3 py-20 text-center">
-            <p className="font-medium text-[var(--color-text-high)]">
-              需要至少 2 个学期的数据才能显示趋势
-            </p>
-            <p className="text-[13px] text-[var(--color-text-mid)]">
-              当前仅有 {snapshots.length} 个学期数据。请先到「浏览」页抓取更多学期的课程。
-            </p>
-            <Link
-              href="/courses"
-              className="text-[13px] text-[var(--color-accent)] hover:underline"
-            >
-              去浏览页抓取 →
-            </Link>
-          </Card>
-        ) : (
-          <FadeIn>
-            <TrendsContent snapshots={snapshots} />
-          </FadeIn>
-        )}
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+      <PageHeader title="公共课表" subtitle={`开课趋势 · ${snapshots.length} 个学期数据`} />
+      <CoursesTabs />
+      {snapshots.length < 2 ? (
+        <Card>
+          <EmptyState
+            icon={TrendingUp}
+            title="需要至少 2 个学期的数据才能显示趋势"
+            description={`当前仅有 ${snapshots.length} 个学期数据。请先到「浏览」页抓取更多学期的课程。`}
+            action={
+              <Link
+                href="/courses"
+                className="text-[13px] text-[var(--color-accent)] hover:underline"
+              >
+                去浏览页抓取 →
+              </Link>
+            }
+          />
+        </Card>
+      ) : (
+        <FadeIn>
+          <TrendsContent snapshots={snapshots} />
+        </FadeIn>
+      )}
+    </div>
   );
 }
 
@@ -77,11 +78,11 @@ function TrendsContent({ snapshots }: { snapshots: SemesterSnapshot[] }) {
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {recentTiles.map((p) => (
-            <Card key={p.semester} className="p-4">
+            <Card key={p.semester} className="px-4 py-3.5">
               <p className="truncate text-[11px] text-[var(--color-text-low)]">
                 {semesterLabel(p.semester)}
               </p>
-              <p className="mt-1 font-bold text-xl text-[var(--color-text-high)] tabular-nums">
+              <p className="mt-1 font-display font-semibold text-xl text-[var(--color-text-high)] tabular-nums">
                 {p.count.toLocaleString()}
               </p>
               <p className="text-[11px] text-[var(--color-text-mid)]">门课程</p>

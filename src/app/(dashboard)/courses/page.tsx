@@ -1,4 +1,4 @@
-import { Header } from "@/components/dashboard/header";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { CoursesBrowser } from "@/features/courses/courses-browser";
 import { CoursesTabs } from "@/features/courses/courses-tabs";
@@ -15,18 +15,16 @@ export default async function CoursesPage() {
   const initial = await queryCachedCourses(semester, { page: 1, pageSize: 30 });
 
   return (
-    <>
-      <Header title="公共课表" subtitle="全校开课课程库 · 可按学期检索" />
-      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
-        <CoursesTabs />
-        <FadeIn>
-          <CoursesBrowser semesters={semesters} initialSemester={semester} initial={initial} />
-        </FadeIn>
-        <p className="mt-6 text-[12px] text-[var(--color-text-low)]">
-          数据来自天津大学教务系统（EAMS），经 tju 抓取并缓存。当前默认学期：
-          {semesterLabel(semester)}。
-        </p>
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+      <PageHeader title="公共课表" subtitle="全校开课课程库 · 可按学期检索" />
+      <CoursesTabs />
+      <FadeIn>
+        <CoursesBrowser semesters={semesters} initialSemester={semester} initial={initial} />
+      </FadeIn>
+      <p className="mt-6 text-[12px] text-[var(--color-text-low)]">
+        数据来自天津大学教务系统（EAMS），经 tju 抓取并缓存。当前默认学期：
+        {semesterLabel(semester)}。
+      </p>
+    </div>
   );
 }

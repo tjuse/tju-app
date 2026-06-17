@@ -90,19 +90,18 @@ src/
 
 ## Design System (must follow)
 
-Minimal modern (Linear/Vercel aesthetic) · **dark-first** · generous whitespace · restrained micro-animations · accent = **Beiyang Blue**.
+**Light, neutral, high-density console** (modeled on the Cloudflare dashboard) · **light-first** (neutral gray ground, white cards) · **Beiyang Blue is the sole accent** · **less is more**. Full design language: the skill **`.claude/skills/tju-ui-design/SKILL.md`** (read it before building UI); token/spec reference: `docs/DESIGN_SYSTEM.md`.
 
-- Spacing: 8px base grid. Cards: `rounded-[var(--radius-lg)]` (16px). Low-contrast borders + subtle inner glow (`card-glow`).
-- Text: three contrast levels: `--color-text-high/mid/low`. Accent only for primary actions, active states, data highlights.
-- States: every feature must have loading (skeleton `<Skeleton>`), empty state, and error state — all intentionally designed.
-- Entrance animation: `<FadeIn>` (opacity + micro translateY, ~220ms ease-out). Lists use stagger with `delay` prop.
-- Accessibility: WCAG AA contrast, `:focus-visible`, keyboard reachable, `prefers-reduced-motion` degraded.
-- All colors via CSS variables (`var(--color-*)`). **Never hardcode hex values** (chart palettes in `stats-charts.tsx` are the only exception).
-- **No left-edge accent bars (forbidden).** Never highlight a block (schedule course cell, list item, card, alert, etc.) with a colored *left border / left edge stripe* (`border-l-*`, `borderLeft`). It looks dated and ugly. To convey a category color, fill the whole block with a low-opacity tint plus a full subtle border, or use a small inline color dot — never an edge bar.
-- **Content width.** Page containers use a centered `max-w-*` wrapper; keep main content comfortably wide (avoid oversized side gutters). Current tiers: dense data pages (courses/schedule/stats/trends/compare/conflict/favorites) `max-w-7xl`; standard pages (home/grades/links) `max-w-6xl`; reading/narrow pages (calendar/exams) `max-w-5xl`; placeholder pages `max-w-4xl`.
-- **No native form controls for selection.** Use the custom `Select` (`src/components/ui/select.tsx`) instead of a raw `<select>`, so the dropdown list follows the design tokens. Native `<select>` option lists cannot be themed.
-
-See `docs/DESIGN_SYSTEM.md` for details.
+- **Less is more — no decorative micro-text (forbidden).** No redundant eyebrows, no bilingual EN/CN captions next to a CN heading (`校园卡 · Card`), no figure/coordinate tags (`FIG.01 · Today`), no ornamental index numbers (`01 02 03`). Show the heading + real data only.
+- **No left-edge accent bars (forbidden).** Never highlight a block with a colored *left border / edge stripe* (`border-l-*`, `borderLeft`). Use a full low-opacity tint + subtle border, or a small inline color dot.
+- **No native form controls for selection.** Use the custom `Select` (`src/components/ui/select.tsx`).
+- **One accent.** Beiyang Blue only (`--color-accent`, light `#00468c` / dark brighter `#4f8fe0` — “深底亮版”), swappable as the future theme color. No second decorative hue.
+- All colors via CSS variables (`var(--color-*)`). **Never hardcode hex** (chart palettes in `stats-charts.tsx` / `timetable.tsx` are the only exception).
+- Surfaces: page = `--color-bg-base` (gray), cards = white `--color-bg-subtle` + `--shadow-card`. Spacing dense; gaps `gap-3`; radius `lg 9px`.
+- Text: three levels `--color-text-high/mid/low`. Headings `.font-display font-semibold`; numbers `tabular-nums`.
+- **Layout.** Slim global top bar (theme toggle only) lives in the dashboard layout; each page renders `<PageHeader>` (title + subtitle + actions) as its first content element. Centered `max-w-*` wrapper, tiers: dense data pages `max-w-7xl`; standard (home/grades/links) `max-w-6xl`; reading (calendar/exams) `max-w-5xl`; placeholders `max-w-4xl`.
+- Reusable: `PageHeader`, `EmptyState`, `StatLedger` (metric tiles), grouped collapsible `Sidebar` (width + opacity animation only — no per-label `max-width`).
+- States: every feature must have loading (`<Skeleton>`), empty (`EmptyState`), and error states. Entrance: `<FadeIn>` with `delay` stagger. Accessibility: WCAG AA, `:focus-visible`, keyboard reachable, `prefers-reduced-motion` degraded.
 
 ## Commands
 

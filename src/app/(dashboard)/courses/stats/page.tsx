@@ -1,5 +1,7 @@
+import { BarChart3 } from "lucide-react";
 import Link from "next/link";
-import { Header } from "@/components/dashboard/header";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Card } from "@/components/ui/card";
 import { CoursesTabs } from "@/features/courses/courses-tabs";
@@ -22,28 +24,29 @@ export default async function StatsPage({
   const cached = await readCachedCourses(semester);
 
   return (
-    <>
-      <Header title="公共课表" subtitle={`课程统计 · ${semesterLabel(semester)}`} />
-      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
-        <CoursesTabs />
-        {!cached ? (
-          <Card className="flex flex-col items-center gap-3 py-20 text-center">
-            <p className="font-medium text-[var(--color-text-high)]">该学期尚无数据</p>
-            <p className="text-[13px] text-[var(--color-text-mid)]">
-              请先到「浏览」页抓取该学期课程，再来看统计。
-            </p>
-            <Link
-              href="/courses"
-              className="text-[13px] text-[var(--color-accent)] hover:underline"
-            >
-              去浏览页抓取 →
-            </Link>
-          </Card>
-        ) : (
-          <StatsContent semester={semester} courses={cached.result.courses} />
-        )}
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+      <PageHeader title="公共课表" subtitle={`课程统计 · ${semesterLabel(semester)}`} />
+      <CoursesTabs />
+      {!cached ? (
+        <Card>
+          <EmptyState
+            icon={BarChart3}
+            title="该学期尚无数据"
+            description="请先到「浏览」页抓取该学期课程，再来看统计。"
+            action={
+              <Link
+                href="/courses"
+                className="text-[13px] text-[var(--color-accent)] hover:underline"
+              >
+                去浏览页抓取 →
+              </Link>
+            }
+          />
+        </Card>
+      ) : (
+        <StatsContent semester={semester} courses={cached.result.courses} />
+      )}
+    </div>
   );
 }
 
@@ -59,17 +62,16 @@ function StatsContent({
     { label: "本科", value: stats.undergraduate },
     { label: "研究生", value: stats.graduate },
     { label: "课程类别", value: stats.byCourseType.filter((t) => t.name !== "其他").length },
-    { label: "开课教师", value: stats.topTeachers.length > 0 ? "Top 10" : 0 },
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <FadeIn>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {tiles.slice(0, 4).map((t) => (
-            <Card key={t.label} className="p-4">
+          {tiles.map((t) => (
+            <Card key={t.label} className="px-4 py-3.5">
               <p className="text-[12px] text-[var(--color-text-mid)]">{t.label}</p>
-              <p className="mt-1 font-bold text-2xl text-[var(--color-text-high)] tabular-nums">
+              <p className="mt-1.5 font-display font-semibold text-[1.75rem] text-[var(--color-text-high)] leading-none tabular-nums">
                 {t.value}
               </p>
             </Card>

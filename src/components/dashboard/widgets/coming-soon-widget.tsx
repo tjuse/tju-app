@@ -13,24 +13,19 @@ interface ComingSoonWidgetProps {
  */
 export function ComingSoonWidget({ title, icon: Icon, hint }: ComingSoonWidgetProps) {
   return (
-    <Card className="relative flex flex-col justify-between overflow-hidden p-5">
-      <div className="flex items-center justify-between text-[var(--color-text-mid)]">
-        <span className="flex items-center gap-2 text-[13px]">
+    <Card className="flex h-full flex-col justify-between gap-3 p-5">
+      <div className="flex items-start justify-between">
+        <h3 className="flex items-center gap-2 font-display font-semibold text-[15px] text-[var(--color-text-mid)]">
           <Icon className="size-4 text-[var(--color-text-low)]" />
           {title}
-        </span>
-        <span className="rounded-[var(--radius-full)] bg-[var(--color-bg-muted)] px-2 py-0.5 text-[10px] text-[var(--color-text-low)]">
+        </h3>
+        <span className="rounded-[var(--radius-sm)] border border-[var(--color-border)] px-2 py-0.5 text-[11px] text-[var(--color-text-low)]">
           待上线
         </span>
       </div>
-      <div className="mt-4">
-        <div className="flex items-baseline gap-1">
-          <span className="font-bold text-3xl text-[var(--color-text-low)] tracking-tight">——</span>
-        </div>
-        <p className="mt-1 text-[12px] text-[var(--color-text-low)]">
-          {hint ?? "需校园统一认证，敬请期待"}
-        </p>
-      </div>
+      <p className="text-[13px] text-[var(--color-text-low)]">
+        {hint ?? "需校园统一认证，敬请期待"}
+      </p>
     </Card>
   );
 }

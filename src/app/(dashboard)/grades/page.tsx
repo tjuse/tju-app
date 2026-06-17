@@ -1,4 +1,4 @@
-import { Header } from "@/components/dashboard/header";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { GradesView } from "@/features/grades/grades-view";
 
@@ -6,13 +6,11 @@ export const metadata = { title: "成绩" };
 
 export default function GradesPage() {
   return (
-    <>
-      <Header title="成绩" subtitle="历史成绩查询" />
-      <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-8 md:px-8">
-        <FadeIn>
-          <GradesView />
-        </FadeIn>
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
+      <PageHeader title="成绩" subtitle="历史成绩查询" />
+      <FadeIn>
+        <GradesView />
+      </FadeIn>
+    </div>
   );
 }

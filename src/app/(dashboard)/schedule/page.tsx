@@ -1,4 +1,4 @@
-import { Header } from "@/components/dashboard/header";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { getCurrentSemester } from "@/features/calendar/calendar-data";
 import { getWeekOfSemester } from "@/features/calendar/utils";
@@ -13,17 +13,15 @@ export default function SchedulePage() {
   const semesterCode = currentSemesterCode();
 
   return (
-    <>
-      <Header title="课程表" subtitle={`${semester.name} · 第 ${currentWeek} 周`} />
-      <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8">
-        <FadeIn>
-          <ScheduleClient
-            semesterCode={semesterCode}
-            semesterName={semester.name}
-            currentWeek={currentWeek}
-          />
-        </FadeIn>
-      </div>
-    </>
+    <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
+      <PageHeader title="课程表" subtitle={`${semester.name} · 第 ${currentWeek} 周`} />
+      <FadeIn>
+        <ScheduleClient
+          semesterCode={semesterCode}
+          semesterName={semester.name}
+          currentWeek={currentWeek}
+        />
+      </FadeIn>
+    </div>
   );
 }

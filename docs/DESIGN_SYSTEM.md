@@ -1,80 +1,62 @@
 # Design System — tju.app
 
-**Style**: minimal modern (Linear / Vercel aesthetic) · dark-first · generous whitespace · restrained micro-animations · Beiyang Blue accent.
+**Style**: a light, neutral, **high-density console** modeled on the Cloudflare
+dashboard. The full, authoritative design language lives in the project skill
+**`.claude/skills/tju-ui-design/SKILL.md`** — read it before building UI. This
+file is the quick token/spec reference.
 
-All tokens are defined in the `@theme` block of `src/app/globals.css` and used via `var(--*)`. **Never hardcode color hex values** (data palettes for charts are the only exception).
+## Hard rules (never break)
 
-## Color
+- **Less is more — no decorative micro-text** (no eyebrows, EN/CN captions,
+  `FIG.0x` tags, ornamental index numbers).
+- **No left-edge accent bars** — use a full tint + border, or a small dot.
+- **No native `<select>`** — use the custom `Select`.
+- **One accent = Beiyang Blue** (`--color-accent`), swappable as the theme color;
+  dark mode uses a brighter sibling (“深底亮版”).
+- **All color via tokens**; never hardcode hex (chart palettes excepted).
 
-### Background layers (dark mode)
-| Token | Value | Usage |
+## Color (tokens in `globals.css`)
+
+Light is the default; `.dark` overrides. Neutral grayscale surfaces, white cards.
+
+| Token | Light | Dark |
 |---|---|---|
-| `--color-bg-base` | `#0a0a0b` | Deepest page background |
-| `--color-bg-subtle` | `#111113` | Card background |
-| `--color-bg-muted` | `#18181b` | Hover state, secondary layer |
-| `--color-bg-overlay` | `#1f1f24` | Modals, dropdowns |
+| `--color-bg-base` (page) | `#f6f6f7` | `#0c0d10` |
+| `--color-bg-subtle` (card) | `#ffffff` | `#151619` |
+| `--color-bg-muted` (hover) | `#eeeef0` | `#1e2025` |
+| `--color-bg-overlay` | `#ffffff` | `#22252c` |
+| `--color-border` | `#e5e5e8` | `#292c33` |
+| `--color-text-high/mid/low` | `#1b1b1f / #64646e / #9a9aa3` | `#ececee / #9a9ca4 / #5f626b` |
+| `--color-accent` (Beiyang Blue) | `#00468c` | `#4f8fe0` |
+| `--shadow-card` | faint | subtle |
 
-### Text (three contrast levels)
-| Token | Usage |
-|---|---|
-| `--color-text-high` | Primary content, headings, body |
-| `--color-text-mid` | Secondary descriptions |
-| `--color-text-low` | Placeholder / disabled / timestamps |
+Status: `--color-success / warning / danger`.
 
-### Borders
-`--color-border` (default low-contrast) · `--color-border-strong` (hover / emphasis)
+## Type
 
-### Accent (Beiyang Blue)
-| Token | Dark value | Usage |
-|---|---|---|
-| `--color-accent` | `#3b82f6` | Primary actions, active state, icon highlight |
-| `--color-accent-hover` | `#60a5fa` | Hover |
-| `--color-accent-muted` | `#1d3a6e` | Low-saturation background |
-| `--color-accent-subtle` | `#172554` | Very faint background (badges, current column) |
+- One neutral grotesk (`--font-display` = same family, heavier) + `--font-mono`
+  for figures/times/IDs. `tabular-nums` everywhere numbers appear.
+- Scale: page title `text-xl font-semibold` · card/section title `text-[15px]
+  font-semibold` · body `text-[13px]` · secondary `text-[12px]` · micro `[11px]`.
 
-> Light mode redefines the same variable names under the `.light` class (accent uses deeper `#1d4ed8` for sufficient contrast).
+## Spacing & shape
 
-### Status colors
-`--color-success` · `--color-warning` · `--color-danger` · `--color-info`
+Dense. Card padding 16–20px · grid gaps `gap-3` · list rows `py-2`–`2.5` with
+`rule-hair` dividers. Radius `sm 5 / md 7 / lg 9 / xl 12`.
 
-## Spacing & Radius
+## Key components
 
-- Spacing: **8px base grid** (matches Tailwind's default scale).
-- Radius: `--radius-sm 6` · `md 10` · **`lg 16` (primary cards)** · `xl 24` · `full`.
+`PageHeader` (in-content title + subtitle + actions) · slim global top bar (theme
+toggle only) · grouped collapsible `Sidebar` with quick-search · metric tiles
+(`StatLedger`) · panel cards with header + `rule-hair` + rows · `EmptyState` ·
+`Card` · `Button` · `Badge` (subtle chip) · `Select` · data tables (small gray
+headers, hairline rows). Collection cards for course grids.
 
-## Typography
+## States (mandatory)
 
-- Sans-serif: Geist → Inter → system → PingFang / Source Han Sans (Chinese fallback).
-- Type scale (Tailwind): heading `text-2xl/lg font-semibold tracking-tight`, body `text-sm`, caption `text-[13px]`, micro `text-[12px]/[11px]`.
-- Numbers use `tabular-nums` (time, amounts, counts — for alignment).
-
-## Components
-
-- Base components in `src/components/ui`: `Button` (6 variants), `Card`, `Badge`, `Skeleton`.
-- Cards use `.card` + `.card-glow` (encapsulated in the `Card` component).
-- Utility classes: `.gradient-text` (Beiyang Blue gradient heading), `.skeleton` (loading animation), `.text-pretty/.text-balance`.
-
-## Animation
-
-- Entrance: `<FadeIn delay={...}>` — opacity + translateY(8px), 220ms ease-out.
-- Lists: stagger with the `delay` prop on each `<FadeIn>`.
-- Micro-interactions: buttons `active:scale-[0.98]`; card hover lifts border brightness slightly.
-- Principle: **restrained, fluid, no showboating**. Respects `prefers-reduced-motion` (globally degraded in `globals.css`).
-
-## State Design (mandatory)
-
-Every data view must cover:
-1. **Loading**: `<Skeleton>` with a shape that matches the real content.
-2. **Empty state**: friendly copy + a guiding action (e.g. "Add a course →").
-3. **Error state**: readable Chinese message + retry entry point.
+Loading (`<Skeleton>`) · empty (`EmptyState`) · error (Chinese message + retry).
 
 ## Accessibility
 
-- Contrast ≥ WCAG AA.
-- `:focus-visible` globally has a 2px Beiyang Blue outline.
-- Touch targets ≥ 44px (mobile).
-- Icon-only buttons must have `aria-label`.
-
-## Responsive
-
-Mobile: single-column stack with bottom tab bar → `md` breakpoint: sidebar + multi-column Bento grid. Breakpoints use Tailwind defaults (`sm/md/lg`).
+WCAG AA · `:focus-visible` blue outline · ≥44px touch targets · `aria-label` on
+icon-only buttons · `prefers-reduced-motion` degraded.

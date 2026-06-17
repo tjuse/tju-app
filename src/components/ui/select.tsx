@@ -146,8 +146,10 @@ function Select({
         onClick={() => !disabled && setOpen((v) => !v)}
         onKeyDown={onKeyDown}
         className={cn(
-          "flex h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-base)] py-1 pr-2.5 pl-3 text-left text-sm text-[var(--color-text-high)] transition-colors",
-          "hover:border-[var(--color-border-strong)]",
+          "flex h-9 w-full items-center justify-between gap-2 rounded-[var(--radius-md)] border bg-[var(--color-bg-subtle)] py-1 pr-2.5 pl-3 text-left text-sm text-[var(--color-text-high)] transition-colors",
+          open
+            ? "border-[var(--color-accent)] bg-[var(--color-bg-muted)]"
+            : "border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-bg-muted)]",
           "focus-visible:border-[var(--color-accent)] focus-visible:outline-none",
           "disabled:cursor-not-allowed disabled:opacity-50",
         )}
@@ -157,8 +159,8 @@ function Select({
         </span>
         <ChevronDown
           className={cn(
-            "size-4 shrink-0 text-[var(--color-text-low)] transition-transform",
-            open && "rotate-180",
+            "size-4 shrink-0 text-[var(--color-text-low)] transition-transform duration-200",
+            open && "rotate-180 text-[var(--color-accent)]",
           )}
         />
       </button>
@@ -168,7 +170,7 @@ function Select({
           id={listId}
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute top-full left-0 z-50 mt-1 max-h-64 min-w-full overflow-y-auto rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-overlay)] p-1 shadow-lg animate-fade-in-up [--fade-y:4px]"
+          className="absolute top-full left-0 z-50 mt-1.5 max-h-64 min-w-full animate-fade-in-up overflow-y-auto overscroll-contain rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-[var(--color-bg-overlay)] p-1 shadow-xl shadow-black/30 [--fade-y:4px]"
         >
           {items.map((opt, idx) => {
             const isSelected = opt.value === value;
@@ -183,12 +185,12 @@ function Select({
                 onMouseEnter={() => setActive(idx)}
                 onClick={() => commit(idx)}
                 className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-left text-sm",
+                  "flex w-full items-center justify-between gap-2 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors",
                   "disabled:cursor-not-allowed disabled:opacity-50",
                   isActive && !opt.disabled
                     ? "bg-[var(--color-bg-muted)] text-[var(--color-text-high)]"
                     : "text-[var(--color-text-mid)]",
-                  isSelected && "text-[var(--color-text-high)]",
+                  isSelected && "font-medium text-[var(--color-text-high)]",
                 )}
               >
                 <span className="truncate">{opt.label}</span>

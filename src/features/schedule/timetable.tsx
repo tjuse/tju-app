@@ -10,8 +10,8 @@ const SLOTS = Array.from({ length: 12 }, (_, i) => i + 1);
 /** Height of one class period, in px. Drives both the grid lines and blocks. */
 const ROW_H = 58;
 
-// 课程色板（北洋蓝为主，辅以协调色）
-const COLORS = ["#3b82f6", "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#6366f1"];
+// 课程色板（北洋蓝为主，辅以协调冷色；分类色板，允许硬编码）
+const COLORS = ["#2f74d6", "#6366f1", "#06b6d4", "#10b981", "#8b5cf6", "#ec4899", "#0ea5e9"];
 
 function colorFor(course: Course, index: number): string {
   return course.color ?? COLORS[index % COLORS.length];
@@ -55,24 +55,21 @@ export function Timetable({ courses, week }: TimetableProps) {
 
         {/* 课表主体：日历式时间轴 */}
         <div className="mt-1 grid grid-cols-[56px_repeat(7,1fr)] gap-1">
-          {/* 时间列：每节课起止时间，节次之间以横线分隔 */}
+          {/* 时间列：节次为主、起始时间贴在网格线上（日历式，去除冗余） */}
           <div className="relative" style={{ height: bodyHeight }}>
             {SLOTS.map((slot) => {
-              const { start, end } = slotToTime(slot);
+              const { start } = slotToTime(slot);
               return (
                 <div
                   key={slot}
-                  className="absolute inset-x-0 flex flex-col justify-between border-[var(--color-border)]/60 border-t py-1 pr-1 text-right"
-                  style={{ top: (slot - 1) * ROW_H, height: ROW_H }}
+                  className="absolute inset-x-0 flex items-center justify-end gap-1.5 pr-2 pt-1.5"
+                  style={{ top: (slot - 1) * ROW_H, height: 16 }}
                 >
-                  <span className="font-medium text-[10px] text-[var(--color-text-mid)] tabular-nums">
+                  <span className="font-mono text-[10px] text-[var(--color-text-low)] tabular-nums">
                     {start}
                   </span>
-                  <span className="font-semibold text-[12px] text-[var(--color-text-low)] leading-none">
+                  <span className="font-medium text-[11px] text-[var(--color-text-mid)] tabular-nums">
                     {slot}
-                  </span>
-                  <span className="text-[10px] text-[var(--color-text-low)] tabular-nums">
-                    {end}
                   </span>
                 </div>
               );
