@@ -101,7 +101,7 @@ export function GradesView() {
   }, [refresh]);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export function GradesView() {
       </div>
 
       {error && (
-        <div className="rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-4 py-2.5 text-[13px] text-[var(--color-danger)]">
+        <div className="rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-3.5 py-2 text-[13px] text-[var(--color-danger)]">
           {error}
         </div>
       )}
@@ -172,25 +172,25 @@ function ScoreTable({
       : null;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* Summary tiles */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <Card className="p-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+        <Card className="px-3.5 py-3">
           <p className="text-[12px] text-[var(--color-text-mid)]">课程数</p>
-          <p className="mt-1 font-display font-semibold text-2xl text-[var(--color-text-high)] tabular-nums">
+          <p className="mt-1.5 font-display font-semibold text-[1.625rem] text-[var(--color-text-high)] leading-none tabular-nums">
             {scores.length}
           </p>
         </Card>
-        <Card className="p-4">
+        <Card className="px-3.5 py-3">
           <p className="text-[12px] text-[var(--color-text-mid)]">总学分</p>
-          <p className="mt-1 font-display font-semibold text-2xl text-[var(--color-text-high)] tabular-nums">
+          <p className="mt-1.5 font-display font-semibold text-[1.625rem] text-[var(--color-text-high)] leading-none tabular-nums">
             {totalCredit.toFixed(1)}
           </p>
         </Card>
         {avgScore && (
-          <Card className="p-4">
+          <Card className="px-3.5 py-3">
             <p className="text-[12px] text-[var(--color-text-mid)]">平均成绩</p>
-            <p className="mt-1 font-display font-semibold text-2xl text-[var(--color-text-high)] tabular-nums">
+            <p className="mt-1.5 font-display font-semibold text-[1.625rem] text-[var(--color-text-high)] leading-none tabular-nums">
               {avgScore}
             </p>
           </Card>
@@ -199,61 +199,64 @@ function ScoreTable({
 
       {/* Score list by semester */}
       {[...bySemester.entries()].map(([sem, list]) => (
-        <div key={sem}>
-          <h3 className="mb-2 font-medium text-[13px] text-[var(--color-text-mid)]">{sem}</h3>
-          <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="border-[var(--color-border)] border-b text-[12px] text-[var(--color-text-low)]">
-                    <th className="px-4 py-2.5 text-left font-medium">课程名称</th>
-                    <th className="px-4 py-2.5 text-left font-medium">课程代码</th>
+        <Card key={sem} className="overflow-hidden p-0">
+          <div className="panel-head">
+            <span className="font-medium text-[13px] text-[var(--color-text-high)]">{sem}</span>
+            <span className="font-mono text-[11px] text-[var(--color-text-low)] tabular-nums">
+              {list.length} 门
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-[var(--color-border)] border-b text-[12px] text-[var(--color-text-low)]">
+                  <th className="px-3.5 py-2 text-left font-medium">课程名称</th>
+                  <th className="px-3.5 py-2 text-left font-medium">课程代码</th>
+                  {studentType === "undergraduate" && (
+                    <th className="px-3.5 py-2 text-left font-medium">课程性质</th>
+                  )}
+                  <th className="px-3.5 py-2 text-right font-medium">学分</th>
+                  <th className="px-3.5 py-2 text-right font-medium">成绩</th>
+                  {studentType === "undergraduate" && (
+                    <th className="px-3.5 py-2 text-right font-medium">绩点</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((s, i) => (
+                  <tr
+                    // biome-ignore lint/suspicious/noArrayIndexKey: stable list in render
+                    key={i}
+                    className="border-[var(--color-border)] border-b last:border-0 hover:bg-[var(--color-bg-subtle)]"
+                  >
+                    <td className="px-3.5 py-2 font-medium text-[var(--color-text-high)]">
+                      {s.name ?? "—"}
+                    </td>
+                    <td className="px-3.5 py-2 font-mono text-[var(--color-text-low)]">
+                      {s.course_id ?? "—"}
+                    </td>
                     {studentType === "undergraduate" && (
-                      <th className="px-4 py-2.5 text-left font-medium">课程性质</th>
+                      <td className="px-3.5 py-2 text-[var(--color-text-mid)]">
+                        {s.course_props ?? s.course_type ?? "—"}
+                      </td>
                     )}
-                    <th className="px-4 py-2.5 text-right font-medium">学分</th>
-                    <th className="px-4 py-2.5 text-right font-medium">成绩</th>
+                    <td className="px-3.5 py-2 text-right tabular-nums text-[var(--color-text-mid)]">
+                      {s.credit ?? "—"}
+                    </td>
+                    <td className="px-3.5 py-2 text-right">
+                      <ScoreBadge score={s.score} />
+                    </td>
                     {studentType === "undergraduate" && (
-                      <th className="px-4 py-2.5 text-right font-medium">绩点</th>
+                      <td className="px-3.5 py-2 text-right tabular-nums text-[var(--color-text-mid)]">
+                        {s.gpa ?? "—"}
+                      </td>
                     )}
                   </tr>
-                </thead>
-                <tbody>
-                  {list.map((s, i) => (
-                    <tr
-                      // biome-ignore lint/suspicious/noArrayIndexKey: stable list in render
-                      key={i}
-                      className="border-[var(--color-border)] border-b last:border-0 hover:bg-[var(--color-bg-subtle)]"
-                    >
-                      <td className="px-4 py-2.5 font-medium text-[var(--color-text-high)]">
-                        {s.name ?? "—"}
-                      </td>
-                      <td className="px-4 py-2.5 font-mono text-[var(--color-text-low)]">
-                        {s.course_id ?? "—"}
-                      </td>
-                      {studentType === "undergraduate" && (
-                        <td className="px-4 py-2.5 text-[var(--color-text-mid)]">
-                          {s.course_props ?? s.course_type ?? "—"}
-                        </td>
-                      )}
-                      <td className="px-4 py-2.5 text-right tabular-nums text-[var(--color-text-mid)]">
-                        {s.credit ?? "—"}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <ScoreBadge score={s.score} />
-                      </td>
-                      {studentType === "undergraduate" && (
-                        <td className="px-4 py-2.5 text-right tabular-nums text-[var(--color-text-mid)]">
-                          {s.gpa ?? "—"}
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       ))}
     </div>
   );
@@ -269,10 +272,10 @@ function ScoreBadge({ score }: { score: string | null }) {
     <span
       className={cn(
         "font-medium tabular-nums",
-        high && "text-emerald-500",
+        high && "text-[var(--color-success)]",
         mid && "text-[var(--color-text-high)]",
         !high && !mid && !pass && "text-[var(--color-danger)]",
-        pass && "text-emerald-500",
+        pass && "text-[var(--color-success)]",
       )}
     >
       {score}

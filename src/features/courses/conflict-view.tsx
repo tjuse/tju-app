@@ -37,7 +37,7 @@ export function ConflictView() {
 
   if (conflicts.length === 0) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <Summary courses={favList} />
         <EmptyState kind="no-conflicts" />
       </div>
@@ -45,10 +45,10 @@ export function ConflictView() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <Summary courses={favList} />
       <div className="flex items-center gap-2">
-        <AlertTriangle className="size-4 text-amber-500" />
+        <AlertTriangle className="size-4 text-[var(--color-warning)]" />
         <span className="font-medium text-[var(--color-text-high)] text-sm">
           发现 {conflicts.length} 处时间冲突
         </span>
@@ -83,9 +83,9 @@ function ConflictCard({ conflict }: { conflict: Conflict }) {
       : `第 ${conflictWeeks[0]}-${conflictWeeks[conflictWeeks.length - 1]} 周（${conflictWeeks.length} 周）`;
 
   return (
-    <Card className="border-amber-500/30 bg-[color-mix(in_srgb,var(--color-bg-base)_97%,#f59e0b_3%)] p-4">
+    <Card className="border-[color-mix(in_srgb,var(--color-warning)_30%,var(--color-border))] bg-[color-mix(in_srgb,var(--color-bg-base)_97%,var(--color-warning)_3%)] p-3.5">
       <div className="flex items-start gap-2">
-        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--color-warning)]" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <CourseChip course={a.course} slot={a} />
@@ -149,8 +149,8 @@ function EmptyState({ kind }: { kind: "no-favorites" | "no-conflicts" }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-bg-base)_97%,#10b981_3%)] py-16 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-emerald-500/10">
+    <div className="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-bg-base)_97%,var(--color-success)_3%)] py-16 text-center">
+      <div className="flex size-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]">
         <span className="text-2xl">✓</span>
       </div>
       <div>

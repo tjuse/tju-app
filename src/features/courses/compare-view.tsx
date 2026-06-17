@@ -86,14 +86,7 @@ const ROWS: CompareRow[] = [
   {
     label: "适用对象",
     render: (c) => (
-      <Badge
-        variant="outline"
-        className={
-          c.student_type === "undergraduate"
-            ? "border-blue-500/40 text-blue-400"
-            : "border-purple-500/40 text-purple-400"
-        }
-      >
+      <Badge variant={c.student_type === "undergraduate" ? "default" : "secondary"}>
         {c.student_type === "undergraduate" ? "本科" : "研究生"}
       </Badge>
     ),
@@ -120,7 +113,9 @@ const ROWS: CompareRow[] = [
     label: "有大纲",
     render: (c) =>
       c.has_syllabus ? (
-        <Badge className="border-green-500/40 bg-green-500/10 text-[11px] text-green-400">有</Badge>
+        <Badge className="border-[color-mix(in_srgb,var(--color-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[11px] text-[var(--color-success)]">
+          有
+        </Badge>
       ) : (
         <span className="text-[var(--color-text-low)]">无</span>
       ),
@@ -153,7 +148,7 @@ export function CompareView() {
 
   return (
     <FadeIn>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {/* Header: selected courses + clear */}
         <div className="flex items-center justify-between gap-3">
           <p className="text-[13px] text-[var(--color-text-mid)]">
@@ -203,13 +198,13 @@ export function CompareView() {
                   key={row.label}
                   className="border-t border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]"
                 >
-                  <td className="py-2.5 pr-3 text-[12px] font-medium text-[var(--color-text-low)]">
+                  <td className="py-2 pr-3 text-[12px] font-medium text-[var(--color-text-low)]">
                     {row.label}
                   </td>
                   {courses.map((c) => (
                     <td
                       key={c.lession_id}
-                      className="border-l border-[var(--color-border)] px-4 py-2.5 text-[var(--color-text-high)]"
+                      className="border-l border-[var(--color-border)] px-4 py-2 text-[var(--color-text-high)]"
                     >
                       {row.render(c)}
                     </td>

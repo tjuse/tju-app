@@ -73,23 +73,22 @@ function TrendsContent({ snapshots }: { snapshots: SemesterSnapshot[] }) {
   const recentTiles = trend.total.slice(-6);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {/* Recent summary tiles (last 6 semesters) */}
       <div>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-2.5 flex items-center justify-between">
           <p className="text-[13px] text-[var(--color-text-mid)]">最近学期</p>
           <p className="text-[12px] text-[var(--color-text-low)]">共 {trend.total.length} 个学期</p>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
           {recentTiles.map((p) => (
-            <Card key={p.semester} className="px-4 py-3.5">
-              <p className="truncate text-[11px] text-[var(--color-text-low)]">
+            <Card key={p.semester} className="px-3.5 py-3">
+              <p className="truncate text-[12px] text-[var(--color-text-mid)]">
                 {semesterLabel(p.semester)}
               </p>
-              <p className="mt-1 font-display font-semibold text-xl text-[var(--color-text-high)] tabular-nums">
+              <p className="mt-1.5 font-display font-semibold text-[1.625rem] text-[var(--color-text-high)] leading-none tabular-nums">
                 {p.count.toLocaleString()}
               </p>
-              <p className="text-[11px] text-[var(--color-text-mid)]">门课程</p>
             </Card>
           ))}
         </div>

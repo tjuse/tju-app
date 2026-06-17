@@ -1,9 +1,8 @@
 "use client";
 
 import { SEMESTER } from "@tju-app/eams-parsers";
-import { Calendar, Clock, MapPin, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
@@ -76,7 +75,7 @@ export function ExamsView({ semesters, initialSemester }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <Select
@@ -130,21 +129,28 @@ export function ExamsView({ semesters, initialSemester }: Props) {
           <p className="text-[var(--color-text-mid)]">该学期暂无考试安排</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {data.exams.map((exam, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: stable list
-            <ExamCard key={i} exam={exam} />
-          ))}
-        </div>
+        <Card className="p-0">
+          <div className="panel-head">
+            <span className="font-medium text-[13px] text-[var(--color-text-high)]">考试安排</span>
+            <span className="font-mono text-[11px] text-[var(--color-text-low)] tabular-nums">
+              {data.exams.length} 场
+            </span>
+          </div>
+          <div className="px-3.5">
+            {data.exams.map((exam, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: stable list
+              <ExamRow key={i} exam={exam} />
+            ))}
+          </div>
+        </Card>
       )}
     </div>
   );
 }
 
-function ExamCard({ exam }: { exam: TjuExamEntry }) {
+function ExamRow({ exam }: { exam: TjuExamEntry }) {
   const dateStr = exam.exam_date
     ? new Date(exam.exam_date).toLocaleDateString("zh-CN", {
-        year: "numeric",
         month: "long",
         day: "numeric",
         weekday: "short",
@@ -152,56 +158,42 @@ function ExamCard({ exam }: { exam: TjuExamEntry }) {
     : null;
   const timeStr = exam.exam_time ? exam.exam_time.join(" – ") : null;
   const isPast = exam.exam_date ? new Date(exam.exam_date) < new Date() : false;
+  const dotTone = isPast
+    ? "bg-[var(--color-border-strong)]"
+    : exam.status && exam.status !== "正常"
+      ? "bg-[var(--color-warning)]"
+      : "bg-[var(--color-success)]";
+  const meta = [exam.class_id, exam.exam_type, exam.exam_category, exam.notice]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <Card className={cn("p-4", isPast && "opacity-60")}>
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-[var(--color-text-high)]">{exam.name ?? "—"}</h3>
-          {exam.class_id && (
-            <p className="mt-0.5 font-mono text-[12px] text-[var(--color-text-low)]">
-              {exam.class_id}
-            </p>
+    <div className={cn("data-row items-start", isPast && "opacity-55")}>
+      <div className="flex min-w-0 items-start gap-2">
+        <span className={cn("status-dot mt-1.5", dotTone)} />
+        <div className="min-w-0">
+          <p className="truncate font-medium text-[13px] text-[var(--color-text-high)]">
+            {exam.name ?? "—"}
+          </p>
+          {meta && (
+            <p className="mt-0.5 truncate text-[11px] text-[var(--color-text-low)]">{meta}</p>
           )}
         </div>
-        <div className="flex shrink-0 flex-wrap gap-1.5">
-          {exam.exam_type && <Badge variant="outline">{exam.exam_type}</Badge>}
-          {exam.status && (
-            <Badge variant={exam.status === "正常" ? "default" : "secondary"}>{exam.status}</Badge>
-          )}
-          {isPast && <Badge variant="secondary">已结束</Badge>}
-        </div>
       </div>
-
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px] text-[var(--color-text-mid)]">
-        {dateStr && (
-          <span className="flex items-center gap-1.5">
-            <Calendar className="size-3.5" />
-            {dateStr}
-          </span>
-        )}
-        {timeStr && (
-          <span className="flex items-center gap-1.5">
-            <Clock className="size-3.5" />
-            {timeStr}
-          </span>
-        )}
-        {exam.location && (
-          <span className="flex items-center gap-1.5">
-            <MapPin className="size-3.5" />
-            {exam.location}
-            {exam.seat && <span className="text-[var(--color-text-low)]">· 座位 {exam.seat}</span>}
-          </span>
-        )}
+      <div className="shrink-0 text-right">
+        <p className="text-[12px] text-[var(--color-text-mid)] tabular-nums">
+          {dateStr ?? "时间待定"}
+          {timeStr && <span className="text-[var(--color-text-low)]"> · {timeStr}</span>}
+        </p>
+        <p className="mt-0.5 text-[11px] text-[var(--color-text-low)]">
+          {exam.location
+            ? `${exam.location}${exam.seat ? ` · 座位 ${exam.seat}` : ""}`
+            : isPast
+              ? "已结束"
+              : (exam.status ?? "")}
+        </p>
       </div>
-
-      {exam.exam_category && (
-        <p className="mt-2 text-[12px] text-[var(--color-text-low)]">{exam.exam_category}</p>
-      )}
-      {exam.notice && (
-        <p className="mt-1 text-[12px] text-[var(--color-text-low)]">{exam.notice}</p>
-      )}
-    </Card>
+    </div>
   );
 }
 

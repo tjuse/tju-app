@@ -19,14 +19,14 @@ export default function LinksPage() {
   return (
     <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-5 md:px-8">
       <PageHeader title="常用链接" subtitle="天津大学校内高频入口" icon={Link2} />
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-5">
         {Object.entries(grouped).map(([category, links], gi) => (
           <FadeIn key={category} delay={gi * 0.05}>
             <section>
               <h3 className="mb-2.5 font-display font-semibold text-[15px] text-[var(--color-text-high)]">
                 {category}
               </h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {links.map((link) => (
                   <a
                     key={link.url}

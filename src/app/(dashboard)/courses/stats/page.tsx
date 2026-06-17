@@ -71,11 +71,11 @@ function StatsContent({
   return (
     <div className="flex flex-col gap-3">
       <FadeIn>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           {tiles.map((t) => (
-            <Card key={t.label} className="px-4 py-3.5">
+            <Card key={t.label} className="px-3.5 py-3">
               <p className="text-[12px] text-[var(--color-text-mid)]">{t.label}</p>
-              <p className="mt-1.5 font-display font-semibold text-[1.75rem] text-[var(--color-text-high)] leading-none tabular-nums">
+              <p className="mt-1.5 font-display font-semibold text-[1.625rem] text-[var(--color-text-high)] leading-none tabular-nums">
                 {t.value}
               </p>
             </Card>

@@ -44,7 +44,7 @@ export function ScheduleView({
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         {/* 周次切换 */}
         <div className="flex items-center gap-1">
           <Button
@@ -88,7 +88,7 @@ export function ScheduleView({
       </div>
 
       {error && (
-        <div className="mb-4 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-4 py-2.5 text-[13px] text-[var(--color-danger)]">
+        <div className="mb-3 rounded-[var(--radius-md)] border border-[var(--color-danger)]/40 bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-4 py-2.5 text-[13px] text-[var(--color-danger)]">
           {error}
         </div>
       )}

@@ -251,7 +251,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
       </div>
 
       {/* 结果统计 */}
-      <div className="mt-4 flex items-center justify-between text-[13px] text-[var(--color-text-mid)]">
+      <div className="mt-3 flex items-center justify-between text-[13px] text-[var(--color-text-mid)]">
         <span>
           {data ? `共 ${data.total} 门` : "—"}
           {data && data.total > 0 ? ` · 第 ${data.page}/${totalPages} 页` : ""}
@@ -268,7 +268,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
       )}
 
       {/* 内容 */}
-      <div className="mt-4">
+      <div className="mt-3">
         {data === null ? (
           <EmptyNoCache refreshing={refreshing} onRefresh={handleRefresh} />
         ) : loading ? (
@@ -278,7 +278,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
             没有匹配的课程，试试调整筛选条件
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((c) => (
               <CourseCard
                 key={`${c.course_id}-${c.class_id}-${c.lession_id}`}
@@ -293,7 +293,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
 
       {/* 分页 */}
       {data && data.total > 0 && (
-        <div className="mt-6 flex items-center justify-center gap-3">
+        <div className="mt-5 flex items-center justify-center gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -330,7 +330,7 @@ export function CoursesBrowser({ semesters, initialSemester, initial }: Props) {
 
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: 静态骨架占位
         <Skeleton key={i} className="h-44 w-full" />

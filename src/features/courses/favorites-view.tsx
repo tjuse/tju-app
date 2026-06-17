@@ -70,7 +70,7 @@ export function FavoritesView() {
         <span className="text-[13px] text-[var(--color-text-mid)]">共 {total} 门收藏</span>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((f) => (
           <div key={f.lessionId} className="flex flex-col gap-1">
             <CourseCard

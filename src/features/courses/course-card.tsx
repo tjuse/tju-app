@@ -39,7 +39,7 @@ export function CourseCard({ course, semester, onOpen }: CourseCardProps) {
 
   return (
     <Card
-      className={cn("group relative p-4", clickable && "card-interactive")}
+      className={cn("group relative p-3.5", clickable && "card-interactive")}
       onClick={clickable ? () => onOpen(course) : undefined}
       onKeyDown={
         clickable
