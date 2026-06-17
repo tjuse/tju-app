@@ -282,7 +282,51 @@ export function parseCourseInfo(html: string): CourseInfo {
 // parse_syllabus
 // ---------------------------------------------------------------------------
 
+// Cell-content converter: a plain instance (no table rule) used to render the
+// inner Markdown of each cell. Kept separate from `_td` to avoid re-entering the
+// table rule on nested tables and to keep cell output single-line.
+const _cellTd = new TurndownService();
+_cellTd.remove(["script", "style"]);
+
+function cellMarkdown(html: string): string {
+  return _cellTd
+    .turndown(html)
+    .replace(/\s*\n\s*/g, " ")
+    .trim();
+}
+
 const _td = new TurndownService();
+// Match Python markdownify: drop <script>/<style> so their text content (e.g.
+// the page toolbar's `window.$BG_LANG=...` JS or `.docpring` CSS) doesn't leak
+// into the Markdown.
+_td.remove(["script", "style"]);
+
+// turndown has no built-in table support and turndown-plugin-gfm refuses
+// header-less tables (it keeps them as raw HTML). EAMS syllabus tables use only
+// <td>, so we convert every table ourselves into a GitHub-flavoured pipe table
+// (first row as the header), expanding colspan into empty padding cells so the
+// columns stay aligned. remark-gfm then renders it.
+_td.addRule("tjuTable", {
+  filter: "table",
+  replacement: (_content, node) => {
+    const el = node as unknown as Element;
+    const rows = Array.from(el.querySelectorAll("tr"));
+    if (rows.length === 0) return "";
+    const matrix = rows.map((tr) =>
+      Array.from(tr.querySelectorAll("th,td")).flatMap((cell) => {
+        const colspan = Number.parseInt(cell.getAttribute("colspan") ?? "1", 10) || 1;
+        const text = cellMarkdown((cell as Element).innerHTML);
+        return [text, ...Array(Math.max(0, colspan - 1)).fill("")];
+      }),
+    );
+    const cols = Math.max(...matrix.map((r) => r.length));
+    const fmt = (cells: string[]) =>
+      `| ${Array.from({ length: cols }, (_, i) => cells[i] ?? "").join(" | ")} |`;
+    const sep = `| ${Array.from({ length: cols }, () => "---").join(" | ")} |`;
+    const [head, ...body] = matrix;
+    return `\n\n${[fmt(head ?? []), sep, ...body.map(fmt)].join("\n")}\n\n`;
+  },
+});
 
 /**
  * Convert syllabus HTML to Markdown, matching Python's markdownify output.
