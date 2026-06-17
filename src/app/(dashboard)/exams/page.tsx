@@ -1,3 +1,4 @@
+import { NotebookPen } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { currentSemesterCode, listSemesters } from "@/features/courses/semesters";
@@ -11,7 +12,7 @@ export default function ExamsPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="考试安排" subtitle="本学期考试时间与地点" />
+      <PageHeader title="考试安排" subtitle="本学期考试时间与地点" icon={NotebookPen} />
       <FadeIn>
         <ExamsView semesters={semesters} initialSemester={semester} />
       </FadeIn>

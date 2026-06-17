@@ -9,7 +9,7 @@ export const metadata = { title: "电费" };
 export default function ElectricityPage() {
   return (
     <div className="mx-auto w-full max-w-4xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="电费" subtitle="宿舍电费余额与用量" />
+      <PageHeader title="电费" subtitle="宿舍电费余额与用量" icon={Zap} />
       <FadeIn>
         <Card>
           <EmptyState

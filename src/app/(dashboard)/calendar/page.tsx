@@ -1,11 +1,44 @@
+import {
+  CalendarDays,
+  type LucideIcon,
+  NotebookPen,
+  Palmtree,
+  PartyPopper,
+  Sparkles,
+} from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentSemester, semesters } from "@/features/calendar/calendar-data";
 import { daysUntil, eventTypeLabel, getWeekOfSemester } from "@/features/calendar/utils";
+import type { AcademicCalendarEvent } from "@/types";
 
 export const metadata = { title: "校历" };
+
+/** Icon + tinted-chip classes per event type. */
+const EVENT_STYLE: Record<AcademicCalendarEvent["type"], { icon: LucideIcon; chip: string }> = {
+  exam: {
+    icon: NotebookPen,
+    chip: "bg-[color-mix(in_srgb,var(--color-warning)_16%,transparent)] text-[var(--color-warning)]",
+  },
+  holiday: {
+    icon: Palmtree,
+    chip: "bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)] text-[var(--color-success)]",
+  },
+  holiday_break: {
+    icon: Palmtree,
+    chip: "bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)] text-[var(--color-success)]",
+  },
+  semester_start: {
+    icon: PartyPopper,
+    chip: "bg-[var(--color-accent-subtle)] text-[var(--color-accent)]",
+  },
+  semester_end: { icon: Sparkles, chip: "bg-[var(--color-bg-muted)] text-[var(--color-text-mid)]" },
+  important: {
+    icon: Sparkles,
+    chip: "bg-[var(--color-accent-subtle)] text-[var(--color-accent)]",
+  },
+};
 
 export default function CalendarPage() {
   const current = getCurrentSemester();
@@ -13,7 +46,7 @@ export default function CalendarPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="校历" subtitle={current.name} />
+      <PageHeader title="校历" subtitle={current.name} icon={CalendarDays} />
       {/* 当前周大卡片 */}
       <FadeIn>
         <Card className="mb-6 flex items-center justify-between p-6">
@@ -45,6 +78,8 @@ export default function CalendarPage() {
                 {semester.events.map((event) => {
                   const days = daysUntil(event.startDate);
                   const past = daysUntil(event.endDate) < 0;
+                  const style = EVENT_STYLE[event.type];
+                  const Icon = style.icon;
                   return (
                     <div
                       key={event.id}
@@ -52,21 +87,20 @@ export default function CalendarPage() {
                         past ? "opacity-40" : ""
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Badge
-                          variant={
-                            event.type === "exam"
-                              ? "warning"
-                              : event.type.startsWith("holiday")
-                                ? "success"
-                                : "secondary"
-                          }
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span
+                          className={`flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] ${style.chip}`}
                         >
-                          {eventTypeLabel(event.type)}
-                        </Badge>
-                        <span className="font-medium text-[var(--color-text-high)] text-sm">
-                          {event.title}
+                          <Icon className="size-4" />
                         </span>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-[var(--color-text-high)] text-sm">
+                            {event.title}
+                          </p>
+                          <p className="text-[11px] text-[var(--color-text-low)]">
+                            {eventTypeLabel(event.type)}
+                          </p>
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="text-[12px] text-[var(--color-text-mid)] tabular-nums">

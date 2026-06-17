@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react";
+import { Library, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -34,7 +34,11 @@ export default async function TrendsPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="公共课表" subtitle={`开课趋势 · ${snapshots.length} 个学期数据`} />
+      <PageHeader
+        title="公共课表"
+        subtitle={`开课趋势 · ${snapshots.length} 个学期数据`}
+        icon={Library}
+      />
       <CoursesTabs />
       {snapshots.length < 2 ? (
         <Card>

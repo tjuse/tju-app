@@ -1,4 +1,4 @@
-import { MapPin, User } from "lucide-react";
+import { Clock, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -21,8 +21,11 @@ export function TodayCoursesWidget({ courses, hasSchedule }: TodayCoursesWidgetP
 
   return (
     <Card className="flex h-full flex-col p-0">
-      <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
-        <h3 className="font-display font-semibold text-[15px] text-[var(--color-text-high)]">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <h3 className="flex items-center gap-2 font-display font-semibold text-[15px] text-[var(--color-text-high)]">
+          <span className="flex size-6 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+            <Clock className="size-3.5" />
+          </span>
           今日课程
         </h3>
         <span className="font-mono text-[12px] text-[var(--color-text-mid)] tabular-nums">

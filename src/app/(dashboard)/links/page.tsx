@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Link2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { Card } from "@/components/ui/card";
@@ -18,7 +18,7 @@ export default function LinksPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="常用链接" subtitle="天津大学校内高频入口" />
+      <PageHeader title="常用链接" subtitle="天津大学校内高频入口" icon={Link2} />
       <div className="flex flex-col gap-7">
         {Object.entries(grouped).map(([category, links], gi) => (
           <FadeIn key={category} delay={gi * 0.05}>

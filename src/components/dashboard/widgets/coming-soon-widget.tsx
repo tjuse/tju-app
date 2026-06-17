@@ -16,7 +16,9 @@ export function ComingSoonWidget({ title, icon: Icon, hint }: ComingSoonWidgetPr
     <Card className="flex h-full flex-col justify-between gap-3 p-5">
       <div className="flex items-start justify-between">
         <h3 className="flex items-center gap-2 font-display font-semibold text-[15px] text-[var(--color-text-mid)]">
-          <Icon className="size-4 text-[var(--color-text-low)]" />
+          <span className="flex size-6 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-bg-muted)] text-[var(--color-text-mid)]">
+            <Icon className="size-3.5" />
+          </span>
           {title}
         </h3>
         <span className="rounded-[var(--radius-sm)] border border-[var(--color-border)] px-2 py-0.5 text-[11px] text-[var(--color-text-low)]">

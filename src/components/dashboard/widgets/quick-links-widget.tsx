@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Compass } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { builtInLinks } from "@/features/links/builtin-links";
@@ -10,7 +10,10 @@ export function QuickLinksWidget() {
   return (
     <Card className="flex h-full flex-col p-0">
       <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
-        <h3 className="font-display font-semibold text-[15px] text-[var(--color-text-high)]">
+        <h3 className="flex items-center gap-2 font-display font-semibold text-[15px] text-[var(--color-text-high)]">
+          <span className="flex size-6 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+            <Compass className="size-3.5" />
+          </span>
           常用入口
         </h3>
         <Link

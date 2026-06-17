@@ -1,3 +1,4 @@
+import { Table2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { getCurrentSemester } from "@/features/calendar/calendar-data";
@@ -14,7 +15,11 @@ export default function SchedulePage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="课程表" subtitle={`${semester.name} · 第 ${currentWeek} 周`} />
+      <PageHeader
+        title="课程表"
+        subtitle={`${semester.name} · 第 ${currentWeek} 周`}
+        icon={Table2}
+      />
       <FadeIn>
         <ScheduleClient
           semesterCode={semesterCode}

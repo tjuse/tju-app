@@ -1,4 +1,11 @@
-import { CreditCard, Zap } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarRange,
+  CreditCard,
+  NotebookPen,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 import { ComingSoonWidget } from "@/components/dashboard/widgets/coming-soon-widget";
 import { Greeting } from "@/components/dashboard/widgets/greeting";
 import { QuickLinksWidget } from "@/components/dashboard/widgets/quick-links-widget";
@@ -25,10 +32,25 @@ export default function DashboardHome() {
       label: "教学周",
       value: week ? String(week) : "假期",
       unit: week ? `/ ${semester.totalWeeks}` : undefined,
+      icon: CalendarRange,
+      tone: "accent",
     },
-    { label: "学期进度", value: String(progress), unit: "%" },
-    { label: "临近考试", value: String(examCount), unit: "场", accent: examCount > 0 },
-    { label: "校历纪事", value: String(upcoming.length), unit: "项" },
+    { label: "学期进度", value: String(progress), unit: "%", icon: TrendingUp, tone: "success" },
+    {
+      label: "临近考试",
+      value: String(examCount),
+      unit: "场",
+      icon: NotebookPen,
+      tone: "warning",
+      accent: examCount > 0,
+    },
+    {
+      label: "校历纪事",
+      value: String(upcoming.length),
+      unit: "项",
+      icon: CalendarClock,
+      tone: "accent",
+    },
   ];
 
   return (

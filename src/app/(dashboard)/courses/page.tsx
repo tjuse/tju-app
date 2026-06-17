@@ -1,3 +1,4 @@
+import { Library } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FadeIn } from "@/components/motion/fade-in";
 import { CoursesBrowser } from "@/features/courses/courses-browser";
@@ -16,7 +17,7 @@ export default async function CoursesPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="公共课表" subtitle="全校开课课程库 · 可按学期检索" />
+      <PageHeader title="公共课表" subtitle="全校开课课程库 · 可按学期检索" icon={Library} />
       <CoursesTabs />
       <FadeIn>
         <CoursesBrowser semesters={semesters} initialSemester={semester} initial={initial} />

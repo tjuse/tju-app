@@ -1,4 +1,4 @@
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Library } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -25,7 +25,11 @@ export default async function StatsPage({
 
   return (
     <div className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-8">
-      <PageHeader title="公共课表" subtitle={`课程统计 · ${semesterLabel(semester)}`} />
+      <PageHeader
+        title="公共课表"
+        subtitle={`课程统计 · ${semesterLabel(semester)}`}
+        icon={Library}
+      />
       <CoursesTabs />
       {!cached ? (
         <Card>
